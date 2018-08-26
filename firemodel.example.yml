@@ -1,0 +1,62 @@
+---
+options:
+  ts:
+    namespace: "example"
+enums:
+- name: Direction
+  values:
+  - name: left
+  - name: right
+  - name: up
+  - name: down
+models:
+- name: TestModel
+  comment: A Test is a test model.
+  options:
+    firestore:
+      path: "users/{user_id}/test_models"
+  fields:
+  - comment: The name.
+    name: name
+    type: string
+  - name: age
+    comment: The age.
+    type: integer
+  - name: pi
+    comment: The number pi.
+    type: double
+  - name: birthdate
+    comment: The birth date.
+    type: timestamp
+  - name: is_good
+    type: boolean
+    comment: True if it is good.
+  - name: data
+    type: bytes
+  - name: friend
+    type: reference
+    extras:
+      referenceTo: TestModel
+  - name: location
+    type: geopoint
+  - name: colors
+    type: array
+    extras:
+      arrayOf: string
+  - name: meta
+    type: map
+  - name: direction
+    type: map
+    extras:
+      mapTo: Direction
+  - name: test_file
+    type: map
+    extras:
+      file: true
+  - name: url
+    type: string
+    extras:
+      url: true
+  collections:
+  - name: nested
+    type: TestModel

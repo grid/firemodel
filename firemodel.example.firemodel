@@ -1,0 +1,33 @@
+option ts.namespace = "example";
+
+enum Direction {
+    left,
+    right,
+    up,
+    down,
+}
+
+// A Test is a test model.
+model TestModel {
+  option firestore.path = "users/{user_id}/test_models";
+
+  // The name.
+  string name;
+  // The age.
+  integer age;
+  // The number pi.
+  double pi;
+  // The birth date.
+  timestamp birthdate;
+  // True if it is good.
+  boolean is_good;
+  bytes data;
+  reference<TestModel> friend;
+  geopoint location;
+  array<string> colors;
+  map meta;
+  Direction direction;
+  File test_file;
+  URL url;
+  TestModel nested;
+}
