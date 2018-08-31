@@ -21,6 +21,13 @@ type SchemaModel struct {
 
 type SchemaOptions map[string]map[string]string
 
+func (options SchemaOptions) Get(key string) map[string]string {
+	if res, ok := options[key]; ok {
+		return res
+	}
+	return map[string]string{}
+}
+
 type SchemaEnum struct {
 	Name    string
 	Comment string
