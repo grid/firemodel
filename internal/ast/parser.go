@@ -2,13 +2,14 @@ package ast
 
 import (
 	"io"
-	"github.com/alecthomas/participle"
-	"github.com/pkg/errors"
-	"github.com/alecthomas/participle/lexer"
-	"text/scanner"
 	"regexp"
 	"sort"
 	"strings"
+	"text/scanner"
+
+	"github.com/alecthomas/participle"
+	"github.com/alecthomas/participle/lexer"
+	"github.com/pkg/errors"
 )
 
 func ParseSchema(r io.Reader) (*AST, error) {
@@ -74,7 +75,7 @@ var (
 		// Primitive types.
 		"boolean", "integer", "double", "timestamp", "string",
 		"bytes", "reference", "geopoint", "array", "map", "url",
-		"file", "collection", "file",
+		"file", "collection",
 		// Keywords.
 		"model", "option", "enum",
 	}
@@ -87,7 +88,13 @@ func init() {
 func (id ASTIdentifier) IsReserved() bool {
 	needle := strings.ToLower(string(id))
 	idx := sort.SearchStrings(reservedIdentifiers, needle)
-	return reservedIdentifiers[idx] == needle
+	if idx >= len(reservedIdentifiers) {
+		return false
+	}
+	if reservedIdentifiers[idx] != needle {
+		return false
+	}
+	return true
 }
 
 type ASTModelElement struct {

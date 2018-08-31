@@ -3,16 +3,21 @@ package firemodel
 import (
 	"github.com/mickeyreiss/firemodel/internal/ast"
 	"io"
-	"github.com/go-errors/errors"
 	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 )
 
 func ParseSchema(r io.Reader) (*Schema, error) {
-	ast, err := ast.ParseSchema(r)
+	tree, err := ast.ParseSchema(r)
 	if err != nil {
 		return nil, err
 	}
-	return (&configSchemaCompiler{ast: ast}).compileConfig(), nil
+	compiler := &configSchemaCompiler{ast: tree}
+	config, err := compiler.compileConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "firemodel/schema")
+	}
+	return config, nil
 }
 
 type configSchemaCompiler struct {
@@ -22,18 +27,22 @@ type configSchemaCompiler struct {
 	ast *ast.AST
 }
 
-func (c *configSchemaCompiler) compileConfig() *Schema {
-	c.precompileEnumTypes()
-	c.precompileModelTypes()
+func (c *configSchemaCompiler) compileConfig() (*Schema, error) {
+	if err := c.precompileEnumTypes(); err != nil {
+		return nil, err
+	}
+	if err := c.precompileModelTypes(); err != nil {
+		return nil, err
+	}
 
 	return &Schema{
 		Models:  c.compileModels(),
 		Enums:   c.compileEnums(),
 		Options: c.compileLanguageOptions(),
-	}
+	}, nil
 }
 
-func (c *configSchemaCompiler) precompileEnumTypes() {
+func (c *configSchemaCompiler) precompileEnumTypes() error {
 	c.enums = make([]*SchemaEnum, 0)
 	for _, v := range c.ast.Types {
 		if v.Enum == nil {
@@ -42,15 +51,17 @@ func (c *configSchemaCompiler) precompileEnumTypes() {
 
 		if v.Enum.Identifier.IsReserved() {
 			err := errors.Errorf("firemodel/schema: can't name enum %s, %s is a reserved word.", v.Enum.Identifier, v.Enum.Identifier)
-			panic(err)
+			return err
 		}
 
 		c.enums = append(c.enums, &SchemaEnum{
 			Name: strcase.ToCamel(string(v.Enum.Identifier)),
 		})
 	}
+	return nil
 }
-func (c *configSchemaCompiler) precompileModelTypes() {
+
+func (c *configSchemaCompiler) precompileModelTypes() error {
 	c.models = make([]*SchemaModel, 0)
 	for _, v := range c.ast.Types {
 		if v.Model == nil {
@@ -59,13 +70,14 @@ func (c *configSchemaCompiler) precompileModelTypes() {
 
 		if v.Model.Identifier.IsReserved() {
 			err := errors.Errorf("firemodel/schema: can't name model %s, %s is a reserved word.", v.Model.Identifier, v.Model.Identifier)
-			panic(err)
+			return err
 		}
 
 		c.models = append(c.models, &SchemaModel{
 			Name: strcase.ToCamel(string(v.Model.Identifier)),
 		})
 	}
+	return nil
 }
 
 func (c *configSchemaCompiler) compileModels() (out []*SchemaModel) {

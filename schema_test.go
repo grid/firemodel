@@ -1,10 +1,11 @@
 package firemodel
 
 import (
-	"testing"
 	"strings"
-	"github.com/go-test/deep"
+	"testing"
+
 	"github.com/davecgh/go-spew/spew"
+	"github.com/go-test/deep"
 )
 
 func TestParseSchema(t *testing.T) {
@@ -485,6 +486,11 @@ model snake_case {
 			},
 		},
 		{
+			name: "reserved model name",
+			schema: ` model Model {} `,
+			wantErr: true,
+		},
+		{
 			name: "syntaxNonsense2",
 			schema: `
 model {
@@ -492,6 +498,30 @@ model {
 }
 `,
 			wantErr: true,
+		},
+		{
+			name: "modelNamedUser",
+			schema: `
+model User {
+	string name;
+}
+`,
+			want: &Schema{
+				Models: []*SchemaModel{
+					{
+						Name: "User",
+						Fields: []*SchemaField{
+							{
+								Name:   "name",
+								Type:   String,
+								Extras: &SchemaFieldExtras{},
+							},
+						},
+						Options: SchemaOptions{},
+					},
+				},
+				Options: SchemaOptions{},
+			},
 		},
 	}
 	for _, tt := range tests {
