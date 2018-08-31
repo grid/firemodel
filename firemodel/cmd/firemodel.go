@@ -54,6 +54,10 @@ var compileCmd = &cobra.Command{
 				return tempwriter.New(prefix, req.wipe)
 			},
 		}
+		if len(args) == 1 && args[0] == "all" {
+			args = firemodel.AllModelers()
+		}
+
 		for _, language := range args {
 			config.Languages = append(config.Languages, firemodel.Language{
 				Language: language,
