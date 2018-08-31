@@ -9,13 +9,13 @@ import Pring
 // TODO: Add documentation to Direction.
 @objc enum Direction: String {
 	// TODO: Add documentation to left.
-	case left = LEFT
+	case left = "LEFT"
 	// TODO: Add documentation to right.
-	case right = RIGHT
+	case right = "RIGHT"
 	// TODO: Add documentation to up.
-	case up = UP
+	case up = "UP"
 	// TODO: Add documentation to down.
-	case down = DOWN
+	case down = "DOWN"
 }
 	
 // A Test is a test model.

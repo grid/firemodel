@@ -5,8 +5,8 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
-	"github.com/pkg/errors"
 	"github.com/mickeyreiss/firemodel"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -187,7 +187,7 @@ import Pring
 	{{- else}}
 	// TODO: Add documentation to {{.Name}}.
 	{{- end}}
-	case {{.Name}} = {{.Name | toScreamingSnake}}
+	case {{.Name}} = "{{.Name | toScreamingSnake}}"
 	{{- end}}
 }
 	`
