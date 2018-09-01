@@ -51,6 +51,8 @@ func (d *lexerDefinition) Symbols() map[string]rune {
 	}
 }
 
+// AST represents the structure of a parsed firemodel schema file.
+//
 // Read about the magical annotations here: https://github.com/alecthomas/participle/.
 type AST struct {
 	Types []*ASTElement `parser:"{ @@ }"`

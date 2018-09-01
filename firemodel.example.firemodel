@@ -30,4 +30,5 @@ model TestModel {
   File test_file;
   URL url;
   TestModel nested;
+  collection<TestModel> nested_collection;
 }

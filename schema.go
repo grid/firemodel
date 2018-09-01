@@ -1,9 +1,10 @@
 package firemodel
 
 import (
-	"github.com/mickeyreiss/firemodel/internal/ast"
 	"io"
+
 	"github.com/iancoleman/strcase"
+	"github.com/mickeyreiss/firemodel/internal/ast"
 	"github.com/pkg/errors"
 )
 
