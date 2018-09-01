@@ -31,12 +31,6 @@ var compileCmd = &cobra.Command{
 	Use:     "compile",
 	Aliases: []string{"c"},
 	Short:   "Type-safe, cross-platform models for Firestore",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			return errors.Errorf("Please specify at least one language. %s %v.", rootCmd.Use, firemodel.AllModelers())
-		}
-		return nil
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
 		r, err := os.Open(req.schema)
@@ -54,7 +48,7 @@ var compileCmd = &cobra.Command{
 				return tempwriter.New(prefix, req.wipe)
 			},
 		}
-		if len(args) == 1 && args[0] == "all" {
+		if len(args) == 0 {
 			args = firemodel.AllModelers()
 		}
 
