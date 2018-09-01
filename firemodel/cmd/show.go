@@ -8,11 +8,10 @@ import (
 
 var showCmd = &cobra.Command{
 	Use:   "show-languages",
-	Short: "Show all available languages for --out",
+	Short: "Show all available languages.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Available languages:")
 		for _, language := range firemodel.AllModelers() {
-			fmt.Println("-", language)
+			fmt.Println(language)
 		}
 	},
 }

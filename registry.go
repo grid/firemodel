@@ -20,7 +20,7 @@ type Language struct {
 
 func AllModelers() (ret []string) {
 	ret = []string{}
-	for modelerName, _ := range registeredModelers {
+	for modelerName := range registeredModelers {
 		ret = append(ret, modelerName)
 	}
 	return ret
