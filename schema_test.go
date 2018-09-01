@@ -1,8 +1,10 @@
 package firemodel
 
 import (
-	"strings"
 	"testing"
+
+	"os"
+	"path"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-test/deep"
@@ -11,20 +13,17 @@ import (
 func TestParseSchema(t *testing.T) {
 	tests := []struct {
 		name    string
-		schema  string
 		want    *Schema
 		wantErr bool
 	}{
 		{
-			name:   "empty",
-			schema: ``,
+			name: "empty",
 			want: &Schema{
 				Options: SchemaOptions{},
 			},
 		},
 		{
-			name:   "empty model",
-			schema: `model Empty {}`,
+			name: "empty_model",
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -37,11 +36,6 @@ func TestParseSchema(t *testing.T) {
 		},
 		{
 			name: "simple",
-			schema: `
-model SimpleModel {
-  string foo;
-}
-`,
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -61,32 +55,6 @@ model SimpleModel {
 		},
 		{
 			name: "full",
-			schema: `
-// A Test is a test model.
-model TestModel {
-	// The name.
-	string name;
-    // The age.
-	integer age;
-    // The number pi.
-    double pi;
-    // The birth date.
-    timestamp birthdate;
-    // True if it is good.
-    boolean is_good;
-	
-    bytes data;
-	
-    reference friend;
-    geopoint location;
-    array colors;
-    map meta;
-
-	// Fake types...
-	File aFile;
-	URL anURL;
-}
-`,
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -165,17 +133,7 @@ model TestModel {
 			},
 		},
 		{
-			name: "schemaExtras",
-			schema: `
-model TestModel {
-    reference<TestModel> other;
-    reference unspecified_other;
-    array<string> str_ary;
-    array<TestModel> model_ary;
-    map<string> str_map;
-    map<TestModel> model_map;
-}
-`,
+			name: "extras",
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -216,11 +174,6 @@ model TestModel {
 		},
 		{
 			name: "url",
-			schema: `
-model TestModel {
-    URL url;
-}
-`,
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -240,21 +193,6 @@ model TestModel {
 		},
 		{
 			name: "enums",
-			schema: `
-// A cardinal direction.
-enum Direction {
-	// Leftwards.
-	left,
-	right,
-	up,
-	down,
-}
-
-model TestModel {
-	// The direction.
-    Direction dir;
-}
-`,
 			want: &Schema{
 				Enums: []*SchemaEnum{
 					{
@@ -295,29 +233,11 @@ model TestModel {
 			},
 		},
 		{
-			name: "error: nonsense",
-			schema: `
-oijasef oijasef
-ijef98 aw3raw 3f98asjf oaoeifj 
-}
-`,
+			name:    "error_nonsense",
 			wantErr: true,
 		},
 		{
 			name: "relational",
-			schema: `
-model Operator {
-	string operator_name;
-}
-model Component {
-	string component_name;
-}
-model Machine {
-	reference<Operator> owner;
-	collection<Component> components;
-	Component embedded_component;
-}
-`,
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -374,15 +294,7 @@ model Machine {
 			},
 		},
 		{
-			name: "language options",
-			schema: `
-option langname.optname = "optval";
-option otherlang.str = "hey";
-option otherlang.number = 1;
-option otherlang.truth = true;
-option otherlang.falseness = false;
-option otherlang.nullness = null;
-`,
+			name: "language_options",
 			want: &Schema{
 				Options: SchemaOptions{
 					"langname": {
@@ -399,12 +311,7 @@ option otherlang.nullness = null;
 			},
 		},
 		{
-			name: "model options",
-			schema: `
-model AnnotatedModel {
-	option lang.opt = "great";
-}
-`,
+			name: "model_options",
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -421,20 +328,6 @@ model AnnotatedModel {
 		},
 		{
 			name: "casing",
-			schema: `
-model NormalCase {
-  string foo_bar;
-}
-model camelCase {
-  string fooBar;
-}
-model TitleCase {
-  string FooBar;
-}
-model snake_case {
-  string foo_bar;
-}
-`,
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
@@ -486,30 +379,20 @@ model snake_case {
 			},
 		},
 		{
-			name: "reserved model name",
-			schema: ` model Model {} `,
+			name:    "reserved_model_name",
 			wantErr: true,
 		},
 		{
-			name: "syntaxNonsense2",
-			schema: `
-model {
-	// missing title
-}
-`,
+			name:    "syntax_nonsense_2",
 			wantErr: true,
 		},
 		{
-			name: "modelNamedUser",
-			schema: `
-model User {
-	string name;
-}
-`,
+			name: "model_named_user",
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
-						Name: "User",
+						Name:    "User",
+						Comment: "Regression test.",
 						Fields: []*SchemaField{
 							{
 								Name:   "name",
@@ -526,7 +409,10 @@ model User {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := strings.NewReader(tt.schema)
+			r, err := os.Open(path.Join("testfixtures", tt.name+".firemodel"))
+			if err != nil {
+				t.Fatal(err)
+			}
 			got, err := ParseSchema(r)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseSchema() error = %v, wantErr %v", err, tt.wantErr)

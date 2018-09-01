@@ -1,0 +1,6 @@
+option langname.optname = "optval";
+option otherlang.str = "hey";
+option otherlang.number = 1;
+option otherlang.truth = true;
+option otherlang.falseness = false;
+option otherlang.nullness = null;

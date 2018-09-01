@@ -1,0 +1,24 @@
+// A Test is a test model.
+model TestModel {
+	// The name.
+	string name;
+    // The age.
+	integer age;
+    // The number pi.
+    double pi;
+    // The birth date.
+    timestamp birthdate;
+    // True if it is good.
+    boolean is_good;
+
+    bytes data;
+
+    reference friend;
+    geopoint location;
+    array colors;
+    map meta;
+
+	// Fake types...
+	File aFile;
+	URL anURL;
+}

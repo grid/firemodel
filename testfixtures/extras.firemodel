@@ -1,0 +1,8 @@
+model TestModel {
+    reference<TestModel> other;
+    reference unspecified_other;
+    array<string> str_ary;
+    array<TestModel> model_ary;
+    map<string> str_map;
+    map<TestModel> model_map;
+}

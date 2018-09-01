@@ -1,0 +1,11 @@
+model Operator {
+	string operator_name;
+}
+model Component {
+	string component_name;
+}
+model Machine {
+	reference<Operator> owner;
+	collection<Component> components;
+	Component embedded_component;
+}

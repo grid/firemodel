@@ -1,0 +1,13 @@
+// A cardinal direction.
+enum Direction {
+	// Leftwards.
+	left,
+	right,
+	up,
+	down,
+}
+
+model TestModel {
+	// The direction.
+    Direction dir;
+}

@@ -1,0 +1,4 @@
+// Regression test.
+model User {
+	string name;
+}

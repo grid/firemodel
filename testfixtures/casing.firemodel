@@ -1,0 +1,12 @@
+model NormalCase {
+  string foo_bar;
+}
+model camelCase {
+  string fooBar;
+}
+model TitleCase {
+  string FooBar;
+}
+model snake_case {
+  string foo_bar;
+}
