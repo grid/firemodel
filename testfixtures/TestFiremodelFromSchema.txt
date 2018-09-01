@@ -144,61 +144,60 @@ const (
 import firestore from 'firebase/firestore';
 
 export namespace example {
-    type URL = string;
+  type URL = string;
 
-    export interface IFile {
-        url: URL;
-        mimeType: string;
-        name: string;
-    }
+  export interface IFile {
+    url: URL;
+    mimeType: string;
+    name: string;
+  };
 
-    interface DocumentReference<T> extends firestore.DocumentReference {
-    }
+  interface DocumentReference<T> extends firestore.DocumentReference {
+  };
 
-    
-    /** TODO: Add documentation to Direction. */
-    enum Direction {
-        /** TODO: Add documentation to left. */
-        left = "LEFT",
-        /** TODO: Add documentation to right. */
-        right = "RIGHT",
-        /** TODO: Add documentation to up. */
-        up = "UP",
-        /** TODO: Add documentation to down. */
-        down = "DOWN",
-    }
-    
-    /** A Test is a test model. */
-    export interface ITestModel {
-        /** The name. */
-        name: string
-        /** The age. */
-        age: number
-        /** The number pi. */
-        pi: number
-        /** The birth date. */
-        birthdate: firestore.Timestamp
-        /** True if it is good. */
-        isGood: boolean
-        /** TODO: Add documentation to data. */
-        data: firestore.Blob
-        /** TODO: Add documentation to friend. */
-        friend: DocumentReference<ITestModel>
-        /** TODO: Add documentation to location. */
-        location: firestore.GeoPoint
-        /** TODO: Add documentation to colors. */
-        colors: string[]
-        /** TODO: Add documentation to meta. */
-        meta: { [key: string]: any; }
-        /** TODO: Add documentation to direction. */
-        direction: Direction
-        /** TODO: Add documentation to test_file. */
-        testFile: IFile
-        /** TODO: Add documentation to url. */
-        url: URL
-        /** TODO: Add documentation to nested. */
-        nested: { [key: string]: ITestModel; }
-    }
-    
-}===================== Close ===================
+  /** TODO: Add documentation to Direction. */
+  enum Direction {
+    /** TODO: Add documentation to left. */
+    left = "LEFT",
+    /** TODO: Add documentation to right. */
+    right = "RIGHT",
+    /** TODO: Add documentation to up. */
+    up = "UP",
+    /** TODO: Add documentation to down. */
+    down = "DOWN",
+  };
+
+  /** A Test is a test model. */
+  export interface ITestModel {
+    /** The name. */
+    name: string;
+    /** The age. */
+    age: number;
+    /** The number pi. */
+    pi: number;
+    /** The birth date. */
+    birthdate: firestore.Timestamp;
+    /** True if it is good. */
+    isGood: boolean;
+    /** TODO: Add documentation to data. */
+    data: firestore.Blob;
+    /** TODO: Add documentation to friend. */
+    friend: DocumentReference<ITestModel>;
+    /** TODO: Add documentation to location. */
+    location: firestore.GeoPoint;
+    /** TODO: Add documentation to colors. */
+    colors: string[];
+    /** TODO: Add documentation to meta. */
+    meta: { [key: string]: any; };
+    /** TODO: Add documentation to direction. */
+    direction: Direction;
+    /** TODO: Add documentation to test_file. */
+    testFile: IFile;
+    /** TODO: Add documentation to url. */
+    url: URL;
+    /** TODO: Add documentation to nested. */
+    nested: { [key: string]: ITestModel; };
+  };
+}
+===================== Close ===================
 ===================== Flush ===================

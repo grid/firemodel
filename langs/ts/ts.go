@@ -12,8 +12,6 @@ func init() {
 	firemodel.RegisterModeler("ts", &Modeler{})
 }
 
-// todo files
-// todo namespace
 type Modeler struct{}
 
 func (m *Modeler) Model(schema *firemodel.Schema, sourceCoder firemodel.SourceCoder) error {
@@ -120,55 +118,60 @@ const (
 import firestore from 'firebase/firestore';
 
 export namespace {{.Options | getRequiredOption "namespace"}} {
-    type URL = string;
+  type URL = string;
 
-    export interface IFile {
-        url: URL;
-        mimeType: string;
-        name: string;
-    }
+  export interface IFile {
+    url: URL;
+    mimeType: string;
+    name: string;
+  };
 
-    interface DocumentReference<T> extends firestore.DocumentReference {
-    }
+  interface DocumentReference<T> extends firestore.DocumentReference {
+  };
 
-    {{range .Enums -}}
-    {{- template "enum" .}}
-    {{end}}
-    {{- range .Models -}}
-    {{- template "model" .}}
-    {{end}}
-}`
+  {{- range .Enums -}}
+  {{- template "enum" .}}
+  {{- end}}
+  {{- range .Models -}}
+  {{- template "model" .}}
+  {{- end}}
+}
+`
 	model = `
+  {{- if .Comment}}
+
+  /** {{.Comment}} */
+  {{- else}}
+
+  /** TODO: Add documentation to {{.Name}}. */
+  {{- end}}
+  export interface {{.Name | interfaceName | ToCamel}} {
+    {{- range .Fields}}
     {{- if .Comment}}
     /** {{.Comment}} */
-    {{- else}}
+    {{- else }}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    export interface {{.Name | interfaceName | ToCamel}} {
-        {{- range .Fields}}
-        {{- if .Comment}}
-        /** {{.Comment}} */
-        {{- else }}
-        /** TODO: Add documentation to {{.Name}}. */
-        {{- end}}
-        {{.Name | ToLowerCamel -}}: {{toTypescriptType .Type .Extras}}
-        {{- end}}
-    }`
+    {{.Name | ToLowerCamel -}}: {{toTypescriptType .Type .Extras}};
+    {{- end}}
+  };`
 
 	enum = `
+  {{- if .Comment}}
+
+  /** {{.Comment}} */
+  {{- else}}
+
+  /** TODO: Add documentation to {{.Name}}. */
+  {{- end}}
+  enum {{.Name | ToCamel}} {
+    {{- range .Values}}
     {{- if .Comment}}
     /** {{.Comment}} */
     {{- else}}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    enum {{.Name | ToCamel}} {
-        {{- range .Values}}
-        {{- if .Comment}}
-        /** {{.Comment}} */
-        {{- else}}
-        /** TODO: Add documentation to {{.Name}}. */
-        {{- end}}
-        {{.Name}} = "{{.Name | ToScreamingSnake}}",
-        {{- end}}
-    }`
+    {{.Name}} = "{{.Name | ToScreamingSnake}}",
+    {{- end}}
+  };`
 )
