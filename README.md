@@ -77,5 +77,77 @@ It is trivial to extend firemodel with custom language providers. See the `Model
 
 ## Schema Language & Type System
 
-TODO: Document supported types and how they are expressed in supported languages.
+With Firemodel, you use a language loosely inspired by proto3 to define your data model.
 
+In firemodel, whitespace is generally ignored, and semi-colons are required.
+
+A model has fields, and each field has a type: 
+
+There's no type for nil, because it's silly to have a field that is always nil. Surprisingly, firestore represents nil as a type; that's not faithfully represented in firemodel.
+
+The primitive types in firemodel match firestore's built-in types exactly:
+
+| Firemodel Type  |  Firestore Type |
+| --------------- | --------------- |
+| `string`        | String          |
+| `integer`       | Number          |
+| `double`        | Double          |
+| `timestamp`     | Timestamp       |
+| `bytes`         | Bytes           |
+| `reference`     | Reference       |
+| `geopoint`      | GeoPoint        |
+| `array`         | Array           |
+| `map`           | Map             |
+
+You can also define Enums:
+
+```
+enum TodoState {
+  TODO,
+  DONE,
+}
+```
+
+These enum values can be used as a field type:
+
+```
+model Todo {
+  TodoState status;
+}
+```
+
+Enums are not real. They end up getting represented in each language, and in firestore itself as strings.
+
+You can also embed a model type:
+
+```
+model Child {}
+
+model Parent {
+  Child daughter;
+}
+```
+
+Embedded models are not real. They end up getting stored as a `Map` in firestore.
+
+`collection` provides a nested collection. Collections are not real; they are not even fields. Collections do not get stored directly in firestore.
+
+### Generics
+
+Firemodel supports generics for `map`, `array` and `reference`.
+
+Generic types can be firemodel primitives or user-defined types:
+
+```
+model Child {}
+
+enum Emotion { HAPPY, SAD, }
+
+model Thing {
+  array<string> primitive_array;
+  array<Child> model_array;
+  array<Emotion> enum_array;
+}
+```
+
+Generic generic types are not currently supported: `array<reference<T>>`.
