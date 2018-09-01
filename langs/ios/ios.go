@@ -136,7 +136,6 @@ import Pring
 	{{- end}}
 
 	{{- range .Collections}}
-	TODO: Collections!
 	{{- if .Comment}}
 	// {{.Comment}}
 	{{- else }}

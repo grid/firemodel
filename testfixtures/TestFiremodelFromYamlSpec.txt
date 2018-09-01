@@ -46,7 +46,6 @@ import Pring
 	dynamic var testFile: Pring.File
 	// TODO: Add documentation to url.
 	dynamic var url: URL?
-	TODO: Collections!
 	// TODO: Add documentation to nested.
 	nested: Pring.NestedCollection<TestModel>
 
