@@ -5,7 +5,9 @@ import (
 	_ "github.com/mickeyreiss/firemodel/langs/go"
 	_ "github.com/mickeyreiss/firemodel/langs/ios"
 	_ "github.com/mickeyreiss/firemodel/langs/ts"
+)
 
+import (
 	"fmt"
 	"github.com/spf13/cobra"
 )
