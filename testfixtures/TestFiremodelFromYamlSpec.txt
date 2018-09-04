@@ -119,7 +119,7 @@ type TestModel struct {
 	// The birth date.
 	Birthdate time.Time `firestore:"birthdate"`
 	// True if it is good.
-	IsGood bool `firestore:"is_good"`
+	IsGood bool `firestore:"isGood"`
 	// TODO: Add comment to TestModel.data.
 	Data []byte `firestore:"data"`
 	// TODO: Add comment to TestModel.friend.
@@ -133,7 +133,7 @@ type TestModel struct {
 	// TODO: Add comment to TestModel.direction.
 	Direction *Direction `firestore:"direction"`
 	// TODO: Add comment to TestModel.test_file.
-	TestFile *runtime.File `firestore:"test_file"`
+	TestFile *runtime.File `firestore:"testFile"`
 	// TODO: Add comment to TestModel.url.
 	Url runtime.URL `firestore:"url"`
 }

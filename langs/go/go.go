@@ -158,7 +158,7 @@ func (m *GoModeler) fields(model *firemodel.SchemaModel) func(g *jen.Group) {
 			g.
 				Id(strcase.ToCamel(field.Name)).
 				Do(m.goType(field.Type, field.Extras)).
-				Tag(map[string]string{"firestore": field.Name})
+				Tag(map[string]string{"firestore": strcase.ToLowerCamel(field.Name)})
 		}
 
 		if model.Options.GetAutoTimestamp() {
