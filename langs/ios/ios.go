@@ -180,6 +180,7 @@ import Pring
     {{.Name}}: Pring.NestedCollection<{{.Type}}>
     {{- end}}
 
+    {{ if .Fields | filterFieldsEnumsOnly -}}
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
         {{range .Fields | filterFieldsEnumsOnly -}}
@@ -206,6 +207,7 @@ import Pring
         }
         return false
     }
+    {{- end}}
 }
 `
 	enum = `

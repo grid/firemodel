@@ -51,23 +51,7 @@ import Pring
     // TODO: Add documentation to nested.
     nested: Pring.NestedCollection<TestModel>
 
-    override func encode(_ key: String, value: Any?) -> Any? {
-        switch key {
-        
-        default:
-            break
-        }
-        return nil
-    }
-
-    override func decode(_ key: String, value: Any?) -> Bool {
-        switch key {
-        
-        default:
-            break
-        }
-        return false
-    }
+    
 }
 ===================== Close ===================
 ===================== Flush ===================
