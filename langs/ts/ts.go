@@ -124,10 +124,10 @@ export namespace {{.Options | getRequiredOption "namespace"}} {
     url: URL;
     mimeType: string;
     name: string;
-  };
+  }
 
-  interface DocumentReference<T> extends firestore.DocumentReference {
-  };
+  export interface DocumentReference<T> extends firestore.DocumentReference {
+  }
 
   {{- range .Enums -}}
   {{- template "enum" .}}
@@ -154,7 +154,7 @@ export namespace {{.Options | getRequiredOption "namespace"}} {
     {{- end}}
     {{.Name | ToLowerCamel -}}: {{toTypescriptType .Type .Extras}};
     {{- end}}
-  };`
+  }`
 
 	enum = `
   {{- if .Comment}}
@@ -164,7 +164,7 @@ export namespace {{.Options | getRequiredOption "namespace"}} {
 
   /** TODO: Add documentation to {{.Name}}. */
   {{- end}}
-  enum {{.Name | ToCamel}} {
+  export enum {{.Name | ToCamel}} {
     {{- range .Values}}
     {{- if .Comment}}
     /** {{.Comment}} */
@@ -173,5 +173,5 @@ export namespace {{.Options | getRequiredOption "namespace"}} {
     {{- end}}
     {{.Name}} = "{{.Name | ToScreamingSnake}}",
     {{- end}}
-  };`
+  }`
 )

@@ -164,13 +164,13 @@ export namespace example {
     url: URL;
     mimeType: string;
     name: string;
-  };
+  }
 
-  interface DocumentReference<T> extends firestore.DocumentReference {
-  };
+  export interface DocumentReference<T> extends firestore.DocumentReference {
+  }
 
   /** TODO: Add documentation to Direction. */
-  enum Direction {
+  export enum Direction {
     /** TODO: Add documentation to left. */
     left = "LEFT",
     /** TODO: Add documentation to right. */
@@ -179,7 +179,7 @@ export namespace example {
     up = "UP",
     /** TODO: Add documentation to down. */
     down = "DOWN",
-  };
+  }
 
   /** A Test is a test model. */
   export interface ITestModel {
@@ -213,7 +213,7 @@ export namespace example {
     url: URL;
     /** TODO: Add documentation to nested. */
     nested: { [key: string]: ITestModel; };
-  };
+  }
 }
 ===================== Close ===================
 ===================== Flush ===================
