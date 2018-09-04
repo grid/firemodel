@@ -162,6 +162,11 @@ type TestModel struct {
 	Url runtime.URL `firestore:"url"`
 	// TODO: Add comment to TestModel.nested.
 	Nested *TestModel `firestore:"nested"`
+
+	// Creation timestamp.
+	CreatedAt time.Time `firestore:"createdAt,serverTimestamp"`
+	// Update timestamp.
+	UpdatedAt time.Time `firestore:"updatedAt,serverTimestamp"`
 }
 
 // TestModelPath returns the path to a particular TestModel in Firestore.
@@ -247,6 +252,11 @@ export namespace example {
     url: URL;
     /** TODO: Add documentation to nested. */
     nested: { [key: string]: ITestModel; };
+
+    /** Record creation timestamp. */
+    createdAt: firebase.firestore.Timestamp;
+    /** Record update timestamp. */
+    updatedAt: firebase.firestore.Timestamp;
   }
 }
 ===================== Close ===================

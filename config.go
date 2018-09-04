@@ -81,6 +81,14 @@ func (options SchemaModelOptions) GetFirestorePath() (format string, args []stri
 	return
 }
 
+func (options SchemaModelOptions) GetAutoTimestamp() bool {
+	if autoTimestamp, ok := options.Get("firestore")["autotimestamp"]; ok && autoTimestamp != "false" {
+
+		return true
+	}
+	return false
+}
+
 type SchemaEnum struct {
 	Name    string
 	Comment string

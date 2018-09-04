@@ -160,6 +160,21 @@ func (m *GoModeler) fields(model *firemodel.SchemaModel) func(g *jen.Group) {
 				Do(m.goType(field.Type, field.Extras)).
 				Tag(map[string]string{"firestore": field.Name})
 		}
+
+		if model.Options.GetAutoTimestamp() {
+			g.Line()
+			g.Comment("Creation timestamp.")
+			g.
+				Id("CreatedAt").
+				Qual("time", "Time").
+				Tag(map[string]string{"firestore":"createdAt,serverTimestamp"})
+
+			g.Comment("Update timestamp.")
+			g.
+				Id("UpdatedAt").
+				Qual("time", "Time").
+				Tag(map[string]string{"firestore":"updatedAt,serverTimestamp"})
+		}
 	}
 }
 

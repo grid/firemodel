@@ -10,6 +10,7 @@ enum Direction {
 // A Test is a test model.
 model TestModel {
   option firestore.path = "users/{user_id}/test_models";
+  option firestore.autotimestamp = true;
 
   // The name.
   string name;

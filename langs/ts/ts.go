@@ -31,12 +31,13 @@ var (
 	tpl = template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"toTypescriptType":  toTypescriptType,
-			"ToScreamingSnake":  strcase.ToScreamingSnake,
-			"ToLowerCamel":      strcase.ToLowerCamel,
-			"ToCamel":           strcase.ToCamel,
-			"getRequiredOption": getRequiredOption,
-			"interfaceName":     interfaceName,
+			"toTypescriptType": toTypescriptType,
+			"ToScreamingSnake": strcase.ToScreamingSnake,
+			"ToLowerCamel":     strcase.ToLowerCamel,
+			"ToCamel":          strcase.ToCamel,
+			"getModelOption":   getModelOption,
+			"getSchemaOption":  getSchemaOption,
+			"interfaceName":    interfaceName,
 		}).
 		Parse(file),
 	)
@@ -98,16 +99,46 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 	}
 }
 
-func getRequiredOption(key string, options firemodel.SchemaOptions) string {
-	ts, ok := options["ts"]
+func getSchemaOption(namespace string, key string, required bool, options firemodel.SchemaOptions) string {
+	ns, ok := options[namespace]
 	if !ok {
-		err := errors.Errorf("option ts.%s is required but not set", key)
-		panic(err)
+		if required {
+			err := errors.Errorf("option %s.%s is required but not set", namespace, key)
+			panic(err)
+		} else {
+			return ""
+		}
 	}
-	opt, ok := ts[key]
+	opt, ok := ns[key]
 	if !ok {
-		err := errors.Errorf("option ts.%s is required but not set", key)
-		panic(err)
+		if required {
+			err := errors.Errorf("option %s.%s is required but not set", namespace, key)
+			panic(err)
+		} else {
+			return ""
+		}
+	}
+	return opt
+}
+
+func getModelOption(namespace string, key string, required bool, options firemodel.SchemaModelOptions) string {
+	ns, ok := options[namespace]
+	if !ok {
+		if required {
+			err := errors.Errorf("option %s.%s is required but not set", namespace, key)
+			panic(err)
+		} else {
+			return ""
+		}
+	}
+	opt, ok := ns[key]
+	if !ok {
+		if required {
+			err := errors.Errorf("option %s.%s is required but not set", namespace, key)
+			panic(err)
+		} else {
+			return ""
+		}
 	}
 	return opt
 }
@@ -117,7 +148,7 @@ const (
 
 import firebase from 'firebase';
 
-export namespace {{.Options | getRequiredOption "namespace"}} {
+export namespace {{.Options | getSchemaOption "ts" "namespace" true}} {
   type URL = string;
 
   export interface IFile {
@@ -153,6 +184,13 @@ export namespace {{.Options | getRequiredOption "namespace"}} {
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
     {{.Name | ToLowerCamel -}}: {{toTypescriptType .Type .Extras}};
+    {{- end}}
+    {{- if .Options | getModelOption "firestore" "autotimestamp" false}}
+
+    /** Record creation timestamp. */
+    createdAt: firebase.firestore.Timestamp;
+    /** Record update timestamp. */
+    updatedAt: firebase.firestore.Timestamp;
     {{- end}}
   }`
 

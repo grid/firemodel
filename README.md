@@ -170,8 +170,9 @@ Here are the currently supported options:
 
 | Option Name | Description | Example |
 | --------- | ------------ | ---- |
-| `firestore.path` | Document's typical location in firestore, specified as a template with variables surrounded with curly braces. | `option firestore.path = "users/{user_id}"` |
-| `ts.namespace` | The TypeScript namespace for generated interfaces. | `option ts.namespace = "SomeApp"` |
-| `go.package` | The name of the go package for generated code. | `option go.package = "myapp"` |
+| `firestore.path` | Document's typical location in firestore, specified as a template with variables surrounded with curly braces. | `option firestore.path = "users/{user_id}";` |
+| `firestore.autotimestamp` | Automatically add createdAt and updatedAt fields. | `option firestore.autotimestamp = true;` |
+| `ts.namespace` | The TypeScript namespace for generated interfaces. | `option ts.namespace = "SomeApp";` |
+| `go.package` | The name of the go package for generated code. | `option go.package = "myapp";` |
 
  
