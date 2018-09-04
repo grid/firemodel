@@ -6,15 +6,52 @@ import Foundation
 import Pring
 
 // TODO: Add documentation to Direction.
-@objc enum Direction: String {
+@objc enum Direction: Int {
     // TODO: Add documentation to left.
-    case left = "LEFT"
+    case left
     // TODO: Add documentation to right.
-    case right = "RIGHT"
+    case right
     // TODO: Add documentation to up.
-    case up = "UP"
+    case up
     // TODO: Add documentation to down.
-    case down = "DOWN"
+    case down
+}
+
+extension Direction: CustomDebugStringConvertible {
+    init?(firestoreValue value: Any?) {
+        guard let value = value as? String else {
+            return nil
+        }
+        switch value {
+        case "LEFT":
+            self = .left
+        case "RIGHT":
+            self = .right
+        case "UP":
+            self = .up
+        case "DOWN":
+            self = .down
+        default:
+            return nil
+        }
+    }
+
+    var firestoreValue: String? {
+        switch self {
+        case .left:
+            return "LEFT"
+        case .right:
+            return "RIGHT"
+        case .up:
+            return "UP"
+        case .down:
+            return "DOWN"
+        default:
+            return nil
+        }
+    }
+
+    var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
 
 // A Test is a test model.
@@ -37,19 +74,19 @@ import Pring
     // TODO: Add documentation to friend.
     dynamic var friend: Pring.Reference<TestModel> = .init()
     // TODO: Add documentation to location.
-    dynamic var location: Pring.GeoPoint
+    dynamic var location: Pring.GeoPoint?
     // TODO: Add documentation to colors.
     dynamic var colors: [string] = []
     // TODO: Add documentation to meta.
-    dynamic var meta: [AnyHashable: Any] = []
+    dynamic var meta: [AnyHashable: Any] = [:]
     // TODO: Add documentation to direction.
-    dynamic var direction: [String: Direction] = [:]
-    // TODO: Add documentation to test_file.
-    dynamic var testFile: Pring.File
+    dynamic var direction: Direction?
+    // TODO: Add documentation to testFile.
+    dynamic var testFile: Pring.File?
     // TODO: Add documentation to url.
     dynamic var url: URL?
     // TODO: Add documentation to nested.
-    nested: Pring.NestedCollection<TestModel>
+    dynamic var nested: Pring.NestedCollection<TestModel> = []
 
     
 }

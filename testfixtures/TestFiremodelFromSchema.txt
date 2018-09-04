@@ -6,15 +6,52 @@ import Foundation
 import Pring
 
 // TODO: Add documentation to Direction.
-@objc enum Direction: String {
+@objc enum Direction: Int {
     // TODO: Add documentation to left.
-    case left = "LEFT"
+    case left
     // TODO: Add documentation to right.
-    case right = "RIGHT"
+    case right
     // TODO: Add documentation to up.
-    case up = "UP"
+    case up
     // TODO: Add documentation to down.
-    case down = "DOWN"
+    case down
+}
+
+extension Direction: CustomDebugStringConvertible {
+    init?(firestoreValue value: Any?) {
+        guard let value = value as? String else {
+            return nil
+        }
+        switch value {
+        case "LEFT":
+            self = .left
+        case "RIGHT":
+            self = .right
+        case "UP":
+            self = .up
+        case "DOWN":
+            self = .down
+        default:
+            return nil
+        }
+    }
+
+    var firestoreValue: String? {
+        switch self {
+        case .left:
+            return "LEFT"
+        case .right:
+            return "RIGHT"
+        case .up:
+            return "UP"
+        case .down:
+            return "DOWN"
+        default:
+            return nil
+        }
+    }
+
+    var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
 
 // A Test is a test model.
@@ -37,28 +74,28 @@ import Pring
     // TODO: Add documentation to friend.
     dynamic var friend: Pring.Reference<TestModel> = .init()
     // TODO: Add documentation to location.
-    dynamic var location: Pring.GeoPoint
+    dynamic var location: Pring.GeoPoint?
     // TODO: Add documentation to colors.
     dynamic var colors: [String] = []
     // TODO: Add documentation to meta.
-    dynamic var meta: [AnyHashable: Any] = []
-    // TODO: Add documentation to meta_strs.
+    dynamic var meta: [AnyHashable: Any] = [:]
+    // TODO: Add documentation to metaStrs.
     dynamic var metaStrs: [String: String] = [:]
     // TODO: Add documentation to direction.
-    dynamic var direction: Direction
-    // TODO: Add documentation to test_file.
-    dynamic var testFile: Pring.File
+    dynamic var direction: Direction?
+    // TODO: Add documentation to testFile.
+    dynamic var testFile: Pring.File?
     // TODO: Add documentation to url.
     dynamic var url: URL?
     // TODO: Add documentation to nested.
-    dynamic var nested: [String: TestModel] = [:]
+    dynamic var nested: TestModel?
     // TODO: Add documentation to nested_collection.
-    nested_collection: Pring.NestedCollection<TestModel>
+    dynamic var nestedCollection: Pring.NestedCollection<TestModel> = []
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
         case "direction":
-            return self.direction.rawValue
+            return self.direction?.firestoreValue
         default:
             break
         }
@@ -68,10 +105,7 @@ import Pring
     override func decode(_ key: String, value: Any?) -> Bool {
         switch key {
         case "direction":
-            if let value = value as? String, let direction = string(rawValue: value) {
-                self.direction = direction
-                return true
-            }
+            self.direction = Direction(firestoreValue: value)
         default:
             break
         }

@@ -35,6 +35,7 @@ var (
 		Funcs(map[string]interface{}{
 			"toSwiftType":                    toSwiftType,
 			"toScreamingSnake":               strcase.ToScreamingSnake,
+			"toCamel":                        strcase.ToCamel,
 			"toLowerCamel":                   strcase.ToLowerCamel,
 			"filterFieldsEnumsOnly":          filterFieldsEnumsOnly,
 			"asStaticConfigForFirestorePath": asStaticConfigForFirestorePath,
@@ -68,7 +69,11 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemo
 		return "Date = Date()"
 	case firemodel.String:
 		if extras != nil && extras.EnumType != "" {
-			return extras.EnumType
+			if root {
+				return fmt.Sprintf("%s?", strcase.ToCamel(extras.EnumType))
+			} else {
+				return fmt.Sprintf("%s", strcase.ToCamel(extras.EnumType))
+			}
 		} else if extras != nil && extras.URL {
 			if root {
 				return "URL?"
@@ -95,24 +100,36 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemo
 			return "Pring.AnyReference"
 		}
 	case firemodel.GeoPoint:
-		return "Pring.GeoPoint"
+		if root {
+			return "Pring.GeoPoint?"
+		} else {
+			return "Pring.GeoPoint"
+		}
 	case firemodel.Array:
 		if extras != nil && extras.ArrayOf != "" {
 			return fmt.Sprintf("[%s] = []", extras.ArrayOf)
 		} else if extras != nil && extras.ArrayOfPrimitive != "" {
-			return fmt.Sprintf("[%s] = []", toSwiftType(nil,false, extras.ArrayOfPrimitive))
+			return fmt.Sprintf("[%s] = []", toSwiftType(nil, false, extras.ArrayOfPrimitive))
 		} else {
 			return "[Any]"
 		}
 	case firemodel.Map:
 		if extras != nil && extras.File {
-			return "Pring.File"
+			if root {
+				return "Pring.File?"
+			} else {
+				return "Pring.File"
+			}
 		} else if extras != nil && extras.MapTo != "" {
-			return fmt.Sprintf("[String: %s] = [:]", extras.MapTo)
+			if root {
+				return fmt.Sprintf("%s?", extras.MapTo)
+			} else {
+				return fmt.Sprintf("%s", extras.MapTo)
+			}
 		} else if extras != nil && extras.MapToPrimitive != "" {
-			return fmt.Sprintf("[String: %s] = [:]", toSwiftType(nil, false,extras.MapToPrimitive))
+			return fmt.Sprintf("[String: %s] = [:]", toSwiftType(nil, false, extras.MapToPrimitive))
 		} else {
-			return "[AnyHashable: Any] = []"
+			return "[AnyHashable: Any] = [:]"
 		}
 	default:
 		err := errors.Errorf("firemodel/ios: unknown type %s", firetype)
@@ -158,15 +175,15 @@ import Pring
 {{- if .Comment}}
 // {{.Comment}}
 {{- else}}
-// TODO: Add documentation to {{.Name}}.
+// TODO: Add documentation to {{.Name | toCamel}}.
 {{- end}}
-@objcMembers class {{.Name}}: Pring.Object {
+@objcMembers class {{.Name | toCamel}}: Pring.Object {
     {{.Options | asStaticConfigForFirestorePath -}}
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}
     {{- else }}
-    // TODO: Add documentation to {{.Name}}.
+    // TODO: Add documentation to {{.Name | toLowerCamel}}.
     {{- end}}
     dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType .Extras true}}
     {{- end}}
@@ -177,7 +194,7 @@ import Pring
     {{- else }}
     // TODO: Add documentation to {{.Name}}.
     {{- end}}
-    {{.Name}}: Pring.NestedCollection<{{.Type}}>
+    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type}}> = []
     {{- end}}
 
     {{ if .Fields | filterFieldsEnumsOnly -}}
@@ -185,7 +202,7 @@ import Pring
         switch key {
         {{range .Fields | filterFieldsEnumsOnly -}}
         case "{{.Name | toLowerCamel}}":
-            return self.{{.Name | toLowerCamel}}.rawValue
+            return self.{{.Name | toLowerCamel}}?.firestoreValue
             {{- end}}
         default:
             break
@@ -197,10 +214,7 @@ import Pring
         switch key {
         {{range .Fields | filterFieldsEnumsOnly -}}
         case "{{.Name | toLowerCamel}}":
-            if let value = value as? String, let {{.Name | toLowerCamel}} = {{.Type}}(rawValue: value) {
-                self.{{.Name | toLowerCamel}} = {{.Name | toLowerCamel}}
-                return true
-            }
+            self.{{.Name | toLowerCamel}} = {{.Name | toCamel }}(firestoreValue: value)
             {{- end}}
         default:
             break
@@ -216,15 +230,44 @@ import Pring
 {{- else}}
 // TODO: Add documentation to {{.Name}}.
 {{- end}}
-@objc enum {{.Name}}: String {
+@objc enum {{.Name | toCamel }}: Int {
     {{- range .Values}}
     {{- if .Comment}}
     // {{.Comment}}
     {{- else}}
     // TODO: Add documentation to {{.Name}}.
     {{- end}}
-    case {{.Name}} = "{{.Name | toScreamingSnake}}"
+    case {{.Name}}
     {{- end}}
+}
+
+extension {{.Name}}: CustomDebugStringConvertible {
+    init?(firestoreValue value: Any?) {
+        guard let value = value as? String else {
+            return nil
+        }
+        switch value {
+        {{- range $v := .Values}}
+        case "{{$v.Name | toScreamingSnake}}":
+            self = .{{$v.Name | toLowerCamel }}
+        {{- end}}
+        default:
+            return nil
+        }
+    }
+
+    var firestoreValue: String? {
+        switch self {
+        {{- range .Values}}
+        case .{{.Name | toLowerCamel}}:
+            return "{{.Name | toScreamingSnake}}"
+        {{- end}}
+        default:
+            return nil
+        }
+    }
+
+    var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
 `
 )
