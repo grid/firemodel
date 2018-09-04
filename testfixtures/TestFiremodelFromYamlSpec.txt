@@ -152,10 +152,10 @@ package firemodel
 type Direction string
 
 const (
-	left  Direction = "LEFT"
-	right           = "RIGHT"
-	up              = "UP"
-	down            = "DOWN"
+	Left  Direction = "LEFT"
+	Right Direction = "RIGHT"
+	Up    Direction = "UP"
+	Down  Direction = "DOWN"
 )
 ===================== Close ===================
 ===================== Flush ===================

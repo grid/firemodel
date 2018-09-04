@@ -115,15 +115,15 @@ func (m *GoModeler) writeEnum(enum *firemodel.SchemaEnum, sourceCoder firemodel.
 	f.Type().Id(enum.Name).String()
 
 	f.Const().DefsFunc(func(g *jen.Group) {
-		for idx, val := range enum.Values {
+		for _, val := range enum.Values {
 			if val.Comment != "" {
 				g.Comment(val.Comment)
 			}
-			if idx == 0 {
-				g.Id(val.Name).Id(enum.Name).Op("=").Lit(strcase.ToScreamingSnake(val.Name))
-			} else {
-				g.Id(val.Name).Op("=").Lit(strcase.ToScreamingSnake(val.Name))
-			}
+			g.
+				Id(strcase.ToCamel(val.Name)).
+				Id(enum.Name).
+				Op("=").
+				Lit(strcase.ToScreamingSnake(val.Name))
 		}
 	})
 
