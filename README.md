@@ -151,3 +151,27 @@ model Thing {
 ```
 
 Generic generic types are not currently supported: `array<reference<T>>`.
+
+### Options
+
+You can specify schema and model options via the following syntax:
+
+```
+option foo.bar = "baz";
+
+model MyModel {
+    option lang.key = "value";
+}
+```
+
+Options are used to provide hints to the modelers.
+
+Here are the currently supported options:
+
+| Option Name | Description | Example |
+| --------- | ------------ | ---- |
+| `firestore.path` | Document's typical location in firestore, specified as a template with variables surrounded with curly braces. | `option firestore.path = "users/{user_id}"` |
+| `ts.namespace` | The TypeScript namespace for generated interfaces. | `option ts.namespace = "SomeApp"` |
+| `go.package` | The name of the go package for generated code. | `option go.package = "myapp"` |
+
+ 
