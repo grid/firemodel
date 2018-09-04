@@ -1,4 +1,4 @@
-# firemodel
+# firemodel [![CircleCI](https://circleci.com/gh/mickeyreiss/firemodel.svg?style=svg)](https://circleci.com/gh/mickeyreiss/firemodel)
 
 > Type-safe, cross-platform models for [Firestore](https://firebase.google.com/docs/firestore/).
 
