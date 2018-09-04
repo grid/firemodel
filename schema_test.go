@@ -28,7 +28,7 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name:    "Empty",
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},
@@ -47,7 +47,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},
@@ -126,7 +126,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{URL: true},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},
@@ -166,7 +166,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{MapTo: "TestModel"},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},
@@ -185,7 +185,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{URL: true},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},
@@ -226,7 +226,7 @@ func TestParseSchema(t *testing.T) {
 								Extras:  &SchemaFieldExtras{EnumType: "Direction"},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},
@@ -249,7 +249,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "Component",
@@ -260,7 +260,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "Machine",
@@ -281,7 +281,7 @@ func TestParseSchema(t *testing.T) {
 								},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 						Collections: []*SchemaNestedCollection{
 							{
 								Name: "components",
@@ -316,7 +316,7 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name: "AnnotatedModel",
-						Options: SchemaOptions{
+						Options: SchemaModelOptions{
 							"lang": {
 								"opt": "great",
 							},
@@ -339,7 +339,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "CamelCase",
@@ -350,7 +350,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "TitleCase",
@@ -361,7 +361,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "SnakeCase",
@@ -372,7 +372,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},
@@ -400,7 +400,7 @@ func TestParseSchema(t *testing.T) {
 								Extras: &SchemaFieldExtras{},
 							},
 						},
-						Options: SchemaOptions{},
+						Options: SchemaModelOptions{},
 					},
 				},
 				Options: SchemaOptions{},

@@ -296,8 +296,8 @@ func (c *configSchemaCompiler) compileExtras(astType *ast.ASTFieldType) *SchemaF
 	return out
 }
 
-func (c *configSchemaCompiler) compileModelOptions(elements []*ast.ASTModelElement) SchemaOptions {
-	out := SchemaOptions{}
+func (c *configSchemaCompiler) compileModelOptions(elements []*ast.ASTModelElement) SchemaModelOptions {
+	out := SchemaModelOptions{}
 	for _, element := range elements {
 		option := element.Option
 		if option == nil {

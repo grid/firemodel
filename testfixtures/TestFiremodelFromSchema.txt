@@ -20,6 +20,9 @@ import Pring
 	
 // A Test is a test model.
 @objcMembers class TestModel: Pring.Object {
+	static var userId: String = ""
+    override class var path: String { return "users/\(userId)/test_models" }
+
 	// The name.
 	dynamic var name: String?
 	// The age.
@@ -86,12 +89,15 @@ package firemodel
 
 import (
 	firestore "cloud.google.com/go/firestore"
+	"fmt"
 	runtime "github.com/mickeyreiss/firemodel/runtime"
 	latlng "google.golang.org/genproto/googleapis/type/latlng"
 	"time"
 )
 
 // A Test is a test model.
+//
+// Firestore document location: /users/{user_id}/test_models
 type TestModel struct {
 	// The name.
 	Name string `firestore:"name"`
@@ -121,6 +127,11 @@ type TestModel struct {
 	Url runtime.URL `firestore:"url"`
 	// TODO: Add comment to TestModel.nested.
 	Nested *TestModel `firestore:"nested"`
+}
+
+// TestModelPath returns the path to a particular TestModel in Firestore.
+func TestModelPath(userId string) string {
+	return fmt.Sprintf("users/%s/test_models", userId)
 }
 ===================== Close ===================
 ===================== Open direction.firemodel.go ===================

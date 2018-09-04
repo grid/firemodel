@@ -46,7 +46,50 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		f.Comment(model.Comment)
 	}
 
+	format, args, err := model.Options.GetFirestorePath()
+	if err != nil {
+		return errors.Wrap(err, "firemodel/go: invalid firestore path")
+	}
+	if format != "" {
+		commentargs := make([]interface{}, len(args))
+		for idx, arg := range args {
+			commentargs[idx] = fmt.Sprintf("{%s}", arg)
+		}
+		f.Comment("")
+		f.Commentf("Firestore document location: /%s", fmt.Sprintf(format, commentargs...))
+	}
+
 	f.Type().Id(model.Name).StructFunc(m.fields(model))
+
+	f.
+		Commentf("%s returns the path to a particular %s in Firestore.", fmt.Sprint(model.Name, "Path"), model.Name)
+	f.
+		Func().
+		Id(fmt.Sprint(model.Name, "Path")).
+		ParamsFunc(func(g *jen.Group) {
+			_, args, err := model.Options.GetFirestorePath()
+			if err != nil {
+				panic(err)
+			}
+			for _, arg := range args {
+				g.Id(strcase.ToLowerCamel(arg)).String()
+			}
+		}).
+		String().
+		Block(jen.ReturnFunc(func(g *jen.Group) {
+			format, args, err := model.Options.GetFirestorePath()
+			if err != nil {
+				panic(err)
+			}
+			g.
+				Qual("fmt", "Sprintf").
+				CallFunc(func(g *jen.Group) {
+					g.Lit(format)
+					for _, arg := range args {
+						g.Id(strcase.ToLowerCamel(arg))
+					}
+				})
+		}))
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))
 	if err != nil {
