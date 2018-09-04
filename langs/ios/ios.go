@@ -56,7 +56,7 @@ func filterFieldsEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField
 	return out
 }
 
-func toSwiftType(extras *firemodel.SchemaFieldExtras, firetype firemodel.SchemaFieldType) string {
+func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemodel.SchemaFieldType) string {
 	switch firetype {
 	case firemodel.Boolean:
 		return "Bool = false"
@@ -70,12 +70,24 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, firetype firemodel.SchemaF
 		if extras != nil && extras.EnumType != "" {
 			return extras.EnumType
 		} else if extras != nil && extras.URL {
-			return "URL?"
+			if root {
+				return "URL?"
+			} else {
+				return "URL"
+			}
 		} else {
-			return "String?"
+			if root {
+				return "String?"
+			} else {
+				return "String"
+			}
 		}
 	case firemodel.Bytes:
-		return "Data?"
+		if root {
+			return "Data?"
+		} else {
+			return "Data"
+		}
 	case firemodel.Reference:
 		if extras != nil && extras.ReferenceTo != "" {
 			return fmt.Sprintf("Pring.Reference<%s> = .init()", extras.ReferenceTo)
@@ -86,19 +98,19 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, firetype firemodel.SchemaF
 		return "Pring.GeoPoint"
 	case firemodel.Array:
 		if extras != nil && extras.ArrayOf != "" {
-			return fmt.Sprintf("Array<%s>", extras.ArrayOf)
+			return fmt.Sprintf("[%s] = []", extras.ArrayOf)
 		} else if extras != nil && extras.ArrayOfPrimitive != "" {
-			return fmt.Sprintf("Array<%s>", toSwiftType(nil, extras.ArrayOfPrimitive))
+			return fmt.Sprintf("[%s] = []", toSwiftType(nil,false, extras.ArrayOfPrimitive))
 		} else {
-			return "Array"
+			return "[Any]"
 		}
 	case firemodel.Map:
 		if extras != nil && extras.File {
 			return "Pring.File"
 		} else if extras != nil && extras.MapTo != "" {
-			return fmt.Sprintf("%s?", extras.MapTo)
+			return fmt.Sprintf("[String: %s] = [:]", extras.MapTo)
 		} else if extras != nil && extras.MapToPrimitive != "" {
-			return fmt.Sprintf("%s?", toSwiftType(nil, extras.MapToPrimitive))
+			return fmt.Sprintf("[String: %s] = [:]", toSwiftType(nil, false,extras.MapToPrimitive))
 		} else {
 			return "[AnyHashable: Any] = []"
 		}
@@ -135,14 +147,13 @@ const (
 
 import Foundation
 import Pring
-
 {{range .Enums -}}
 {{template "enum" .}}
 {{- end}}
 {{- range .Models -}}
 {{- template "model" .}}
-{{end -}}
-	`
+{{- end -}}`
+
 	model = `
 {{- if .Comment}}
 // {{.Comment}}
@@ -150,54 +161,53 @@ import Pring
 // TODO: Add documentation to {{.Name}}.
 {{- end}}
 @objcMembers class {{.Name}}: Pring.Object {
-	{{.Options | asStaticConfigForFirestorePath -}}
-	{{- range .Fields}}
-	{{- if .Comment}}
-	// {{.Comment}}
-	{{- else }}
-	// TODO: Add documentation to {{.Name}}.
-	{{- end}}
-	dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType .Extras}}
-	{{- end}}
+    {{.Options | asStaticConfigForFirestorePath -}}
+    {{- range .Fields}}
+    {{- if .Comment}}
+    // {{.Comment}}
+    {{- else }}
+    // TODO: Add documentation to {{.Name}}.
+    {{- end}}
+    dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType .Extras true}}
+    {{- end}}
 
-	{{- range .Collections}}
-	{{- if .Comment}}
-	// {{.Comment}}
-	{{- else }}
-	// TODO: Add documentation to {{.Name}}.
-	{{- end}}
-	{{.Name}}: Pring.NestedCollection<{{.Type}}>
-	{{- end}}
+    {{- range .Collections}}
+    {{- if .Comment}}
+    // {{.Comment}}
+    {{- else }}
+    // TODO: Add documentation to {{.Name}}.
+    {{- end}}
+    {{.Name}}: Pring.NestedCollection<{{.Type}}>
+    {{- end}}
 
+    override func encode(_ key: String, value: Any?) -> Any? {
+        switch key {
+        {{range .Fields | filterFieldsEnumsOnly -}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}.rawValue
+            {{- end}}
+        default:
+            break
+        }
+        return nil
+    }
 
-	override func encode(_ key: String, value: Any?) -> Any? {
-		switch key {
-			{{range .Fields | filterFieldsEnumsOnly -}}
-		case "{{.Name | toLowerCamel}}":
-			return self.{{.Name | toLowerCamel}}.rawValue
-			{{- end}}
-		default:
-			break
-		}
-		return nil
-	}
-
-	override func decode(_ key: String, value: Any?) -> Bool {
-		switch key {
-			{{range .Fields | filterFieldsEnumsOnly -}}
-		case "{{.Name | toLowerCamel}}":
-			if let value = value as? String, let {{.Name | toLowerCamel}} = {{.Type}}(rawValue: value) {
-				self.{{.Name | toLowerCamel}} = {{.Name | toLowerCamel}}
-				return true
-			}
-			{{end -}}
-		default:
-			break
-		}
-		return false
-	}
+    override func decode(_ key: String, value: Any?) -> Bool {
+        switch key {
+        {{range .Fields | filterFieldsEnumsOnly -}}
+        case "{{.Name | toLowerCamel}}":
+            if let value = value as? String, let {{.Name | toLowerCamel}} = {{.Type}}(rawValue: value) {
+                self.{{.Name | toLowerCamel}} = {{.Name | toLowerCamel}}
+                return true
+            }
+            {{- end}}
+        default:
+            break
+        }
+        return false
+    }
 }
-	`
+`
 	enum = `
 {{- if .Comment}}
 // {{.Comment}}
@@ -205,14 +215,14 @@ import Pring
 // TODO: Add documentation to {{.Name}}.
 {{- end}}
 @objc enum {{.Name}}: String {
-	{{- range .Values}}
-	{{- if .Comment}}
-	// {{.Comment}}
-	{{- else}}
-	// TODO: Add documentation to {{.Name}}.
-	{{- end}}
-	case {{.Name}} = "{{.Name | toScreamingSnake}}"
-	{{- end}}
+    {{- range .Values}}
+    {{- if .Comment}}
+    // {{.Comment}}
+    {{- else}}
+    // TODO: Add documentation to {{.Name}}.
+    {{- end}}
+    case {{.Name}} = "{{.Name | toScreamingSnake}}"
+    {{- end}}
 }
-	`
+`
 )

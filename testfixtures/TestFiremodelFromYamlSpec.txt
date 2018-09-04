@@ -5,72 +5,70 @@
 import Foundation
 import Pring
 
-
 // TODO: Add documentation to Direction.
 @objc enum Direction: String {
-	// TODO: Add documentation to left.
-	case left = "LEFT"
-	// TODO: Add documentation to right.
-	case right = "RIGHT"
-	// TODO: Add documentation to up.
-	case up = "UP"
-	// TODO: Add documentation to down.
-	case down = "DOWN"
+    // TODO: Add documentation to left.
+    case left = "LEFT"
+    // TODO: Add documentation to right.
+    case right = "RIGHT"
+    // TODO: Add documentation to up.
+    case up = "UP"
+    // TODO: Add documentation to down.
+    case down = "DOWN"
 }
-	
+
 // A Test is a test model.
 @objcMembers class TestModel: Pring.Object {
-	static var userId: String = ""
+    static var userId: String = ""
     override class var path: String { return "users/\(userId)/test_models" }
 
-	// The name.
-	dynamic var name: String?
-	// The age.
-	dynamic var age: Int = 0
-	// The number pi.
-	dynamic var pi: Float = 0.0
-	// The birth date.
-	dynamic var birthdate: Date = Date()
-	// True if it is good.
-	dynamic var isGood: Bool = false
-	// TODO: Add documentation to data.
-	dynamic var data: Data?
-	// TODO: Add documentation to friend.
-	dynamic var friend: Pring.Reference<TestModel> = .init()
-	// TODO: Add documentation to location.
-	dynamic var location: Pring.GeoPoint
-	// TODO: Add documentation to colors.
-	dynamic var colors: Array<string>
-	// TODO: Add documentation to meta.
-	dynamic var meta: [AnyHashable: Any] = []
-	// TODO: Add documentation to direction.
-	dynamic var direction: Direction?
-	// TODO: Add documentation to test_file.
-	dynamic var testFile: Pring.File
-	// TODO: Add documentation to url.
-	dynamic var url: URL?
-	// TODO: Add documentation to nested.
-	nested: Pring.NestedCollection<TestModel>
+    // The name.
+    dynamic var name: String?
+    // The age.
+    dynamic var age: Int = 0
+    // The number pi.
+    dynamic var pi: Float = 0.0
+    // The birth date.
+    dynamic var birthdate: Date = Date()
+    // True if it is good.
+    dynamic var isGood: Bool = false
+    // TODO: Add documentation to data.
+    dynamic var data: Data?
+    // TODO: Add documentation to friend.
+    dynamic var friend: Pring.Reference<TestModel> = .init()
+    // TODO: Add documentation to location.
+    dynamic var location: Pring.GeoPoint
+    // TODO: Add documentation to colors.
+    dynamic var colors: [string] = []
+    // TODO: Add documentation to meta.
+    dynamic var meta: [AnyHashable: Any] = []
+    // TODO: Add documentation to direction.
+    dynamic var direction: [String: Direction] = [:]
+    // TODO: Add documentation to test_file.
+    dynamic var testFile: Pring.File
+    // TODO: Add documentation to url.
+    dynamic var url: URL?
+    // TODO: Add documentation to nested.
+    nested: Pring.NestedCollection<TestModel>
 
+    override func encode(_ key: String, value: Any?) -> Any? {
+        switch key {
+        
+        default:
+            break
+        }
+        return nil
+    }
 
-	override func encode(_ key: String, value: Any?) -> Any? {
-		switch key {
-			
-		default:
-			break
-		}
-		return nil
-	}
-
-	override func decode(_ key: String, value: Any?) -> Bool {
-		switch key {
-			default:
-			break
-		}
-		return false
-	}
+    override func decode(_ key: String, value: Any?) -> Bool {
+        switch key {
+        
+        default:
+            break
+        }
+        return false
+    }
 }
-	
 ===================== Close ===================
 ===================== Flush ===================
 ===================== ./go ===================

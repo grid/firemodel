@@ -26,6 +26,7 @@ model TestModel {
   geopoint location;
   array<string> colors;
   map meta;
+  map<string> meta_strs;
   Direction direction;
   File test_file;
   URL url;
