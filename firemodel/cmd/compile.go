@@ -58,7 +58,7 @@ var compileCmd = &cobra.Command{
 		}
 
 		for language, outDir := range compileReq.langOutDirs {
-			if outDir != nil {
+			if outDir == nil {
 				continue
 			}
 			config.Languages = append(config.Languages, firemodel.Language{
