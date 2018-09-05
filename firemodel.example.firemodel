@@ -1,6 +1,6 @@
 option ts.namespace = "example";
 
-enum Direction {
+enum TestDirection {
     left,
     right,
     up,
@@ -28,7 +28,7 @@ model TestModel {
   array<string> colors;
   map meta;
   map<string> meta_strs;
-  Direction direction;
+  TestDirection direction;
   File test_file;
   URL url;
   TestModel nested;
