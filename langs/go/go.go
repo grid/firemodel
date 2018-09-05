@@ -113,18 +113,22 @@ func (m *GoModeler) writeEnum(enum *firemodel.SchemaEnum, sourceCoder firemodel.
 	} else {
 		f.Comment(enum.Comment)
 	}
-	f.Type().Id(enumName).String()
+	// TODO: Change enums back to strings.
+	//f.Type().Id(enumName).String()
+	f.Type().Id(enumName).Int()
 
 	f.Const().DefsFunc(func(g *jen.Group) {
-		for _, val := range enum.Values {
+		for idx, val := range enum.Values {
 			if val.Comment != "" {
 				g.Comment(val.Comment)
 			}
 			g.
-				Id(fmt.Sprintf("%s_%s", enumName, strcase.ToScreamingSnake(val.Name))).
+				Commentf/*Lit*/("NOTE: This will shortly change back to \"%s\"",strcase.ToScreamingSnake(val.Name))
+			g.
+				Id(strcase.ToCamel(val.Name)).
 				Id(enumName).
 				Op("=").
-				Lit(strcase.ToScreamingSnake(val.Name))
+				Lit(idx)
 		}
 	})
 
