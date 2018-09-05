@@ -180,13 +180,17 @@ func TestModelPath(userId string) string {
 package firemodel
 
 // TODO: Add comment to TestDirection
-type TestDirection string
+type TestDirection int
 
 const (
-	TestDirection_LEFT  TestDirection = "LEFT"
-	TestDirection_RIGHT TestDirection = "RIGHT"
-	TestDirection_UP    TestDirection = "UP"
-	TestDirection_DOWN  TestDirection = "DOWN"
+	// NOTE: This will shortly change back to "TestDirection_LEFT"
+	TestDirection_LEFT TestDirection = 0
+	// NOTE: This will shortly change back to "TestDirection_RIGHT"
+	TestDirection_RIGHT TestDirection = 1
+	// NOTE: This will shortly change back to "TestDirection_UP"
+	TestDirection_UP TestDirection = 2
+	// NOTE: This will shortly change back to "TestDirection_DOWN"
+	TestDirection_DOWN TestDirection = 3
 )
 ===================== Close ===================
 ===================== Flush ===================

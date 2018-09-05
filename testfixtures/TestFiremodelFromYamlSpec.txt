@@ -149,13 +149,17 @@ func TestModelPath(userId string) string {
 package firemodel
 
 // TODO: Add comment to Direction
-type Direction string
+type Direction int
 
 const (
-	Direction_LEFT  Direction = "LEFT"
-	Direction_RIGHT Direction = "RIGHT"
-	Direction_UP    Direction = "UP"
-	Direction_DOWN  Direction = "DOWN"
+	// NOTE: This will shortly change back to "Direction_LEFT"
+	Direction_LEFT Direction = 0
+	// NOTE: This will shortly change back to "Direction_RIGHT"
+	Direction_RIGHT Direction = 1
+	// NOTE: This will shortly change back to "Direction_UP"
+	Direction_UP Direction = 2
+	// NOTE: This will shortly change back to "Direction_DOWN"
+	Direction_DOWN Direction = 3
 )
 ===================== Close ===================
 ===================== Flush ===================

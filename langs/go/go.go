@@ -122,10 +122,11 @@ func (m *GoModeler) writeEnum(enum *firemodel.SchemaEnum, sourceCoder firemodel.
 			if val.Comment != "" {
 				g.Comment(val.Comment)
 			}
+			enumValue := fmt.Sprintf("%s_%s", enumName, strcase.ToScreamingSnake(val.Name))
 			g.
-				Commentf/*Lit*/("NOTE: This will shortly change back to \"%s\"",strcase.ToScreamingSnake(val.Name))
+				Commentf /*Lit*/ ("NOTE: This will shortly change back to \"%s\"", enumValue)
 			g.
-				Id(strcase.ToCamel(val.Name)).
+				Id(enumValue).
 				Id(enumName).
 				Op("=").
 				Lit(idx)
