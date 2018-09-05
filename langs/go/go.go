@@ -133,7 +133,7 @@ func (m *GoModeler) writeEnum(enum *firemodel.SchemaEnum, sourceCoder firemodel.
 		}
 	})
 
-	w, err := sourceCoder.NewFile(fmt.Sprint(enumName, fileExtension))
+	w, err := sourceCoder.NewFile(fmt.Sprint(enum.Name, fileExtension))
 	if err != nil {
 		return errors.Wrap(err, "firemodel/go: open source code file")
 	}
