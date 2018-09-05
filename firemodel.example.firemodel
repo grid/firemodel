@@ -34,3 +34,7 @@ model TestModel {
   TestModel nested;
   collection<TestModel> nested_collection;
 }
+
+model TestTimestamps {
+  option firestore.autotimestamp = true;
+}

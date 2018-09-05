@@ -99,24 +99,14 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 	}
 }
 
-func getSchemaOption(namespace string, key string, required bool, options firemodel.SchemaOptions) string {
+func getSchemaOption(namespace string, key string, defaultValue string, options firemodel.SchemaOptions) string {
 	ns, ok := options[namespace]
 	if !ok {
-		if required {
-			err := errors.Errorf("option %s.%s is required but not set", namespace, key)
-			panic(err)
-		} else {
-			return ""
-		}
+		return defaultValue
 	}
 	opt, ok := ns[key]
 	if !ok {
-		if required {
-			err := errors.Errorf("option %s.%s is required but not set", namespace, key)
-			panic(err)
-		} else {
-			return ""
-		}
+		return defaultValue
 	}
 	return opt
 }
@@ -148,7 +138,7 @@ const (
 
 import firebase from 'firebase';
 
-export namespace {{.Options | getSchemaOption "ts" "namespace" true}} {
+export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   type URL = string;
 
   export interface IFile {
