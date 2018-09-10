@@ -112,9 +112,11 @@ type SchemaEnumValue struct {
 type SchemaFieldExtras struct {
 	ReferenceTo      string
 	ArrayOfPrimitive SchemaFieldType
-	ArrayOf          string
+	ArrayOfModel     string
+	ArrayOfEnum      string
 	MapToPrimitive   SchemaFieldType
-	MapTo            string
+	MapToModel       string
+	MapToEnum        string
 	EnumType         string
 	URL              bool
 	File             bool

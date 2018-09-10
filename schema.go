@@ -202,7 +202,7 @@ func (c *configSchemaCompiler) compileFieldType(astFieldType *ast.ASTFieldType) 
 	if astFieldType.Base == ast.URL {
 		return String
 	}
-	_, ok := c.assertEnumType(astFieldType)
+	_, ok := c.assertEnumType(astFieldType.Base)
 	if ok {
 		return String
 	}
@@ -240,10 +240,10 @@ func (c *configSchemaCompiler) assertModelType(astType ast.ASTType) (string, boo
 	return "", false
 }
 
-func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (ast.ASTType, bool) {
+func (c *configSchemaCompiler) assertEnumType(astType ast.ASTType) (string, bool) {
 	for _, enum := range c.enums {
-		if enum.Name == strcase.ToCamel(string(astType.Base)) {
-			return astType.Base, true
+		if enum.Name == strcase.ToCamel(string(astType)) {
+			return enum.Name, true
 		}
 
 	}
@@ -253,11 +253,11 @@ func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (ast.AS
 func (c *configSchemaCompiler) compileExtras(astType *ast.ASTFieldType) *SchemaFieldExtras {
 	out := &SchemaFieldExtras{}
 
-	if enumType, ok := c.assertEnumType(astType); ok {
+	if enumType, ok := c.assertEnumType(astType.Base); ok {
 		out.EnumType = string(enumType)
 	}
 	if modelType, ok := c.assertModelType(astType.Base); ok {
-		out.MapTo = string(modelType)
+		out.MapToModel = string(modelType)
 	}
 
 	switch astType.Base {
@@ -272,14 +272,24 @@ func (c *configSchemaCompiler) compileExtras(astType *ast.ASTFieldType) *SchemaF
 		case ast.Map:
 			if astType.Generic.IsPrimitive() {
 				out.MapToPrimitive = SchemaFieldType(astType.Generic)
+			} else if modelType, ok := c.assertModelType(astType.Generic); ok {
+				out.MapToModel = modelType
+			} else if enumType, ok := c.assertEnumType(astType.Generic); ok {
+				out.MapToEnum = enumType
 			} else {
-				out.MapTo = string(astType.Generic)
+				err := errors.Errorf("firemodel/schema: unrecognized generic type: %s", astType.Generic)
+				panic(err)
 			}
 		case ast.Array:
 			if astType.Generic.IsPrimitive() {
 				out.ArrayOfPrimitive = SchemaFieldType(astType.Generic)
+			} else if modelType, ok := c.assertModelType(astType.Generic); ok {
+				out.ArrayOfModel = modelType
+			} else if enumType, ok := c.assertEnumType(astType.Generic); ok {
+				out.ArrayOfEnum = enumType
 			} else {
-				out.ArrayOf = string(astType.Generic)
+				err := errors.Errorf("firemodel/schema: unrecognized generic type: %s", astType.Generic)
+				panic(err)
 			}
 		case ast.Reference:
 			if astType.Generic.IsPrimitive() {

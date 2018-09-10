@@ -1,8 +1,14 @@
+enum TestEnum {}
+
 model TestModel {
     reference<TestModel> other;
     reference unspecified_other;
-    array<string> str_ary;
+    array<string> primative_ary;
     array<TestModel> model_ary;
-    map<string> str_map;
+    array<TestEnum> enum_ary;
+    array generic_ary;
+    map<string> primative_map;
     map<TestModel> model_map;
+    map<TestEnum> enum_map;
+    map generic_map;
 }

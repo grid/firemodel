@@ -26,6 +26,7 @@ model TestModel {
   reference<TestModel> friend;
   geopoint location;
   array<string> colors;
+  array<TestDirection> directions;
   map meta;
   map<string> meta_strs;
   TestDirection direction;

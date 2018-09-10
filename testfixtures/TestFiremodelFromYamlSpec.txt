@@ -76,7 +76,7 @@ extension Direction: CustomDebugStringConvertible {
     // TODO: Add documentation to location.
     dynamic var location: Pring.GeoPoint?
     // TODO: Add documentation to colors.
-    dynamic var colors: [string] = []
+    dynamic var colors: [String] = []
     // TODO: Add documentation to meta.
     dynamic var meta: [AnyHashable: Any] = [:]
     // TODO: Add documentation to direction.
@@ -191,6 +191,8 @@ export namespace example {
 
   /** A Test is a test model. */
   export interface ITestModel {
+    /** TODO: Add documentation to nested. */
+    nested: firebase.firestore.CollectionReference<ITestModel>;
     /** The name. */
     name: string;
     /** The age. */
@@ -208,11 +210,11 @@ export namespace example {
     /** TODO: Add documentation to location. */
     location: firebase.firestore.GeoPoint;
     /** TODO: Add documentation to colors. */
-    colors: Istring[];
+    colors: string[];
     /** TODO: Add documentation to meta. */
     meta: { [key: string]: any; };
     /** TODO: Add documentation to direction. */
-    direction: { [key: string]: IDirection; };
+    direction: Direction;
     /** TODO: Add documentation to test_file. */
     testFile: IFile;
     /** TODO: Add documentation to url. */

@@ -135,35 +135,61 @@ func TestParseSchema(t *testing.T) {
 		{
 			name: "extras",
 			want: &Schema{
+				Enums: []*SchemaEnum{
+					{Name: "TestEnum"},
+				},
 				Models: []*SchemaModel{
 					{
 						Name: "TestModel",
 						Fields: []*SchemaField{
 							{
-								Name: "other", Type: Reference, Extras: &SchemaFieldExtras{ReferenceTo: "TestModel"}},
+								Name:   "other",
+								Type:   Reference,
+								Extras: &SchemaFieldExtras{ReferenceTo: "TestModel"}},
 							{
 								Name:   "unspecified_other",
 								Type:   Reference,
 								Extras: &SchemaFieldExtras{},
 							},
 							{
-								Name:   "str_ary",
+								Name:   "primative_ary",
 								Type:   Array,
 								Extras: &SchemaFieldExtras{ArrayOfPrimitive: String},
 							},
 							{
 								Name:   "model_ary",
 								Type:   Array,
-								Extras: &SchemaFieldExtras{ArrayOf: "TestModel"}},
+								Extras: &SchemaFieldExtras{ArrayOfModel: "TestModel"},
+							},
 							{
-								Name:   "str_map",
+								Name:   "enum_ary",
+								Type:   Array,
+								Extras: &SchemaFieldExtras{ArrayOfEnum: "TestEnum"},
+							},
+							{
+								Name:   "generic_ary",
+								Type:   Array,
+								Extras: &SchemaFieldExtras{},
+							},
+							{
+								Name:   "primative_map",
 								Type:   Map,
 								Extras: &SchemaFieldExtras{MapToPrimitive: String},
 							},
 							{
 								Name:   "model_map",
 								Type:   Map,
-								Extras: &SchemaFieldExtras{MapTo: "TestModel"},
+								Extras: &SchemaFieldExtras{MapToModel: "TestModel"},
+							},
+							{
+								Name:   "enum_map",
+								Type:   Map,
+								Extras: &SchemaFieldExtras{MapToEnum: "TestEnum"},
+							},
+							{
+								Name:   "generic_map",
+								Type:   Map,
+								Extras: &SchemaFieldExtras{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -277,7 +303,7 @@ func TestParseSchema(t *testing.T) {
 								Name: "embedded_component",
 								Type: Map,
 								Extras: &SchemaFieldExtras{
-									MapTo: "Component",
+									MapToModel: "Component",
 								},
 							},
 						},

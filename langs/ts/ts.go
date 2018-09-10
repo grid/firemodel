@@ -76,8 +76,10 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 	case firemodel.GeoPoint:
 		return "firebase.firestore.GeoPoint"
 	case firemodel.Array:
-		if extras != nil && extras.ArrayOf != "" {
-			return fmt.Sprintf("%s[]", interfaceName(extras.ArrayOf))
+		if extras != nil && extras.ArrayOfModel != "" {
+			return fmt.Sprintf("%s[]", interfaceName(extras.ArrayOfModel))
+		} else if extras != nil && extras.ArrayOfEnum != "" {
+			return fmt.Sprintf("%s[]", extras.ArrayOfEnum)
 		} else if extras != nil && extras.ArrayOfPrimitive != "" {
 			return fmt.Sprintf("%s[]", extras.ArrayOfPrimitive)
 		} else {
@@ -86,8 +88,10 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 	case firemodel.Map:
 		if extras != nil && extras.File {
 			return "IFile"
-		} else if extras != nil && extras.MapTo != "" {
-			return fmt.Sprintf("{ [key: string]: %s; }", interfaceName(extras.MapTo))
+		} else if extras != nil && extras.MapToModel != "" {
+			return interfaceName(extras.MapToModel)
+		} else if extras != nil && extras.MapToEnum != "" {
+			return extras.MapToEnum
 		} else if extras != nil && extras.MapToPrimitive != "" {
 			return fmt.Sprintf("{ [key: string]: %s; }", extras.MapToPrimitive)
 		} else {
@@ -167,6 +171,15 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   /** TODO: Add documentation to {{.Name}}. */
   {{- end}}
   export interface {{.Name | interfaceName | ToCamel}} {
+    {{- range .Collections}}
+    {{- if .Comment}}
+    /** {{.Comment}} */
+    {{- else }}
+    /** TODO: Add documentation to {{.Name}}. */
+    {{- end}}
+    {{.Name | ToLowerCamel}}: firebase.firestore.CollectionReference<{{.Type | interfaceName | ToCamel}}>;
+    {{- end}}
+
     {{- range .Fields}}
     {{- if .Comment}}
     /** {{.Comment}} */

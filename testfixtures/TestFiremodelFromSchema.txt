@@ -77,6 +77,8 @@ extension TestDirection: CustomDebugStringConvertible {
     dynamic var location: Pring.GeoPoint?
     // TODO: Add documentation to colors.
     dynamic var colors: [String] = []
+    // TODO: Add documentation to directions.
+    dynamic var directions: [TestDirection] = []
     // TODO: Add documentation to meta.
     dynamic var meta: [AnyHashable: Any] = [:]
     // TODO: Add documentation to metaStrs.
@@ -158,6 +160,8 @@ type TestModel struct {
 	Location *latlng.LatLng `firestore:"location"`
 	// TODO: Add comment to TestModel.colors.
 	Colors []string `firestore:"colors"`
+	// TODO: Add comment to TestModel.directions.
+	Directions []TestDirection `firestore:"directions"`
 	// TODO: Add comment to TestModel.meta.
 	Meta map[string]interface{} `firestore:"meta"`
 	// TODO: Add comment to TestModel.meta_strs.
@@ -246,6 +250,8 @@ export namespace example {
 
   /** A Test is a test model. */
   export interface ITestModel {
+    /** TODO: Add documentation to nested_collection. */
+    nestedCollection: firebase.firestore.CollectionReference<ITestModel>;
     /** The name. */
     name: string;
     /** The age. */
@@ -264,6 +270,8 @@ export namespace example {
     location: firebase.firestore.GeoPoint;
     /** TODO: Add documentation to colors. */
     colors: string[];
+    /** TODO: Add documentation to directions. */
+    directions: TestDirection[];
     /** TODO: Add documentation to meta. */
     meta: { [key: string]: any; };
     /** TODO: Add documentation to meta_strs. */
@@ -275,7 +283,7 @@ export namespace example {
     /** TODO: Add documentation to url. */
     url: URL;
     /** TODO: Add documentation to nested. */
-    nested: { [key: string]: ITestModel; };
+    nested: ITestModel;
 
     /** Record creation timestamp. */
     createdAt: firebase.firestore.Timestamp;

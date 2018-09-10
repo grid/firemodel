@@ -42,13 +42,13 @@ models:
   - name: colors
     type: array
     extras:
-      arrayOf: string
+      arrayOfPrimitive: string
   - name: meta
     type: map
   - name: direction
     type: map
     extras:
-      mapTo: Direction
+      mapToEnum: Direction
   - name: test_file
     type: map
     extras:
