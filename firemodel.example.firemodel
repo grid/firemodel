@@ -27,6 +27,8 @@ model TestModel {
   geopoint location;
   array<string> colors;
   array<TestDirection> directions;
+  array<TestModel> models;
+  array<reference> refs;
   map meta;
   map<string> meta_strs;
   TestDirection direction;

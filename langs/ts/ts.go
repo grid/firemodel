@@ -81,7 +81,7 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 		} else if extras != nil && extras.ArrayOfEnum != "" {
 			return fmt.Sprintf("%s[]", extras.ArrayOfEnum)
 		} else if extras != nil && extras.ArrayOfPrimitive != "" {
-			return fmt.Sprintf("%s[]", extras.ArrayOfPrimitive)
+			return fmt.Sprintf("%s[]", toTypescriptType(extras.ArrayOfPrimitive, nil))
 		} else {
 			return "any[]"
 		}
@@ -93,7 +93,7 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 		} else if extras != nil && extras.MapToEnum != "" {
 			return extras.MapToEnum
 		} else if extras != nil && extras.MapToPrimitive != "" {
-			return fmt.Sprintf("{ [key: string]: %s; }", extras.MapToPrimitive)
+			return fmt.Sprintf("{ [key: string]: %s; }", toTypescriptType(extras.MapToPrimitive, nil))
 		} else {
 			return `{ [key: string]: any; }`
 		}

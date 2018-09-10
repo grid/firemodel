@@ -79,6 +79,10 @@ extension TestDirection: CustomDebugStringConvertible {
     dynamic var colors: [String] = []
     // TODO: Add documentation to directions.
     dynamic var directions: [TestDirection] = []
+    // TODO: Add documentation to models.
+    dynamic var models: [TestModel] = []
+    // TODO: Add documentation to refs.
+    dynamic var refs: [Pring.AnyReference] = []
     // TODO: Add documentation to meta.
     dynamic var meta: [AnyHashable: Any] = [:]
     // TODO: Add documentation to metaStrs.
@@ -162,6 +166,10 @@ type TestModel struct {
 	Colors []string `firestore:"colors"`
 	// TODO: Add comment to TestModel.directions.
 	Directions []TestDirection `firestore:"directions"`
+	// TODO: Add comment to TestModel.models.
+	Models []TestModel `firestore:"models"`
+	// TODO: Add comment to TestModel.refs.
+	Refs []*firestore.DocumentRef `firestore:"refs"`
 	// TODO: Add comment to TestModel.meta.
 	Meta map[string]interface{} `firestore:"meta"`
 	// TODO: Add comment to TestModel.meta_strs.
@@ -272,6 +280,10 @@ export namespace example {
     colors: string[];
     /** TODO: Add documentation to directions. */
     directions: TestDirection[];
+    /** TODO: Add documentation to models. */
+    models: ITestModel[];
+    /** TODO: Add documentation to refs. */
+    refs: firebase.firestore.DocumentReference[];
     /** TODO: Add documentation to meta. */
     meta: { [key: string]: any; };
     /** TODO: Add documentation to meta_strs. */
