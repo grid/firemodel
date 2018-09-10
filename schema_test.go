@@ -435,7 +435,7 @@ func TestParseSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := os.Open(path.Join("testfixtures", tt.name+".firemodel"))
+			r, err := os.Open(path.Join("testfixtures", "schema", tt.name+".firemodel"))
 			if err != nil {
 				t.Fatal(err)
 			}
