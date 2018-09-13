@@ -186,14 +186,14 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- else }}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    {{.Name | ToLowerCamel -}}: {{toTypescriptType .Type .Extras}};
+    {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type .Extras}};
     {{- end}}
     {{- if .Options | getModelOption "firestore" "autotimestamp" false}}
 
     /** Record creation timestamp. */
-    createdAt: firebase.firestore.Timestamp;
+    createdAt?: firebase.firestore.Timestamp;
     /** Record update timestamp. */
-    updatedAt: firebase.firestore.Timestamp;
+    updatedAt?: firebase.firestore.Timestamp;
     {{- end}}
   }`
 
