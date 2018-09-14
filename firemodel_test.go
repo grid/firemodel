@@ -11,15 +11,14 @@ import (
 	"os"
 	"io"
 	"io/ioutil"
-	"go.uber.org/zap/buffer"
-	"fmt"
-	"strings"
 	"path"
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/mickeyreiss/firemodel"
+	"bytes"
+	"path/filepath"
 )
 
-const fixturesRoot = "testfixtures"
+const fixturesRoot = "testfixtures/firemodel"
 
 func TestFiremodelFromSchema(t *testing.T) {
 	file, err := os.Open("firemodel.example.firemodel")
@@ -33,13 +32,7 @@ func TestFiremodelFromSchema(t *testing.T) {
 		panic(err)
 	}
 
-	ctx := &testCtx{t: t}
-
-	if err := firemodel.Run(schema, ctx.firemodelConfig()); err != nil {
-		panic(err)
-	}
-
-	ctx.Test()
+	runTest(t, schema)
 }
 
 func TestFiremodelFromYamlSpec(t *testing.T) {
@@ -55,81 +48,130 @@ func TestFiremodelFromYamlSpec(t *testing.T) {
 		panic(errors.Wrapf(err, "firemodel: parsing %s", v.ConfigFileUsed()))
 	}
 
-	// Set up output.
-	ctx := &testCtx{t: t}
-
-	if err := firemodel.Run(&schema, ctx.firemodelConfig()); err != nil {
-		panic(err)
-	}
-
-	ctx.Test()
+	runTest(t, &schema)
 }
 
-func (ctx *testCtx) firemodelConfig() *firemodel.Config {
-	ctx.t.Helper()
-
+func (ctx *testCtx) firemodelConfig(testName string) *firemodel.Config {
 	return &firemodel.Config{
 		Languages: []firemodel.Language{
 			{Language: "ios", Output: "./swift/"},
 			{Language: "go", Output: "./go"},
 			{Language: "ts", Output: "./ts/"},
 		},
-		SourceCoderProvider: func(prefix string) firemodel.SourceCoder {
-			fmt.Fprintf(&ctx.buf, "===================== %s ===================\n", prefix)
-			return ctx
-		},
+		SourceCoderProvider: ctx.newTestSourceCodeProvider(testName),
 	}
+}
+
+type inMemoryFilesByName map[string]*inMemoryFile
+
+func (filesByName inMemoryFilesByName) keys() []string {
+	ret := make([]string, 0, len(filesByName))
+	for name := range filesByName {
+		ret = append(ret, name)
+	}
+	return ret
 }
 
 type testCtx struct {
-	buf buffer.Buffer
-	t   *testing.T
+	prefix string
+	files  inMemoryFilesByName
 }
 
-func (ctx *testCtx) Test() {
-	if _, update := os.LookupEnv("FIREMODEL_UPDATE_FIXTURES"); update {
-		os.MkdirAll(fixturesRoot, 0700)
-		err := ioutil.WriteFile(ctx.fixtureFile(), ctx.buf.Bytes(), 0600)
+func runTest(t *testing.T, schema *firemodel.Schema) {
+	t.Helper()
+	ctx := testCtx{
+		prefix: path.Join(fixturesRoot, t.Name()),
+		files:  make(inMemoryFilesByName),
+	}
+
+	if isUpdate() {
+		if err := os.RemoveAll(ctx.prefix); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll(ctx.prefix, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := firemodel.Run(schema, ctx.firemodelConfig(t.Name())); err != nil {
+		t.Fatal(err)
+	}
+
+	if !isUpdate() {
+		fixtures, err := filepath.Glob(path.Join(ctx.prefix, "*", "*"))
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		exp, err := ioutil.ReadFile(ctx.fixtureFile())
-		if err != nil {
-			ctx.t.Error(err)
+		if len(fixtures) != len(ctx.files) {
+			t.Errorf("Fixtures do not match up with generated files. Fixtures %v, Actual: %v", fixtures, ctx.files.keys())
 		}
+		for _, filename := range fixtures {
+			actualBuf, ok := ctx.files[filename]
+			if !ok {
+				t.Errorf("Missing generated file for fixture %s", filename)
+				continue
+			}
+			actual := actualBuf.Bytes()
+			exp, err := ioutil.ReadFile(filename)
+			if err != nil {
+				t.Fatalf("fixture not found for generated file: %v", err)
+			}
+			if !bytes.Equal(exp, actual) {
+				dmp := diffmatchpatch.New()
+				diffs := dmp.DiffMain(string(exp), string(actual), true)
 
-		res := ctx.buf.String()
-		if strings.TrimSpace(string(exp)) != strings.TrimSpace(res) {
-
-			dmp := diffmatchpatch.New()
-			diffs := dmp.DiffMain(string(exp), res, true)
-
-			ctx.t.Error(dmp.DiffPrettyText(diffs))
-			ctx.t.Log("If this diff looks ok, re-run tests with FIREMODEL_UPDATE_FIXTURES=true")
+				t.Error(dmp.DiffPrettyText(diffs))
+				t.Log("If this diff looks ok, re-run tests with FIREMODEL_UPDATE_FIXTURES=true")
+			}
 		}
 	}
 }
 
-func (ctx *testCtx) fixtureFile() string {
-	return path.Join(fixturesRoot, ctx.t.Name()+".txt")
+func (ctx *testCtx) newTestSourceCodeProvider(testName string) func(prefix string) firemodel.SourceCoder {
+	return func(prefix string) firemodel.SourceCoder {
+		coder := &testSourceCoder{
+			prefix: path.Join(ctx.prefix, prefix),
+			files:  ctx.files,
+		}
+		if err := os.MkdirAll(coder.prefix, 0700); err != nil {
+			panic(err)
+		}
+		return coder
+	}
 }
 
-func (ctx *testCtx) NewFile(filename string) (io.WriteCloser, error) {
-	fmt.Fprintf(&ctx.buf, "===================== Open %s ===================\n", filename)
-	return ctx, nil
+type testSourceCoder struct {
+	prefix string
+	files  map[string]*inMemoryFile
 }
 
-func (ctx *testCtx) Write(p []byte) (n int, err error) {
-	return ctx.buf.Write(p)
+func isUpdate() bool {
+	_, update := os.LookupEnv("FIREMODEL_UPDATE_FIXTURES")
+	return update
 }
 
-func (ctx *testCtx) Close() error {
-	_, err := fmt.Fprintf(&ctx.buf, "===================== Close ===================\n")
-	return err
+func (ctx *testSourceCoder) NewFile(filename string) (io.WriteCloser, error) {
+	if isUpdate() {
+		return os.OpenFile(path.Join(ctx.prefix, filename), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
+	} else {
+		var file inMemoryFile
+		ctx.files[path.Join(ctx.prefix, filename)] = &file
+		return &file, nil
+	}
 }
 
-func (ctx *testCtx) Flush() error {
-	_, err := fmt.Fprintf(&ctx.buf, "===================== Flush ===================\n")
-	return err
+func (ctx *testSourceCoder) Flush() error {
+	return nil
+}
+
+type inMemoryFile struct {
+	bytes.Buffer
+}
+
+func (f *inMemoryFile) Write(p []byte) (n int, err error) {
+	return f.Buffer.Write(p)
+}
+
+func (_ *inMemoryFile) Close() error {
+	return nil
 }

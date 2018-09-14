@@ -76,20 +76,24 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 	case firemodel.GeoPoint:
 		return "firebase.firestore.GeoPoint"
 	case firemodel.Array:
-		if extras != nil && extras.ArrayOf != "" {
-			return fmt.Sprintf("%s[]", interfaceName(extras.ArrayOf))
+		if extras != nil && extras.ArrayOfModel != "" {
+			return fmt.Sprintf("%s[]", interfaceName(extras.ArrayOfModel))
+		} else if extras != nil && extras.ArrayOfEnum != "" {
+			return fmt.Sprintf("%s[]", extras.ArrayOfEnum)
 		} else if extras != nil && extras.ArrayOfPrimitive != "" {
-			return fmt.Sprintf("%s[]", extras.ArrayOfPrimitive)
+			return fmt.Sprintf("%s[]", toTypescriptType(extras.ArrayOfPrimitive, nil))
 		} else {
 			return "any[]"
 		}
 	case firemodel.Map:
 		if extras != nil && extras.File {
 			return "IFile"
-		} else if extras != nil && extras.MapTo != "" {
-			return fmt.Sprintf("{ [key: string]: %s; }", interfaceName(extras.MapTo))
+		} else if extras != nil && extras.MapToModel != "" {
+			return interfaceName(extras.MapToModel)
+		} else if extras != nil && extras.MapToEnum != "" {
+			return extras.MapToEnum
 		} else if extras != nil && extras.MapToPrimitive != "" {
-			return fmt.Sprintf("{ [key: string]: %s; }", extras.MapToPrimitive)
+			return fmt.Sprintf("{ [key: string]: %s; }", toTypescriptType(extras.MapToPrimitive, nil))
 		} else {
 			return `{ [key: string]: any; }`
 		}
@@ -138,6 +142,53 @@ const (
 
 import firebase from 'firebase';
 
+export interface DocumentSnapshot<DataType = firebase.firestore.DocumentData>
+  extends firebase.firestore.DocumentSnapshot {
+  data(options?: firebase.firestore.SnapshotOptions): DataType | undefined;
+}
+export interface QueryDocumentSnapshot<
+  DataType = firebase.firestore.DocumentData
+> extends firebase.firestore.QueryDocumentSnapshot {
+  data(options?: firebase.firestore.SnapshotOptions): DataType | undefined;
+}
+export interface QuerySnapshot<DataType = firebase.firestore.DocumentData>
+  extends firebase.firestore.QuerySnapshot {
+  readonly docs: QueryDocumentSnapshot<DataType>[];
+}
+export interface DocumentSnapshotExpanded<
+  DataType = firebase.firestore.DocumentData
+> {
+  exists: firebase.firestore.DocumentSnapshot['exists'];
+  ref: firebase.firestore.DocumentSnapshot['ref'];
+  id: firebase.firestore.DocumentSnapshot['id'];
+  metadata: firebase.firestore.DocumentSnapshot['metadata'];
+  data: DataType;
+}
+export interface QuerySnapshotExpanded<
+  DataType = firebase.firestore.DocumentData
+> {
+  metadata: {
+    hasPendingWrites: firebase.firestore.QuerySnapshot['metadata']['hasPendingWrites'];
+    fromCache: firebase.firestore.QuerySnapshot['metadata']['fromCache'];
+  };
+  size: firebase.firestore.QuerySnapshot['size'];
+  empty: firebase.firestore.QuerySnapshot['empty'];
+  docs: {
+    [docId: string]: DocumentSnapshotExpanded<DataType>;
+  };
+}
+export interface DocumentReference<DataType> extends firebase.firestore.DocumentReference {
+  data(options?: firebase.firestore.SnapshotOptions): DataType | undefined;
+}
+export interface CollectionReference<
+  DataType = firebase.firestore.DocumentData
+> extends firebase.firestore.CollectionReference {
+  get(options?: firebase.firestore.GetOptions): Promise<QuerySnapshot<DataType>>;
+}
+export interface Collection<DataType = firebase.firestore.DocumentData> {
+  [id: string]: DocumentSnapshotExpanded<DataType>;
+}
+
 export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   type URL = string;
 
@@ -147,8 +198,6 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     name: string;
   }
 
-  export interface DocumentReference<T> extends firebase.firestore.DocumentReference {
-  }
 
   {{- range .Enums -}}
   {{- template "enum" .}}
@@ -167,20 +216,29 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   /** TODO: Add documentation to {{.Name}}. */
   {{- end}}
   export interface {{.Name | interfaceName | ToCamel}} {
+    {{- range .Collections}}
+    {{- if .Comment}}
+    /** {{.Comment}} */
+    {{- else }}
+    /** TODO: Add documentation to {{.Name}}. */
+    {{- end}}
+    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type | interfaceName | ToCamel}}>;
+    {{- end}}
+
     {{- range .Fields}}
     {{- if .Comment}}
     /** {{.Comment}} */
     {{- else }}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    {{.Name | ToLowerCamel -}}: {{toTypescriptType .Type .Extras}};
+    {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type .Extras}};
     {{- end}}
     {{- if .Options | getModelOption "firestore" "autotimestamp" false}}
 
     /** Record creation timestamp. */
-    createdAt: firebase.firestore.Timestamp;
+    createdAt?: firebase.firestore.Timestamp;
     /** Record update timestamp. */
-    updatedAt: firebase.firestore.Timestamp;
+    updatedAt?: firebase.firestore.Timestamp;
     {{- end}}
   }`
 

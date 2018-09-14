@@ -106,8 +106,10 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemo
 			return "Pring.GeoPoint"
 		}
 	case firemodel.Array:
-		if extras != nil && extras.ArrayOf != "" {
-			return fmt.Sprintf("[%s] = []", extras.ArrayOf)
+		if extras != nil && extras.ArrayOfModel != "" {
+			return fmt.Sprintf("[%s] = []", extras.ArrayOfModel)
+		} else if extras != nil && extras.ArrayOfEnum != "" {
+			return fmt.Sprintf("[%s] = []", extras.ArrayOfEnum)
 		} else if extras != nil && extras.ArrayOfPrimitive != "" {
 			return fmt.Sprintf("[%s] = []", toSwiftType(nil, false, extras.ArrayOfPrimitive))
 		} else {
@@ -120,11 +122,17 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemo
 			} else {
 				return "Pring.File"
 			}
-		} else if extras != nil && extras.MapTo != "" {
+		} else if extras != nil && extras.MapToModel != "" {
 			if root {
-				return fmt.Sprintf("%s?", extras.MapTo)
+				return fmt.Sprintf("%s?", extras.MapToModel)
 			} else {
-				return fmt.Sprintf("%s", extras.MapTo)
+				return fmt.Sprintf("%s", extras.MapToModel)
+			}
+		} else if extras != nil && extras.MapToEnum != "" {
+			if root {
+				return fmt.Sprintf("%s?", extras.MapToEnum)
+			} else {
+				return fmt.Sprintf("%s", extras.MapToEnum)
 			}
 		} else if extras != nil && extras.MapToPrimitive != "" {
 			return fmt.Sprintf("[String: %s] = [:]", toSwiftType(nil, false, extras.MapToPrimitive))

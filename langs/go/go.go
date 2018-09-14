@@ -209,8 +209,11 @@ func (m *GoModeler) goType(firetype firemodel.SchemaFieldType, extras *firemodel
 	case firemodel.GeoPoint:
 		return func(s *jen.Statement) { s.Op("*").Qual("google.golang.org/genproto/googleapis/type/latlng", "LatLng") }
 	case firemodel.Array:
-		if extras != nil && extras.ArrayOf != "" {
-			return func(s *jen.Statement) { s.Index().Id(extras.ArrayOf) }
+		if extras != nil && extras.ArrayOfModel != "" {
+			return func(s *jen.Statement) { s.Index().Id(extras.ArrayOfModel) }
+		}
+		if extras != nil && extras.ArrayOfEnum != "" {
+			return func(s *jen.Statement) { s.Index().Id(extras.ArrayOfEnum) }
 		}
 		if extras != nil && extras.ArrayOfPrimitive != "" {
 			return func(s *jen.Statement) { s.Index().Do(m.goType(extras.ArrayOfPrimitive, nil)) }
@@ -220,8 +223,10 @@ func (m *GoModeler) goType(firetype firemodel.SchemaFieldType, extras *firemodel
 		if extras != nil && extras.File {
 			return func(s *jen.Statement) { s.Op("*").Qual("github.com/mickeyreiss/firemodel/runtime", "File") }
 		}
-		if extras != nil && extras.MapTo != "" {
-			return func(s *jen.Statement) { s.Op("*").Id(extras.MapTo) }
+		if extras != nil && extras.MapToModel != "" {
+			return func(s *jen.Statement) { s.Op("*").Id(extras.MapToModel) }
+		} else if extras != nil && extras.MapToEnum != "" {
+			return func(s *jen.Statement) { s.Op("*").Id(extras.MapToEnum) }
 		} else if extras != nil && extras.MapToPrimitive != "" {
 			return func(s *jen.Statement) { s.Map(jen.String()).Do(m.goType(extras.MapToPrimitive, nil)) }
 		}
