@@ -39,6 +39,7 @@ export interface QuerySnapshotExpanded<
 }
 export interface DocumentReference<DataType> extends firebase.firestore.DocumentReference {
   data(options?: firebase.firestore.SnapshotOptions): DataType | undefined;
+  get(options?: firestore.GetOptions): Promise<DocumentSnapshot<DataType>>;
 }
 export interface CollectionReference<
   DataType = firebase.firestore.DocumentData
