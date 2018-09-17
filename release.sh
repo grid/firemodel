@@ -19,8 +19,8 @@ fi
 
 echo "Preflight…"
 
-go test ./...
-hub ci-status master #TODO
+go test ./... || (echo "error: Tests failed."; exit 1)
+hub ci-status || (echo "error: CI check failed"; exit 1)
 
 echo Fetching latest tags…
 git fetch --tags origin
