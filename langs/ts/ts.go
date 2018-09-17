@@ -88,8 +88,6 @@ func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.Sche
 	case firemodel.Map:
 		if extras != nil && extras.File {
 			return "IFile"
-	  }	else if extras != nil && extras.DeviceToken {
-			return "DeviceToken"
 		} else if extras != nil && extras.MapToModel != "" {
 			return interfaceName(extras.MapToModel)
 		} else if extras != nil && extras.MapToEnum != "" {
