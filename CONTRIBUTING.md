@@ -1,3 +1,7 @@
+# Contributing
+
+Thanks your help with building Firemodel!
+
 ## Code
 
 Firemodel is written in go 1.10.
@@ -24,6 +28,10 @@ Typical workflow:
 4. If changes are acceptable, regenerate fixtures: `FIREMODEL_UPDATE_FIXTURES=true go test ./...`.
 5. Commit code changes and fixture updates in a single commit.
 
-## Distribution
+## Releases
 
-Firemodel is still in early development. There are not yet versioned binary releases.
+Firemodel is still in early development. There are not yet regular releases.
+
+To cut a new binary release on GitHub, use `release.sh`.
+
+Version numbers should use semver, and breaking changes—both to the CLI as well as to the firemodel output—should be avoided.
