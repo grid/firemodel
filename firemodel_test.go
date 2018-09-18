@@ -1,21 +1,20 @@
 package firemodel_test
 
 import (
-	_ "github.com/mickeyreiss/firemodel/langs/ios"
 	_ "github.com/mickeyreiss/firemodel/langs/go"
+	_ "github.com/mickeyreiss/firemodel/langs/ios"
 	_ "github.com/mickeyreiss/firemodel/langs/ts"
 
-	"testing"
-	"github.com/spf13/viper"
-	"github.com/pkg/errors"
-	"os"
+	"bytes"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
-	"github.com/sergi/go-diff/diffmatchpatch"
-	"github.com/mickeyreiss/firemodel"
-	"bytes"
 	"path/filepath"
+	"testing"
+
+	"github.com/mickeyreiss/firemodel"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const fixturesRoot = "testfixtures/firemodel"
@@ -33,22 +32,6 @@ func TestFiremodelFromSchema(t *testing.T) {
 	}
 
 	runTest(t, schema)
-}
-
-func TestFiremodelFromYamlSpec(t *testing.T) {
-	// Set up config.
-	v := viper.New()
-	v.SetConfigName("firemodel.example")
-	v.AddConfigPath(".")
-	if err := v.ReadInConfig(); err != nil {
-		panic(errors.Wrap(err, "firemodel: reading config"))
-	}
-	var schema firemodel.Schema
-	if err := v.UnmarshalExact(&schema); err != nil {
-		panic(errors.Wrapf(err, "firemodel: parsing %s", v.ConfigFileUsed()))
-	}
-
-	runTest(t, &schema)
 }
 
 func (ctx *testCtx) firemodelConfig(testName string) *firemodel.Config {
