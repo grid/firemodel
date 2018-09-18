@@ -1,22 +1,9 @@
 package firemodel
 
 import (
-	"github.com/mickeyreiss/firemodel/internal/ast"
 	"io"
-	"github.com/go-errors/errors"
-)
 
-const (
-	Boolean   = SchemaFieldType(ast.Boolean)
-	Integer   = SchemaFieldType(ast.Integer)
-	Double    = SchemaFieldType(ast.Double)
-	Timestamp = SchemaFieldType(ast.Timestamp)
-	String    = SchemaFieldType(ast.String)
-	Bytes     = SchemaFieldType(ast.Bytes)
-	Reference = SchemaFieldType(ast.Reference)
-	GeoPoint  = SchemaFieldType(ast.GeoPoint)
-	Array     = SchemaFieldType(ast.Array)
-	Map       = SchemaFieldType(ast.Map)
+	"github.com/go-errors/errors"
 )
 
 type SourceCoder interface {

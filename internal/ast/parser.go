@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"io"
 	"regexp"
 	"sort"
@@ -127,8 +128,36 @@ type ASTField struct {
 }
 
 type ASTFieldType struct {
-	Base    ASTType `parser:"@Ident"`
-	Generic ASTType `parser:"[ '<' @Ident '>' ]"`
+	Base    ASTType       `parser:"@Ident"`
+	Generic *ASTFieldType `parser:"[ '<' @@ '>' ]"`
+}
+
+func (ft *ASTFieldType) String() string {
+	if ft.Generic != nil {
+		return fmt.Sprintf("%s<%s>", ft.Base, ft.Generic)
+	} else {
+		return fmt.Sprintf("%s", ft.Base)
+	}
+}
+
+func (ft *ASTFieldType) IsPrimitive() bool {
+	switch ft.Base {
+	case String,
+		Integer,
+		Bytes,
+		Double,
+		Timestamp,
+		Boolean,
+		Reference,
+		GeoPoint,
+		Array,
+		Map:
+		return true
+	case collection:
+		panic("firemodel/schema: bug. collection should never be treated as primitive type.")
+	default:
+		return false
+	}
 }
 
 type ASTType string
@@ -153,24 +182,4 @@ const (
 
 func (s ASTType) IsCollection() bool {
 	return s == collection
-}
-
-func (s ASTType) IsPrimitive() bool {
-	switch s {
-	case String,
-		Integer,
-		Bytes,
-		Double,
-		Timestamp,
-		Boolean,
-		Reference,
-		GeoPoint,
-		Array,
-		Map:
-		return true
-	case collection:
-		panic("firemodel/schema: bug. collection should never be treated as primitive type.")
-	default:
-		return false
-	}
 }

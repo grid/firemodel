@@ -160,7 +160,6 @@ func (c *configSchemaCompiler) compileFields(elements []*ast.ASTModelElement) (o
 			Name:    strcase.ToSnake(field.Name),
 			Comment: field.Comment,
 			Type:    c.compileFieldType(field.Type),
-			Extras:  c.compileExtras(field.Type),
 		})
 	}
 	return
@@ -190,120 +189,103 @@ func (c *configSchemaCompiler) compileCollections(elements []*ast.ASTModelElemen
 }
 
 func (c *configSchemaCompiler) compileFieldType(astFieldType *ast.ASTFieldType) SchemaFieldType {
-	if astFieldType.Base.IsPrimitive() {
-		return SchemaFieldType(astFieldType.Base)
-	}
 	if c.enums == nil {
 		panic("bug: enum types not yet registered")
 	}
-	if astFieldType.Base == ast.File {
-		return Map
+	if enum, ok := c.assertEnumType(astFieldType); ok {
+		return enum
 	}
-	if astFieldType.Base == ast.URL {
-		return String
+	if model, ok := c.assertModelType(astFieldType); ok {
+		return model
 	}
-	_, ok := c.assertEnumType(astFieldType.Base)
-	if ok {
-		return String
+	switch astFieldType.Base {
+	case ast.Boolean:
+		return &Boolean{}
+	case ast.Integer:
+		return &Integer{}
+	case ast.Double:
+		return &Double{}
+	case ast.Timestamp:
+		return &Timestamp{}
+	case ast.String:
+		return &String{}
+	case ast.Bytes:
+		return &Bytes{}
+	case ast.GeoPoint:
+		return &GeoPoint{}
+	case ast.File:
+		return &File{}
+	case ast.URL:
+		return &URL{}
+	case ast.Map:
+		if generic := astFieldType.Generic; generic != nil {
+			return &Map{T: c.compileFieldType(astFieldType.Generic)}
+		}
+		return &Map{}
+	case ast.Array:
+		if generic := astFieldType.Generic; generic != nil {
+			return &Array{T: c.compileFieldType(generic)}
+		}
+		return &Array{}
+	case ast.Reference:
+		if astFieldType.Generic == nil {
+			return &Reference{}
+		} else if modelType, ok := c.assertModelType(astFieldType.Generic); ok {
+			return &Reference{T: modelType.T}
+		} else {
+			err := errors.Errorf("firemodel: invalid generic type %s in %s<%s> (must be a model type)", astFieldType.Generic, astFieldType.Base, astFieldType.Generic)
+			panic(err)
+		}
 	}
-	_, ok = c.assertModelType(astFieldType.Base)
-	if ok {
-		return Map
-	}
+
 	err := errors.Errorf("invalid type: %s", astFieldType.Base)
 	panic(err)
 }
 
-func (c *configSchemaCompiler) compileModelType(astType *ast.ASTFieldType) string {
-	if astType.Generic != "" {
+func (c *configSchemaCompiler) compileModelType(astType *ast.ASTFieldType) *Model {
+	if astType.Generic != nil {
 		err := errors.Errorf("models cannot have generics: %s<%s>", astType.Base, astType.Generic)
 		panic(err)
 	}
 
-	if modelType, ok := c.assertModelType(astType.Base); ok {
+	if modelType, ok := c.assertModelType(astType); ok {
 		return modelType
 	}
 
-	err := errors.Errorf("invalid type: %s", astType.Base)
+	err := errors.Errorf("invalid type: %s", astType)
 	panic(err)
 }
 
-func (c *configSchemaCompiler) assertModelType(astType ast.ASTType) (string, bool) {
+func (c *configSchemaCompiler) assertModelType(astFieldType *ast.ASTFieldType) (*Model, bool) {
 	if c.models == nil {
 		panic("bug: model types not yet registered")
 	}
+	if astFieldType == nil {
+		return nil, false
+	}
+	astType := astFieldType.Base
 	for _, model := range c.models {
 		if model.Name == strcase.ToCamel(string(astType)) {
-			return model.Name, true
+			return &Model{T: model}, true
 		}
 	}
-	return "", false
+	return nil, false
 }
 
-func (c *configSchemaCompiler) assertEnumType(astType ast.ASTType) (string, bool) {
+func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (*Enum, bool) {
+	if astType == nil {
+		return nil, false
+	}
 	for _, enum := range c.enums {
-		if enum.Name == strcase.ToCamel(string(astType)) {
-			return enum.Name, true
+		if enum.Name == strcase.ToCamel(string(astType.Base)) {
+			if astType.Generic != nil {
+				panic(errors.Errorf("generic enums are not supported: %s %v", astType.Base, astType.Generic))
+			}
+			return &Enum{T: enum}, true
 		}
 
 	}
-	return "", false
-}
-
-func (c *configSchemaCompiler) compileExtras(astType *ast.ASTFieldType) *SchemaFieldExtras {
-	out := &SchemaFieldExtras{}
-
-	if enumType, ok := c.assertEnumType(astType.Base); ok {
-		out.EnumType = string(enumType)
-	}
-	if modelType, ok := c.assertModelType(astType.Base); ok {
-		out.MapToModel = string(modelType)
-	}
-
-	switch astType.Base {
-	case ast.URL:
-		out.URL = true
-	case ast.File:
-		out.File = true
-	}
-
-	if astType.Generic != "" {
-		switch astType.Base {
-		case ast.Map:
-			if astType.Generic.IsPrimitive() {
-				out.MapToPrimitive = SchemaFieldType(astType.Generic)
-			} else if modelType, ok := c.assertModelType(astType.Generic); ok {
-				out.MapToModel = modelType
-			} else if enumType, ok := c.assertEnumType(astType.Generic); ok {
-				out.MapToEnum = enumType
-			} else {
-				err := errors.Errorf("firemodel/schema: unrecognized generic type: %s", astType.Generic)
-				panic(err)
-			}
-		case ast.Array:
-			if astType.Generic.IsPrimitive() {
-				out.ArrayOfPrimitive = SchemaFieldType(astType.Generic)
-			} else if modelType, ok := c.assertModelType(astType.Generic); ok {
-				out.ArrayOfModel = modelType
-			} else if enumType, ok := c.assertEnumType(astType.Generic); ok {
-				out.ArrayOfEnum = enumType
-			} else {
-				err := errors.Errorf("firemodel/schema: unrecognized generic type: %s", astType.Generic)
-				panic(err)
-			}
-		case ast.Reference:
-			if astType.Generic.IsPrimitive() {
-				err := errors.Errorf("firemodel: invalid generic type %s in %s<%s> (must be a model type)", astType.Generic, astType.Base, astType.Generic)
-				panic(err)
-			} else {
-				out.ReferenceTo = string(astType.Generic)
-			}
-		default:
-			err := errors.Errorf("firemodel: invalid generic type on %s", astType.Base)
-			panic(err)
-		}
-	}
-	return out
+	return nil, false
 }
 
 func (c *configSchemaCompiler) compileModelOptions(elements []*ast.ASTModelElement) SchemaModelOptions {

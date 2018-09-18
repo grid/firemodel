@@ -52,7 +52,8 @@ extension TestDirection: CustomDebugStringConvertible {
 
 // A Test is a test model.
 @objcMembers class TestModel: Pring.Object {static var userId: String = ""
-  override class var path: String { return "users/\(userId)/test_models" }
+static var testModelId: String = ""
+  override class var path: String { return "users/\(userId)/test_models/\(testModelId)" }
 
     // The name.
     dynamic var name: String?
@@ -78,6 +79,8 @@ extension TestDirection: CustomDebugStringConvertible {
     dynamic var models: [TestModel]?
     // TODO: Add documentation to refs.
     dynamic var refs: [Pring.AnyReference]?
+    // TODO: Add documentation to modelRefs.
+    dynamic var modelRefs: [Pring.Reference<TestTimestamps>]?
     // TODO: Add documentation to meta.
     dynamic var meta: [AnyHashable: Any] = [:]
     // TODO: Add documentation to metaStrs.
@@ -115,5 +118,7 @@ extension TestDirection: CustomDebugStringConvertible {
 }
 
 // TODO: Add documentation to TestTimestamps.
-@objcMembers class TestTimestamps: Pring.Object {
+@objcMembers class TestTimestamps: Pring.Object {static var testTimestampsId: String = ""
+  override class var path: String { return "timestamps/\(testTimestampsId)" }
+
 }

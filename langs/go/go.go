@@ -159,7 +159,7 @@ func (m *GoModeler) fields(model *firemodel.SchemaModel) func(g *jen.Group) {
 			}
 			g.
 				Id(strcase.ToCamel(field.Name)).
-				Do(m.goType(field.Type, field.Extras)).
+				Do(m.goType(field.Type)).
 				Tag(map[string]string{"firestore": strcase.ToLowerCamel(field.Name)})
 		}
 
@@ -180,53 +180,41 @@ func (m *GoModeler) fields(model *firemodel.SchemaModel) func(g *jen.Group) {
 	}
 }
 
-func (m *GoModeler) goType(firetype firemodel.SchemaFieldType, extras *firemodel.SchemaFieldExtras) func(s *jen.Statement) {
-	switch firetype {
-	case firemodel.Boolean:
+func (m *GoModeler) goType(firetype firemodel.SchemaFieldType) func(s *jen.Statement) {
+	switch firetype := firetype.(type) {
+	case *firemodel.Boolean:
 		return func(s *jen.Statement) { s.Bool() }
-	case firemodel.Integer:
+	case *firemodel.Integer:
 		return func(s *jen.Statement) { s.Int64() }
-	case firemodel.Double:
+	case *firemodel.Double:
 		return func(s *jen.Statement) { s.Float64() }
-	case firemodel.Timestamp:
+	case *firemodel.Timestamp:
 		return func(s *jen.Statement) { s.Qual("time", "Time") }
-	case firemodel.String:
-		if extras != nil && extras.EnumType != "" {
-			return func(s *jen.Statement) { s.Id(extras.EnumType) }
-		}
-		if extras != nil && extras.URL {
-			return func(s *jen.Statement) { s.Qual("github.com/mickeyreiss/firemodel/runtime", "URL") }
-		}
+	case *firemodel.String:
 		return func(s *jen.Statement) { s.String() }
-	case firemodel.Bytes:
+	case *firemodel.URL:
+		return func(s *jen.Statement) { s.Qual("github.com/mickeyreiss/firemodel/runtime", "URL") }
+	case *firemodel.Enum:
+		return func(s *jen.Statement) { s.Id(firetype.T.Name) }
+	case *firemodel.Bytes:
 		return func(s *jen.Statement) { s.Index().Byte() }
-	case firemodel.Reference:
+	case *firemodel.Reference:
 		return func(s *jen.Statement) { s.Op("*").Qual("cloud.google.com/go/firestore", "DocumentRef") }
-	case firemodel.GeoPoint:
+	case *firemodel.GeoPoint:
 		return func(s *jen.Statement) { s.Op("*").Qual("google.golang.org/genproto/googleapis/type/latlng", "LatLng") }
-	case firemodel.Array:
-		if extras != nil && extras.ArrayOfModel != "" {
-			return func(s *jen.Statement) { s.Index().Id(extras.ArrayOfModel) }
-		}
-		if extras != nil && extras.ArrayOfEnum != "" {
-			return func(s *jen.Statement) { s.Index().Id(extras.ArrayOfEnum) }
-		}
-		if extras != nil && extras.ArrayOfPrimitive != "" {
-			return func(s *jen.Statement) { s.Index().Do(m.goType(extras.ArrayOfPrimitive, nil)) }
+	case *firemodel.Model:
+		return func(s *jen.Statement) { s.Op("*").Id(firetype.T.Name) }
+	case *firemodel.Array:
+		if firetype.T != nil {
+			return func(s *jen.Statement) { s.Index().Do(m.goType(firetype.T)) }
 		}
 		return func(s *jen.Statement) { s.Index().Interface() }
-	case firemodel.Map:
-		if extras != nil && extras.File {
-			return func(s *jen.Statement) { s.Op("*").Qual("github.com/mickeyreiss/firemodel/runtime", "File") }
+	case *firemodel.File:
+		return func(s *jen.Statement) { s.Op("*").Qual("github.com/mickeyreiss/firemodel/runtime", "File") }
+	case *firemodel.Map:
+		if firetype.T != nil {
+			return func(s *jen.Statement) { s.Map(jen.String()).Do(m.goType(firetype.T)) }
 		}
-		if extras != nil && extras.MapToModel != "" {
-			return func(s *jen.Statement) { s.Op("*").Id(extras.MapToModel) }
-		} else if extras != nil && extras.MapToEnum != "" {
-			return func(s *jen.Statement) { s.Op("*").Id(extras.MapToEnum) }
-		} else if extras != nil && extras.MapToPrimitive != "" {
-			return func(s *jen.Statement) { s.Map(jen.String()).Do(m.goType(extras.MapToPrimitive, nil)) }
-		}
-
 		return func(s *jen.Statement) { s.Map(jen.String()).Interface() }
 	default:
 		err := errors.Errorf("firemodel/go: unknown type %s", firetype)

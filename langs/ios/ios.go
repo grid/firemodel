@@ -52,7 +52,7 @@ var (
 func filterFieldsEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
 	var out []*firemodel.SchemaField
 	for _, i := range in {
-		if i.Extras == nil || i.Extras.EnumType == "" {
+		if _, ok := i.Type.(*firemodel.Enum); !ok {
 			continue
 		}
 		out = append(out, i)
@@ -60,85 +60,76 @@ func filterFieldsEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField
 	return out
 }
 
-func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemodel.SchemaFieldType) string {
-	switch firetype {
-	case firemodel.Boolean:
+func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
+	switch firetype := firetype.(type) {
+	case *firemodel.Boolean:
 		return "Bool = false"
-	case firemodel.Integer:
+	case *firemodel.Integer:
 		return "Int = 0"
-	case firemodel.Double:
+	case *firemodel.Double:
 		return "Float = 0.0"
-	case firemodel.Timestamp:
+	case *firemodel.Timestamp:
 		return "Date = Date()"
-	case firemodel.String:
-		if extras != nil && extras.EnumType != "" {
-			if root {
-				return fmt.Sprintf("%s?", strcase.ToCamel(extras.EnumType))
-			} else {
-				return fmt.Sprintf("%s", strcase.ToCamel(extras.EnumType))
-			}
-		} else if extras != nil && extras.URL {
-			if root {
-				return "URL?"
-			} else {
-				return "URL"
-			}
+	case *firemodel.URL:
+		if root {
+			return "URL?"
 		} else {
-			if root {
-				return "String?"
-			} else {
-				return "String"
-			}
+			return "URL"
 		}
-	case firemodel.Bytes:
+	case *firemodel.String:
+		if root {
+			return "String?"
+		} else {
+			return "String"
+		}
+	case *firemodel.Bytes:
 		if root {
 			return "Data?"
 		} else {
 			return "Data"
 		}
-	case firemodel.Reference:
-		if extras != nil && extras.ReferenceTo != "" {
-			return fmt.Sprintf("Pring.Reference<%s> = .init()", extras.ReferenceTo)
+	case *firemodel.Reference:
+		if firetype.T != nil {
+			if root {
+				return fmt.Sprintf("Pring.Reference<%s> = .init()", strcase.ToCamel(firetype.T.Name))
+			} else {
+				return fmt.Sprintf("Pring.Reference<%s>", strcase.ToCamel(firetype.T.Name))
+			}
 		} else {
 			return "Pring.AnyReference"
 		}
-	case firemodel.GeoPoint:
+	case *firemodel.GeoPoint:
 		if root {
 			return "Pring.GeoPoint?"
 		} else {
 			return "Pring.GeoPoint"
 		}
-	case firemodel.Array:
-		if extras != nil && extras.ArrayOfModel != "" {
-			return fmt.Sprintf("[%s]?", extras.ArrayOfModel)
-		} else if extras != nil && extras.ArrayOfEnum != "" {
-			return fmt.Sprintf("[%s]?", extras.ArrayOfEnum)
-		} else if extras != nil && extras.ArrayOfPrimitive != "" {
-			return fmt.Sprintf("[%s]?", toSwiftType(nil, false, extras.ArrayOfPrimitive))
-		} else {
-			return "[Any]"
+	case *firemodel.Array:
+		if firetype.T != nil {
+			return fmt.Sprintf("[%s]?", toSwiftType(false, firetype.T))
 		}
-	case firemodel.Map:
-		if extras != nil && extras.File {
-			if root {
-				return "Pring.File?"
-			} else {
-				return "Pring.File"
-			}
-		} else if extras != nil && extras.MapToModel != "" {
-			if root {
-				return fmt.Sprintf("%s?", extras.MapToModel)
-			} else {
-				return fmt.Sprintf("%s", extras.MapToModel)
-			}
-		} else if extras != nil && extras.MapToEnum != "" {
-			if root {
-				return fmt.Sprintf("%s?", extras.MapToEnum)
-			} else {
-				return fmt.Sprintf("%s", extras.MapToEnum)
-			}
-		} else if extras != nil && extras.MapToPrimitive != "" {
-			return fmt.Sprintf("[String: %s] = [:]", toSwiftType(nil, false, extras.MapToPrimitive))
+		return "[Any]"
+	case *firemodel.File:
+		if root {
+			return "Pring.File?"
+		} else {
+			return "Pring.File"
+		}
+	case *firemodel.Model:
+		if root {
+			return fmt.Sprintf("%s?", firetype.T.Name)
+		} else {
+			return fmt.Sprintf("%s", firetype.T.Name)
+		}
+	case *firemodel.Enum:
+		if root {
+			return fmt.Sprintf("%s?", strcase.ToCamel(firetype.T.Name))
+		} else {
+			return fmt.Sprintf("%s", strcase.ToCamel(firetype.T.Name))
+		}
+	case *firemodel.Map:
+		if firetype.T != nil {
+			return fmt.Sprintf("[String: %s] = [:]", toSwiftType(false, firetype.T))
 		} else {
 			return "[AnyHashable: Any] = [:]"
 		}
@@ -202,7 +193,7 @@ import Pring
     {{- else }}
     // TODO: Add documentation to {{.Name | toLowerCamel}}.
     {{- end}}
-    dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType .Extras true}}
+    dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
     {{- end}}
     {{- range .Collections}}
     {{- if .Comment}}
@@ -210,7 +201,7 @@ import Pring
     {{- else }}
     // TODO: Add documentation to {{.Name}}.
     {{- end}}
-    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type}}> = []
+    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.T.Name}}> = []
     {{- end}}
     {{- if .Fields | filterFieldsEnumsOnly}}
 
