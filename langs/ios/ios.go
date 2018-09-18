@@ -2,6 +2,7 @@ package ios
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"text/template"
 
@@ -34,13 +35,13 @@ var (
 	tpl = template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"firemodelVersion":               func() string { return version.Version },
-			"toSwiftType":                    toSwiftType,
-			"toScreamingSnake":               strcase.ToScreamingSnake,
-			"toCamel":                        strcase.ToCamel,
-			"toLowerCamel":                   strcase.ToLowerCamel,
-			"filterFieldsEnumsOnly":          filterFieldsEnumsOnly,
-			"asStaticConfigForFirestorePath": asStaticConfigForFirestorePath,
+			"firemodelVersion":      func() string { return version.Version },
+			"toSwiftType":           toSwiftType,
+			"toScreamingSnake":      strcase.ToScreamingSnake,
+			"toCamel":               strcase.ToCamel,
+			"toLowerCamel":          strcase.ToLowerCamel,
+			"filterFieldsEnumsOnly": filterFieldsEnumsOnly,
+			"firestorePath":         firestorePath,
 		}).
 		Parse(file),
 	)
@@ -109,11 +110,11 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemo
 		}
 	case firemodel.Array:
 		if extras != nil && extras.ArrayOfModel != "" {
-			return fmt.Sprintf("[%s] = []", extras.ArrayOfModel)
+			return fmt.Sprintf("[%s]?", extras.ArrayOfModel)
 		} else if extras != nil && extras.ArrayOfEnum != "" {
-			return fmt.Sprintf("[%s] = []", extras.ArrayOfEnum)
+			return fmt.Sprintf("[%s]?", extras.ArrayOfEnum)
 		} else if extras != nil && extras.ArrayOfPrimitive != "" {
-			return fmt.Sprintf("[%s] = []", toSwiftType(nil, false, extras.ArrayOfPrimitive))
+			return fmt.Sprintf("[%s]?", toSwiftType(nil, false, extras.ArrayOfPrimitive))
 		} else {
 			return "[Any]"
 		}
@@ -147,11 +148,17 @@ func toSwiftType(extras *firemodel.SchemaFieldExtras, root bool, firetype firemo
 	}
 }
 
-func asStaticConfigForFirestorePath(options firemodel.SchemaModelOptions) string {
-	format, args, err := options.GetFirestorePath()
+func firestorePath(model firemodel.SchemaModel) string {
+	format, args, err := model.Options.GetFirestorePath()
 	if err != nil {
 		panic(err)
 	}
+
+	if len(args) == 0 {
+		log.Printf("ios: warning: no firestore path for %s", model.Name)
+		return ""
+	}
+
 	var out strings.Builder
 
 	for _, arg := range args {
@@ -164,7 +171,7 @@ func asStaticConfigForFirestorePath(options firemodel.SchemaModelOptions) string
 	}
 	path := fmt.Sprintf(format, argsWrappedInInterpolationParens...)
 
-	fmt.Fprintf(&out, "    override class var path: String { return \"%s\" }\n", path)
+	fmt.Fprintf(&out, "  override class var path: String { return \"%s\" }\n", path)
 
 	return out.String()
 }
@@ -188,7 +195,7 @@ import Pring
 // TODO: Add documentation to {{.Name | toCamel}}.
 {{- end}}
 @objcMembers class {{.Name | toCamel}}: Pring.Object {
-    {{.Options | asStaticConfigForFirestorePath -}}
+    {{- . | firestorePath -}}
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}
@@ -197,7 +204,6 @@ import Pring
     {{- end}}
     dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType .Extras true}}
     {{- end}}
-
     {{- range .Collections}}
     {{- if .Comment}}
     // {{.Comment}}
@@ -206,8 +212,8 @@ import Pring
     {{- end}}
     dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type}}> = []
     {{- end}}
+    {{- if .Fields | filterFieldsEnumsOnly}}
 
-    {{ if .Fields | filterFieldsEnumsOnly -}}
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
         {{range .Fields | filterFieldsEnumsOnly -}}
@@ -247,7 +253,7 @@ import Pring
     {{- else}}
     // TODO: Add documentation to {{.Name}}.
     {{- end}}
-    case {{.Name}}
+    case {{.Name | toLowerCamel}}
     {{- end}}
 }
 
@@ -272,8 +278,6 @@ extension {{.Name}}: CustomDebugStringConvertible {
         case .{{.Name | toLowerCamel}}:
             return "{{.Name | toScreamingSnake}}"
         {{- end}}
-        default:
-            return nil
         }
     }
 

@@ -44,8 +44,6 @@ extension TestDirection: CustomDebugStringConvertible {
             return "UP"
         case .down:
             return "DOWN"
-        default:
-            return nil
         }
     }
 
@@ -53,9 +51,8 @@ extension TestDirection: CustomDebugStringConvertible {
 }
 
 // A Test is a test model.
-@objcMembers class TestModel: Pring.Object {
-    static var userId: String = ""
-    override class var path: String { return "users/\(userId)/test_models" }
+@objcMembers class TestModel: Pring.Object {static var userId: String = ""
+  override class var path: String { return "users/\(userId)/test_models" }
 
     // The name.
     dynamic var name: String?
@@ -74,13 +71,13 @@ extension TestDirection: CustomDebugStringConvertible {
     // TODO: Add documentation to location.
     dynamic var location: Pring.GeoPoint?
     // TODO: Add documentation to colors.
-    dynamic var colors: [String] = []
+    dynamic var colors: [String]?
     // TODO: Add documentation to directions.
-    dynamic var directions: [TestDirection] = []
+    dynamic var directions: [TestDirection]?
     // TODO: Add documentation to models.
-    dynamic var models: [TestModel] = []
+    dynamic var models: [TestModel]?
     // TODO: Add documentation to refs.
-    dynamic var refs: [Pring.AnyReference] = []
+    dynamic var refs: [Pring.AnyReference]?
     // TODO: Add documentation to meta.
     dynamic var meta: [AnyHashable: Any] = [:]
     // TODO: Add documentation to metaStrs.
@@ -119,8 +116,4 @@ extension TestDirection: CustomDebugStringConvertible {
 
 // TODO: Add documentation to TestTimestamps.
 @objcMembers class TestTimestamps: Pring.Object {
-        override class var path: String { return "" }
-
-
-    
 }
