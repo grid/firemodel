@@ -42,9 +42,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "SimpleModel",
 						Fields: []*SchemaField{
 							{
-								Name:   "foo",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "foo",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -61,69 +60,59 @@ func TestParseSchema(t *testing.T) {
 						Name:    "TestModel",
 						Comment: "A Test is a test model.",
 						Fields: []*SchemaField{
-							{Name: "name",
+							{
+								Name:    "name",
 								Comment: "The name.",
-								Type:    String,
-								Extras:  &SchemaFieldExtras{},
+								Type:    &String{},
 							},
 							{
 								Name:    "age",
 								Comment: "The age.",
-								Type:    Integer,
-								Extras:  &SchemaFieldExtras{},
+								Type:    &Integer{},
 							},
 							{
 								Name:    "pi",
 								Comment: "The number pi.",
-								Type:    Double,
-								Extras:  &SchemaFieldExtras{},
+								Type:    &Double{},
 							},
 							{
 								Name:    "birthdate",
 								Comment: "The birth date.",
-								Type:    Timestamp,
-								Extras:  &SchemaFieldExtras{},
+								Type:    &Timestamp{},
 							},
 							{
 								Name:    "is_good",
 								Comment: "True if it is good.",
-								Type:    Boolean,
-								Extras:  &SchemaFieldExtras{},
+								Type:    &Boolean{},
 							},
 							{
-								Name: "data", Type: Bytes,
-								Extras: &SchemaFieldExtras{},
+								Name: "data",
+								Type: &Bytes{},
 							},
 							{
-								Name:   "friend",
-								Type:   Reference,
-								Extras: &SchemaFieldExtras{},
+								Name: "friend",
+								Type: &Reference{T: &SchemaModel{Name: "Friend"}},
 							},
 							{
-								Name:   "location",
-								Type:   GeoPoint,
-								Extras: &SchemaFieldExtras{},
+								Name: "location",
+								Type: &GeoPoint{},
 							},
 							{
-								Name:   "colors",
-								Type:   Array,
-								Extras: &SchemaFieldExtras{},
+								Name: "colors",
+								Type: &Array{T: &String{}},
 							},
 							{
-								Name:   "meta",
-								Type:   Map,
-								Extras: &SchemaFieldExtras{},
+								Name: "meta",
+								Type: &Map{},
 							},
 							{
 								Name:    "a_file",
 								Comment: "Fake types...",
-								Type:    Map,
-								Extras:  &SchemaFieldExtras{File: true},
+								Type:    &File{},
 							},
 							{
-								Name:   "an_url",
-								Type:   String,
-								Extras: &SchemaFieldExtras{URL: true},
+								Name: "an_url",
+								Type: &URL{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -143,53 +132,52 @@ func TestParseSchema(t *testing.T) {
 						Name: "TestModel",
 						Fields: []*SchemaField{
 							{
-								Name:   "other",
-								Type:   Reference,
-								Extras: &SchemaFieldExtras{ReferenceTo: "TestModel"}},
-							{
-								Name:   "unspecified_other",
-								Type:   Reference,
-								Extras: &SchemaFieldExtras{},
+								Name: "other",
+								Type: &Reference{T: &SchemaModel{Name: "TestModel"}},
 							},
 							{
-								Name:   "primative_ary",
-								Type:   Array,
-								Extras: &SchemaFieldExtras{ArrayOfPrimitive: String},
+								Name: "unspecified_other",
+								Type: &Reference{},
 							},
 							{
-								Name:   "model_ary",
-								Type:   Array,
-								Extras: &SchemaFieldExtras{ArrayOfModel: "TestModel"},
+								Name: "primative_ary",
+								Type: &Array{T: &String{}},
 							},
 							{
-								Name:   "enum_ary",
-								Type:   Array,
-								Extras: &SchemaFieldExtras{ArrayOfEnum: "TestEnum"},
+								Name: "model_ary",
+								Type: &Array{T: &Model{ /*TestModel*/ }},
 							},
 							{
-								Name:   "generic_ary",
-								Type:   Array,
-								Extras: &SchemaFieldExtras{},
+								Name: "enum_ary",
+								Type: &Array{T: &Enum{ /*TestModel*/ }},
 							},
 							{
-								Name:   "primative_map",
-								Type:   Map,
-								Extras: &SchemaFieldExtras{MapToPrimitive: String},
+								Name: "reference_ary",
+								Type: &Array{T: &Reference{ /* TestModel*/ }},
 							},
 							{
-								Name:   "model_map",
-								Type:   Map,
-								Extras: &SchemaFieldExtras{MapToModel: "TestModel"},
+								Name: "nested_ary",
+								Type: &Array{T: &Array{&String{}}},
 							},
 							{
-								Name:   "enum_map",
-								Type:   Map,
-								Extras: &SchemaFieldExtras{MapToEnum: "TestEnum"},
+								Name: "generic_ary",
+								Type: &Array{},
 							},
 							{
-								Name:   "generic_map",
-								Type:   Map,
-								Extras: &SchemaFieldExtras{},
+								Name: "primative_map",
+								Type: &Map{T: &String{}},
+							},
+							{
+								Name: "model_map",
+								Type: &Map{T: &Model{ /*TestModel*/ }},
+							},
+							{
+								Name: "enum_map",
+								Type: &Map{T: &Enum{ /*TestModel*/ }},
+							},
+							{
+								Name: "generic_map",
+								Type: &Map{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -206,9 +194,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "TestModel",
 						Fields: []*SchemaField{
 							{
-								Name:   "url",
-								Type:   String,
-								Extras: &SchemaFieldExtras{URL: true},
+								Name: "url",
+								Type: &URL{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -248,8 +235,7 @@ func TestParseSchema(t *testing.T) {
 							{
 								Comment: "The direction.",
 								Name:    "dir",
-								Type:    String,
-								Extras:  &SchemaFieldExtras{EnumType: "Direction"},
+								Type:    &Enum{ /*Direction*/ },
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -270,9 +256,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "Operator",
 						Fields: []*SchemaField{
 							{
-								Name:   "operator_name",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "operator_name",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -281,9 +266,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "Component",
 						Fields: []*SchemaField{
 							{
-								Name:   "component_name",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "component_name",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -293,25 +277,19 @@ func TestParseSchema(t *testing.T) {
 						Fields: []*SchemaField{
 							{
 								Name: "owner",
-								Type: Reference,
-								Extras: &SchemaFieldExtras{
-									ReferenceTo: "Operator",
-								},
+								Type: &Reference{ /*Operator*/ },
 							},
 							// note: no components "field" here.
 							{
 								Name: "embedded_component",
-								Type: Map,
-								Extras: &SchemaFieldExtras{
-									MapToModel: "Component",
-								},
+								Type: &Model{T: &SchemaModel{Name: "Component"}},
 							},
 						},
 						Options: SchemaModelOptions{},
 						Collections: []*SchemaNestedCollection{
 							{
 								Name: "components",
-								Type: "Component",
+								Type: &Model{ /* "Component"*/ },
 							},
 						},
 					},
@@ -360,9 +338,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "NormalCase",
 						Fields: []*SchemaField{
 							{
-								Name:   "foo_bar",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "foo_bar",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -371,9 +348,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "CamelCase",
 						Fields: []*SchemaField{
 							{
-								Name:   "foo_bar",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "foo_bar",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -382,9 +358,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "TitleCase",
 						Fields: []*SchemaField{
 							{
-								Name:   "foo_bar",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "foo_bar",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -393,9 +368,8 @@ func TestParseSchema(t *testing.T) {
 						Name: "SnakeCase",
 						Fields: []*SchemaField{
 							{
-								Name:   "foo_bar",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "foo_bar",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -421,9 +395,8 @@ func TestParseSchema(t *testing.T) {
 						Comment: "Regression test.",
 						Fields: []*SchemaField{
 							{
-								Name:   "name",
-								Type:   String,
-								Extras: &SchemaFieldExtras{},
+								Name: "name",
+								Type: &String{},
 							},
 						},
 						Options: SchemaModelOptions{},

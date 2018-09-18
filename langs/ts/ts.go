@@ -52,51 +52,43 @@ func interfaceName(sym string) string {
 	return fmt.Sprintf("I%s", sym)
 }
 
-func toTypescriptType(firetype firemodel.SchemaFieldType, extras *firemodel.SchemaFieldExtras) string {
-	switch firetype {
-	case firemodel.Boolean:
+func toTypescriptType(firetype firemodel.SchemaFieldType) string {
+	switch firetype := firetype.(type) {
+	case *firemodel.Boolean:
 		return "boolean"
-	case firemodel.Integer, firemodel.Double:
+	case *firemodel.Integer, *firemodel.Double:
 		return "number"
-	case firemodel.Timestamp:
+	case *firemodel.Timestamp:
 		return "firestore.Timestamp"
-	case firemodel.String:
-		if extras != nil && extras.EnumType != "" {
-			return extras.EnumType
-		} else if extras != nil && extras.URL {
-			return "URL"
-		} else {
-			return "string"
-		}
-	case firemodel.Bytes:
+	case *firemodel.String:
+		return "string"
+	case *firemodel.Enum:
+		return firetype.T.Name
+	case *firemodel.URL:
+		return "URL"
+	case *firemodel.Bytes:
 		return "firestore.Blob"
-	case firemodel.Reference:
-		if extras != nil && extras.ReferenceTo != "" {
-			return fmt.Sprintf("DocumentReference<%s>", interfaceName(extras.ReferenceTo))
+	case *firemodel.Reference:
+		if firetype.T != nil {
+			return fmt.Sprintf("DocumentReference<%s>", interfaceName(firetype.T.Name))
 		} else {
 			return "firestore.DocumentReference"
 		}
-	case firemodel.GeoPoint:
+	case *firemodel.GeoPoint:
 		return "firestore.GeoPoint"
-	case firemodel.Array:
-		if extras != nil && extras.ArrayOfModel != "" {
-			return fmt.Sprintf("%s[]", interfaceName(extras.ArrayOfModel))
-		} else if extras != nil && extras.ArrayOfEnum != "" {
-			return fmt.Sprintf("%s[]", extras.ArrayOfEnum)
-		} else if extras != nil && extras.ArrayOfPrimitive != "" {
-			return fmt.Sprintf("%s[]", toTypescriptType(extras.ArrayOfPrimitive, nil))
+	case *firemodel.Array:
+		if firetype.T != nil {
+			return fmt.Sprintf("%s[]", toTypescriptType(firetype.T))
 		} else {
 			return "any[]"
 		}
-	case firemodel.Map:
-		if extras != nil && extras.File {
-			return "IFile"
-		} else if extras != nil && extras.MapToModel != "" {
-			return interfaceName(extras.MapToModel)
-		} else if extras != nil && extras.MapToEnum != "" {
-			return extras.MapToEnum
-		} else if extras != nil && extras.MapToPrimitive != "" {
-			return fmt.Sprintf("{ [key: string]: %s; }", toTypescriptType(extras.MapToPrimitive, nil))
+	case *firemodel.Model:
+		return interfaceName(firetype.T.Name)
+	case *firemodel.File:
+		return "IFile"
+	case *firemodel.Map:
+		if firetype.T != nil {
+			return fmt.Sprintf("{ [key: string]: %s; }", toTypescriptType(firetype.T))
 		} else {
 			return `{ [key: string]: any; }`
 		}
@@ -226,7 +218,7 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- else }}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type | interfaceName | ToCamel}}>;
+    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type.T.Name | interfaceName | ToCamel}}>;
     {{- end}}
 
     {{- range .Fields}}
@@ -235,7 +227,7 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- else }}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type .Extras}};
+    {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type}};
     {{- end}}
     {{- if .Options | getModelOption "firestore" "autotimestamp" false}}
 

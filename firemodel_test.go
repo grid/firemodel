@@ -61,7 +61,6 @@ type testCtx struct {
 }
 
 func runTest(t *testing.T, schema *firemodel.Schema) {
-	t.Helper()
 	ctx := testCtx{
 		prefix: path.Join(fixturesRoot, t.Name()),
 		files:  make(inMemoryFilesByName),

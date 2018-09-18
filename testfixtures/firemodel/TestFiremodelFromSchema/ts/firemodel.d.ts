@@ -100,6 +100,8 @@ export namespace example {
     models?: ITestModel[];
     /** TODO: Add documentation to refs. */
     refs?: firestore.DocumentReference[];
+    /** TODO: Add documentation to model_refs. */
+    modelRefs?: DocumentReference<ITestTimestamps>[];
     /** TODO: Add documentation to meta. */
     meta?: { [key: string]: any; };
     /** TODO: Add documentation to meta_strs. */

@@ -1,9 +1,10 @@
 package firemodel
 
 import (
-	"strings"
-	"github.com/pkg/errors"
 	"regexp"
+	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type Schema struct {
@@ -64,8 +65,12 @@ func (options SchemaModelOptions) GetFirestorePath() (format string, args []stri
 		err = errors.Errorf(`firemodel: invalid path option "%s"`, pathTemplate)
 		return
 	}
-
 	components := strings.Split(pathTemplate, "/")
+	if len(components)%2 != 0 {
+		err = errors.Errorf(`firemodel: invalid path option (must be even number of components) "%s"`, pathTemplate)
+		return
+	}
+
 	for idx, component := range components {
 		if firestorePathConstantPattern.MatchString(component) {
 			continue
@@ -99,31 +104,49 @@ type SchemaField struct {
 	Name    string
 	Comment string
 	Type    SchemaFieldType
-	Extras  *SchemaFieldExtras
 }
 
-type SchemaFieldType string
+type SchemaFieldType interface {
+	isSchemaTypeName()
+}
 
 type SchemaEnumValue struct {
 	Name    string
 	Comment string
 }
 
-type SchemaFieldExtras struct {
-	ReferenceTo      string
-	ArrayOfPrimitive SchemaFieldType
-	ArrayOfModel     string
-	ArrayOfEnum      string
-	MapToPrimitive   SchemaFieldType
-	MapToModel       string
-	MapToEnum        string
-	EnumType         string
-	URL              bool
-	File             bool
-}
+type Boolean struct{}
+type Integer struct{}
+type Double struct{}
+type GeoPoint struct{}
+type Timestamp struct{}
+type String struct{}
+type Bytes struct{}
+type Reference struct{ T *SchemaModel }
+type Array struct{ T SchemaFieldType }
+type Map struct{ T SchemaFieldType }
+type Model struct{ T *SchemaModel }
+type Enum struct{ T *SchemaEnum }
+type URL struct{}
+type File struct{}
+
+func (t *Boolean) isSchemaTypeName()   {}
+func (t *Integer) isSchemaTypeName()   {}
+func (t *Double) isSchemaTypeName()    {}
+func (t *GeoPoint) isSchemaTypeName()  {}
+func (t *Timestamp) isSchemaTypeName() {}
+func (t *String) isSchemaTypeName()    {}
+func (t *Bytes) isSchemaTypeName()     {}
+func (t *Reference) isSchemaTypeName() {}
+func (t *Array) isSchemaTypeName()     {}
+func (t *Map) isSchemaTypeName()       {}
+func (t *Model) isSchemaTypeName()     {}
+func (t *Enum) isSchemaTypeName()      {}
+func (t *URL) isSchemaTypeName()       {}
+func (t *File) isSchemaTypeName()      {}
 
 type SchemaNestedCollection struct {
 	Name    string
 	Comment string
-	Type    string
+	Type    *Model
 }
