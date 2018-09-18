@@ -19,7 +19,7 @@ func init() {
 type Modeler struct{}
 
 func (m *Modeler) Model(schema *firemodel.Schema, sourceCoder firemodel.SourceCoder) error {
-	f, err := sourceCoder.NewFile("firemodel.swift")
+	f, err := sourceCoder.NewFile("Firemodel.swift")
 	if err != nil {
 		return errors.Wrapf(err, "firemodel/ios: create swift file")
 	}
