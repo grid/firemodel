@@ -1,0 +1,4 @@
+// A sample struct
+struct Person {
+  string display_name;
+}

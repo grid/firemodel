@@ -10,6 +10,7 @@ import (
 type Schema struct {
 	Models  []*SchemaModel
 	Enums   []*SchemaEnum
+	Structs []*SchemaStruct
 	Options SchemaOptions
 }
 
@@ -24,6 +25,12 @@ type SchemaModel struct {
 	Fields      []*SchemaField
 	Collections []*SchemaNestedCollection
 	Options     SchemaModelOptions
+}
+
+type SchemaStruct struct {
+	Name    string
+	Comment string
+	Fields  []*SchemaField
 }
 
 type SchemaOptions map[string]map[string]string
@@ -125,7 +132,7 @@ type Bytes struct{}
 type Reference struct{ T *SchemaModel }
 type Array struct{ T SchemaFieldType }
 type Map struct{ T SchemaFieldType }
-type Model struct{ T *SchemaModel }
+type Struct struct{ T *SchemaStruct }
 type Enum struct{ T *SchemaEnum }
 type URL struct{}
 type File struct{}
@@ -140,7 +147,7 @@ func (t *Bytes) isSchemaTypeName()     {}
 func (t *Reference) isSchemaTypeName() {}
 func (t *Array) isSchemaTypeName()     {}
 func (t *Map) isSchemaTypeName()       {}
-func (t *Model) isSchemaTypeName()     {}
+func (t *Struct) isSchemaTypeName()    {}
 func (t *Enum) isSchemaTypeName()      {}
 func (t *URL) isSchemaTypeName()       {}
 func (t *File) isSchemaTypeName()      {}
@@ -148,5 +155,5 @@ func (t *File) isSchemaTypeName()      {}
 type SchemaNestedCollection struct {
 	Name    string
 	Comment string
-	Type    *Model
+	Type    *SchemaModel
 }

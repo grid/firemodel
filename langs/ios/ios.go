@@ -35,24 +35,48 @@ var (
 	tpl = template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"firemodelVersion":      func() string { return version.Version },
-			"toSwiftType":           toSwiftType,
-			"toScreamingSnake":      strcase.ToScreamingSnake,
-			"toCamel":               strcase.ToCamel,
-			"toLowerCamel":          strcase.ToLowerCamel,
-			"filterFieldsEnumsOnly": filterFieldsEnumsOnly,
-			"firestorePath":         firestorePath,
+			"firemodelVersion":        func() string { return version.Version },
+			"toSwiftType":             toSwiftType,
+			"toScreamingSnake":        strcase.ToScreamingSnake,
+			"toCamel":                 strcase.ToCamel,
+			"toLowerCamel":            strcase.ToLowerCamel,
+			"filterFieldsEnumsOnly":   filterFieldsEnumsOnly,
+			"filterFieldsStructsOnly": filterFieldsStructsOnly,
+			"hasFieldsOrStructs":      hasFieldsOrStructs,
+			"firestorePath":           firestorePath,
 		}).
 		Parse(file),
 	)
 	_ = template.Must(tpl.New("model").Parse(model))
 	_ = template.Must(tpl.New("enum").Parse(enum))
+	_ = template.Must(tpl.New("struct").Parse(structTpl))
 )
+
+func hasFieldsOrStructs(in []*firemodel.SchemaField) bool {
+	if len(filterFieldsStructsOnly(in)) > 0 {
+		return true
+	}
+	if len(filterFieldsStructsOnly(in)) > 0 {
+		return true
+	}
+	return false
+}
 
 func filterFieldsEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
 	var out []*firemodel.SchemaField
 	for _, i := range in {
 		if _, ok := i.Type.(*firemodel.Enum); !ok {
+			continue
+		}
+		out = append(out, i)
+	}
+	return out
+}
+
+func filterFieldsStructsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
+	var out []*firemodel.SchemaField
+	for _, i := range in {
+		if _, ok := i.Type.(*firemodel.Struct); !ok {
 			continue
 		}
 		out = append(out, i)
@@ -115,7 +139,7 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 		} else {
 			return "Pring.File"
 		}
-	case *firemodel.Model:
+	case *firemodel.Struct:
 		if root {
 			return fmt.Sprintf("%s?", firetype.T.Name)
 		} else {
@@ -162,7 +186,7 @@ func firestorePath(model firemodel.SchemaModel) string {
 	}
 	path := fmt.Sprintf(format, argsWrappedInInterpolationParens...)
 
-	fmt.Fprintf(&out, "  override class var path: String { return \"%s\" }\n", path)
+	fmt.Fprintf(&out, "    override class var path: String { return \"%s\" }", path)
 
 	return out.String()
 }
@@ -175,6 +199,9 @@ import Pring
 {{range .Enums -}}
 {{template "enum" .}}
 {{- end}}
+{{range .Structs -}}
+{{template "struct" .}}
+{{- end}}
 {{- range .Models -}}
 {{- template "model" .}}
 {{- end -}}`
@@ -186,7 +213,7 @@ import Pring
 // TODO: Add documentation to {{.Name | toCamel}}.
 {{- end}}
 @objcMembers class {{.Name | toCamel}}: Pring.Object {
-    {{- . | firestorePath -}}
+    {{. | firestorePath}}
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}
@@ -201,16 +228,20 @@ import Pring
     {{- else }}
     // TODO: Add documentation to {{.Name}}.
     {{- end}}
-    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.T.Name}}> = []
+    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
     {{- end}}
-    {{- if .Fields | filterFieldsEnumsOnly}}
+    {{- if .Fields | hasFieldsOrStructs }}
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
         {{range .Fields | filterFieldsEnumsOnly -}}
         case "{{.Name | toLowerCamel}}":
             return self.{{.Name | toLowerCamel}}?.firestoreValue
-            {{- end}}
+				{{- end}}
+        {{range .Fields | filterFieldsStructsOnly -}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.firestoreValue
+				{{- end}}
         default:
             break
         }
@@ -273,6 +304,24 @@ extension {{.Name}}: CustomDebugStringConvertible {
     }
 
     var debugDescription: String { return firestoreValue ?? "<INVALID>" }
+}
+`
+
+	structTpl = `
+{{- if .Comment}}
+// {{.Comment}}
+{{- else}}
+// TODO: Add documentation to {{.Name}}.
+{{- end}}
+@objc struct {{.Name | toCamel }} {
+    {{- range .Fields}}
+    {{- if .Comment}}
+    // {{.Comment}}
+    {{- else}}
+    // TODO: Add documentation to {{.Name}}.
+    {{- end}}
+    case {{.Name | toLowerCamel}}
+    {{- end}}
 }
 `
 )

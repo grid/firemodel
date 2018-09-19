@@ -1,0 +1,6 @@
+model SomeModel {}
+
+model Invalid {
+  // Invalid!
+  TestModel bad_nested;
+}

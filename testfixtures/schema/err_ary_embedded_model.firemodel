@@ -1,0 +1,6 @@
+model SomeModel {}
+
+model Invalid {
+  // Invalid!
+  array<TestModel> bad_nested_ary;
+}

@@ -1,16 +1,18 @@
 enum TestEnum {}
 
+struct TestStruct {}
+
 model TestModel {
     reference<TestModel> other;
     reference unspecified_other;
     array<string> primative_ary;
-    array<TestModel> model_ary;
+    array<TestStruct> struct_ary;
     array<TestEnum> enum_ary;
     array<reference<TestModel>> reference_ary;
     array<array<string>> nested_ary;
     array generic_ary;
     map<string> primative_map;
-    map<TestModel> model_map;
+    map<TestStruct> struct_map;
     map<TestEnum> enum_map;
     map generic_map;
 }

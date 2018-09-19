@@ -3,6 +3,7 @@ package firemodel
 import (
 	"io"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/iancoleman/strcase"
 	"github.com/mickeyreiss/firemodel/internal/ast"
 	"github.com/pkg/errors"
@@ -22,8 +23,9 @@ func ParseSchema(r io.Reader) (*Schema, error) {
 }
 
 type configSchemaCompiler struct {
-	models []*SchemaModel
-	enums  []*SchemaEnum
+	models  []*SchemaModel
+	structs []*SchemaStruct
+	enums   []*SchemaEnum
 
 	ast *ast.AST
 }
@@ -35,10 +37,14 @@ func (c *configSchemaCompiler) compileConfig() (*Schema, error) {
 	if err := c.precompileModelTypes(); err != nil {
 		return nil, err
 	}
+	if err := c.precompileStructTypes(); err != nil {
+		return nil, err
+	}
 
 	return &Schema{
 		Models:  c.compileModels(),
 		Enums:   c.compileEnums(),
+		Structs: c.compileStructs(),
 		Options: c.compileLanguageOptions(),
 	}, nil
 }
@@ -81,6 +87,25 @@ func (c *configSchemaCompiler) precompileModelTypes() error {
 	return nil
 }
 
+func (c *configSchemaCompiler) precompileStructTypes() error {
+	c.structs = make([]*SchemaStruct, 0)
+	for _, v := range c.ast.Types {
+		if v.Struct == nil {
+			continue
+		}
+
+		if v.Struct.Identifier.IsReserved() {
+			err := errors.Errorf("firemodel/schema: can't name struct %s, %s is a reserved word.", v.Struct.Identifier, v.Struct.Identifier)
+			return err
+		}
+
+		c.structs = append(c.structs, &SchemaStruct{
+			Name: strcase.ToCamel(string(v.Struct.Identifier)),
+		})
+	}
+	return nil
+}
+
 func (c *configSchemaCompiler) compileModels() (out []*SchemaModel) {
 	for _, v := range c.ast.Types {
 		if v.Model == nil {
@@ -95,9 +120,30 @@ func (c *configSchemaCompiler) compileModels() (out []*SchemaModel) {
 		out = append(out, &SchemaModel{
 			Name:        strcase.ToCamel(string(v.Model.Identifier)),
 			Comment:     v.Comment,
-			Fields:      c.compileFields(v.Model.Elements),
+			Fields:      c.compileModelFields(v.Model.Elements),
 			Collections: c.compileCollections(v.Model.Elements),
 			Options:     c.compileModelOptions(v.Model.Elements),
+		})
+	}
+	return
+}
+
+func (c *configSchemaCompiler) compileStructs() (out []*SchemaStruct) {
+	for _, v := range c.ast.Types {
+		if v.Struct == nil {
+			continue
+		}
+
+		if v.Struct.Identifier.IsReserved() {
+			err := errors.Errorf("firemodel/schema: can't name struct %s, %s is a reserved word.", v.Struct.Identifier, v.Struct.Identifier)
+			panic(err)
+		}
+
+		spew.Dump(v)
+		out = append(out, &SchemaStruct{
+			Name:    strcase.ToCamel(string(v.Struct.Identifier)),
+			Comment: v.Comment,
+			Fields:  c.compileStructFields(v.Struct.Elements),
 		})
 	}
 	return
@@ -146,11 +192,30 @@ func (c *configSchemaCompiler) enumValuesToConfig(values []*ast.ASTEnumValue) (o
 	return
 }
 
-func (c *configSchemaCompiler) compileFields(elements []*ast.ASTModelElement) (out []*SchemaField) {
+func (c *configSchemaCompiler) compileModelFields(elements []*ast.ASTModelElement) (out []*SchemaField) {
 	for _, element := range elements {
 		field := element.Field
 		if field == nil {
-			continue // element is not a Field
+			continue
+		}
+		if field.Type.Base.IsCollection() {
+			continue // handled in compileCollections
+		}
+
+		out = append(out, &SchemaField{
+			Name:    strcase.ToSnake(field.Name),
+			Comment: field.Comment,
+			Type:    c.compileFieldType(field.Type),
+		})
+	}
+	return
+}
+
+func (c *configSchemaCompiler) compileStructFields(elements []*ast.ASTStructElement) (out []*SchemaField) {
+	for _, element := range elements {
+		field := element.Field
+		if field == nil {
+			continue
 		}
 		if field.Type.Base.IsCollection() {
 			continue // handled in compileCollections
@@ -193,10 +258,14 @@ func (c *configSchemaCompiler) compileFieldType(astFieldType *ast.ASTFieldType) 
 		panic("bug: enum types not yet registered")
 	}
 	if enum, ok := c.assertEnumType(astFieldType); ok {
-		return enum
+		return &Enum{T: enum}
 	}
-	if model, ok := c.assertModelType(astFieldType); ok {
-		return model
+	if _, ok := c.assertModelType(astFieldType); ok {
+		err := errors.Errorf("firemodel/schema: can't use models as field types (got %s); please use reference, collection or switch model to struct instead", astFieldType)
+		panic(err)
+	}
+	if structT, ok := c.assertStructType(astFieldType); ok {
+		return &Struct{T: structT}
 	}
 	switch astFieldType.Base {
 	case ast.Boolean:
@@ -219,7 +288,7 @@ func (c *configSchemaCompiler) compileFieldType(astFieldType *ast.ASTFieldType) 
 		return &URL{}
 	case ast.Map:
 		if generic := astFieldType.Generic; generic != nil {
-			return &Map{T: c.compileFieldType(astFieldType.Generic)}
+			return &Map{T: c.compileFieldType(generic)}
 		}
 		return &Map{}
 	case ast.Array:
@@ -231,7 +300,7 @@ func (c *configSchemaCompiler) compileFieldType(astFieldType *ast.ASTFieldType) 
 		if astFieldType.Generic == nil {
 			return &Reference{}
 		} else if modelType, ok := c.assertModelType(astFieldType.Generic); ok {
-			return &Reference{T: modelType.T}
+			return &Reference{T: modelType}
 		} else {
 			err := errors.Errorf("firemodel: invalid generic type %s in %s<%s> (must be a model type)", astFieldType.Generic, astFieldType.Base, astFieldType.Generic)
 			panic(err)
@@ -242,21 +311,7 @@ func (c *configSchemaCompiler) compileFieldType(astFieldType *ast.ASTFieldType) 
 	panic(err)
 }
 
-func (c *configSchemaCompiler) compileModelType(astType *ast.ASTFieldType) *Model {
-	if astType.Generic != nil {
-		err := errors.Errorf("models cannot have generics: %s<%s>", astType.Base, astType.Generic)
-		panic(err)
-	}
-
-	if modelType, ok := c.assertModelType(astType); ok {
-		return modelType
-	}
-
-	err := errors.Errorf("invalid type: %s", astType)
-	panic(err)
-}
-
-func (c *configSchemaCompiler) assertModelType(astFieldType *ast.ASTFieldType) (*Model, bool) {
+func (c *configSchemaCompiler) assertModelType(astFieldType *ast.ASTFieldType) (*SchemaModel, bool) {
 	if c.models == nil {
 		panic("bug: model types not yet registered")
 	}
@@ -266,13 +321,29 @@ func (c *configSchemaCompiler) assertModelType(astFieldType *ast.ASTFieldType) (
 	astType := astFieldType.Base
 	for _, model := range c.models {
 		if model.Name == strcase.ToCamel(string(astType)) {
-			return &Model{T: model}, true
+			return model, true
 		}
 	}
 	return nil, false
 }
 
-func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (*Enum, bool) {
+func (c *configSchemaCompiler) assertStructType(astFieldType *ast.ASTFieldType) (*SchemaStruct, bool) {
+	if c.structs == nil {
+		panic("bug: model types not yet registered")
+	}
+	if astFieldType == nil {
+		return nil, false
+	}
+	astType := astFieldType.Base
+	for _, schemaStruct := range c.structs {
+		if schemaStruct.Name == strcase.ToCamel(string(astType)) {
+			return schemaStruct, true
+		}
+	}
+	return nil, false
+}
+
+func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (*SchemaEnum, bool) {
 	if astType == nil {
 		return nil, false
 	}
@@ -281,7 +352,7 @@ func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (*Enum,
 			if astType.Generic != nil {
 				panic(errors.Errorf("generic enums are not supported: %s %v", astType.Base, astType.Generic))
 			}
-			return &Enum{T: enum}, true
+			return enum, true
 		}
 
 	}

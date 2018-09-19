@@ -50,11 +50,20 @@ extension TestDirection: CustomDebugStringConvertible {
     var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
 
-// A Test is a test model.
-@objcMembers class TestModel: Pring.Object {static var userId: String = ""
-static var testModelId: String = ""
-  override class var path: String { return "users/\(userId)/test_models/\(testModelId)" }
 
+// TODO: Add documentation to TestStruct.
+@objc struct TestStruct {
+    // TODO: Add documentation to where.
+    case where
+    // TODO: Add documentation to how_much.
+    case howMuch
+}
+
+// A Test is a test model.
+@objcMembers class TestModel: Pring.Object {
+    static var userId: String = ""
+static var testModelId: String = ""
+    override class var path: String { return "users/\(userId)/test_models/\(testModelId)" }
     // The name.
     dynamic var name: String?
     // The age.
@@ -76,7 +85,7 @@ static var testModelId: String = ""
     // TODO: Add documentation to directions.
     dynamic var directions: [TestDirection]?
     // TODO: Add documentation to models.
-    dynamic var models: [TestModel]?
+    dynamic var models: [TestStruct]?
     // TODO: Add documentation to refs.
     dynamic var refs: [Pring.AnyReference]?
     // TODO: Add documentation to modelRefs.
@@ -92,7 +101,7 @@ static var testModelId: String = ""
     // TODO: Add documentation to url.
     dynamic var url: URL?
     // TODO: Add documentation to nested.
-    dynamic var nested: TestModel?
+    dynamic var nested: TestStruct?
     // TODO: Add documentation to nested_collection.
     dynamic var nestedCollection: Pring.NestedCollection<TestModel> = []
 
@@ -100,6 +109,8 @@ static var testModelId: String = ""
         switch key {
         case "direction":
             return self.direction?.firestoreValue
+        case "nested":
+            return self.nested?.firestoreValue
         default:
             break
         }
@@ -118,7 +129,7 @@ static var testModelId: String = ""
 }
 
 // TODO: Add documentation to TestTimestamps.
-@objcMembers class TestTimestamps: Pring.Object {static var testTimestampsId: String = ""
-  override class var path: String { return "timestamps/\(testTimestampsId)" }
-
+@objcMembers class TestTimestamps: Pring.Object {
+    static var testTimestampsId: String = ""
+    override class var path: String { return "timestamps/\(testTimestampsId)" }
 }
