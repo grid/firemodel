@@ -35,7 +35,7 @@ type TestModel struct {
 	// TODO: Add comment to TestModel.directions.
 	Directions []TestDirection `firestore:"directions"`
 	// TODO: Add comment to TestModel.models.
-	Models []*TestModel `firestore:"models"`
+	Models []*TestStruct `firestore:"models"`
 	// TODO: Add comment to TestModel.refs.
 	Refs []*firestore.DocumentRef `firestore:"refs"`
 	// TODO: Add comment to TestModel.model_refs.
@@ -51,7 +51,7 @@ type TestModel struct {
 	// TODO: Add comment to TestModel.url.
 	Url runtime.URL `firestore:"url"`
 	// TODO: Add comment to TestModel.nested.
-	Nested *TestModel `firestore:"nested"`
+	Nested *TestStruct `firestore:"nested"`
 
 	// Creation timestamp.
 	CreatedAt time.Time `firestore:"createdAt,serverTimestamp"`

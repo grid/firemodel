@@ -46,6 +46,7 @@ var (
 	)
 	_ = template.Must(tpl.New("model").Parse(model))
 	_ = template.Must(tpl.New("enum").Parse(enum))
+	_ = template.Must(tpl.New("struct").Parse(structTpl))
 )
 
 func interfaceName(sym string) string {
@@ -82,7 +83,7 @@ func toTypescriptType(firetype firemodel.SchemaFieldType) string {
 		} else {
 			return "any[]"
 		}
-	case *firemodel.Model:
+	case *firemodel.Struct:
 		return interfaceName(firetype.T.Name)
 	case *firemodel.File:
 		return "IFile"
@@ -271,6 +272,9 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   {{- range .Enums -}}
   {{- template "enum" .}}
   {{- end}}
+  {{- range .Structs -}}
+  {{- template "struct" .}}
+  {{- end}}
   {{- range .Models -}}
   {{- template "model" .}}
   {{- end}}
@@ -291,7 +295,7 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- else }}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type.T.Name | interfaceName | ToCamel}}>;
+    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type.Name | interfaceName | ToCamel}}>;
     {{- end}}
 
     {{- range .Fields}}
@@ -308,6 +312,25 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     createdAt?: firestore.Timestamp;
     /** Record update timestamp. */
     updatedAt?: firestore.Timestamp;
+    {{- end}}
+  }`
+
+	structTpl = `
+  {{- if .Comment}}
+
+  /** {{.Comment}} */
+  {{- else}}
+
+  /** TODO: Add documentation to {{.Name}}. */
+  {{- end}}
+  export interface {{.Name | interfaceName | ToCamel}} {
+    {{- range .Fields}}
+    {{- if .Comment}}
+    /** {{.Comment}} */
+    {{- else }}
+    /** TODO: Add documentation to {{.Name}}. */
+    {{- end}}
+    {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type}};
     {{- end}}
   }`
 

@@ -145,6 +145,14 @@ export namespace example {
     down = "DOWN",
   }
 
+  /** TODO: Add documentation to TestStruct. */
+  export interface ITestStruct {
+    /** TODO: Add documentation to where. */
+    where?: string;
+    /** TODO: Add documentation to how_much. */
+    howMuch?: number;
+  }
+
   /** A Test is a test model. */
   export interface ITestModel {
     /** TODO: Add documentation to nested_collection. */
@@ -170,7 +178,7 @@ export namespace example {
     /** TODO: Add documentation to directions. */
     directions?: TestDirection[];
     /** TODO: Add documentation to models. */
-    models?: ITestModel[];
+    models?: ITestStruct[];
     /** TODO: Add documentation to refs. */
     refs?: firestore.DocumentReference[];
     /** TODO: Add documentation to model_refs. */
@@ -186,7 +194,7 @@ export namespace example {
     /** TODO: Add documentation to url. */
     url?: URL;
     /** TODO: Add documentation to nested. */
-    nested?: ITestModel;
+    nested?: ITestStruct;
 
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;

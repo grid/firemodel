@@ -7,5 +7,4 @@ model Component {
 model Machine {
 	reference<Operator> owner;
 	collection<Component> components;
-	Component embedded_component;
 }

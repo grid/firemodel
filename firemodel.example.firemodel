@@ -7,6 +7,11 @@ enum TestDirection {
     down,
 }
 
+struct TestStruct {
+  string where;
+  integer how_much;
+}
+
 // A Test is a test model.
 model TestModel {
   option firestore.path = "users/{user_id}/test_models/{test_model_id}";
@@ -27,7 +32,7 @@ model TestModel {
   geopoint location;
   array<string> colors;
   array<TestDirection> directions;
-  array<TestModel> models;
+  array<TestStruct> models;
   array<reference> refs;
   array<reference<TestTimestamps>> model_refs;
   map meta;
@@ -35,7 +40,7 @@ model TestModel {
   TestDirection direction;
   File test_file;
   URL url;
-  TestModel nested;
+  TestStruct nested;
   collection<TestModel> nested_collection;
 }
 

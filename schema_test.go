@@ -144,16 +144,16 @@ func TestParseSchema(t *testing.T) {
 								Type: &Array{T: &String{}},
 							},
 							{
-								Name: "model_ary",
-								Type: &Array{T: &Model{ /*TestModel*/ }},
+								Name: "struct_ary",
+								Type: &Array{T: &Reference{T: &SchemaModel{Name: "TestModel"}}},
 							},
 							{
 								Name: "enum_ary",
-								Type: &Array{T: &Enum{ /*TestModel*/ }},
+								Type: &Array{T: &Enum{T: &SchemaEnum{Name: "TestModel"}}},
 							},
 							{
 								Name: "reference_ary",
-								Type: &Array{T: &Reference{ /* TestModel*/ }},
+								Type: &Array{T: &Reference{T: &SchemaModel{Name: "TestModel"}}},
 							},
 							{
 								Name: "nested_ary",
@@ -168,12 +168,12 @@ func TestParseSchema(t *testing.T) {
 								Type: &Map{T: &String{}},
 							},
 							{
-								Name: "model_map",
-								Type: &Map{T: &Model{ /*TestModel*/ }},
+								Name: "struct_map",
+								Type: &Map{T: &Struct{T: &SchemaStruct{Name: "TestModel"}}},
 							},
 							{
 								Name: "enum_map",
-								Type: &Map{T: &Enum{ /*TestModel*/ }},
+								Type: &Map{T: &Enum{T: &SchemaEnum{Name: "TestModel"}}},
 							},
 							{
 								Name: "generic_map",
@@ -181,6 +181,11 @@ func TestParseSchema(t *testing.T) {
 							},
 						},
 						Options: SchemaModelOptions{},
+					},
+				},
+				Structs: []*SchemaStruct{
+					{
+						Name: "TestStruct",
 					},
 				},
 				Options: SchemaOptions{},
@@ -277,19 +282,14 @@ func TestParseSchema(t *testing.T) {
 						Fields: []*SchemaField{
 							{
 								Name: "owner",
-								Type: &Reference{ /*Operator*/ },
-							},
-							// note: no components "field" here.
-							{
-								Name: "embedded_component",
-								Type: &Model{T: &SchemaModel{Name: "Component"}},
+								Type: &Reference{T: &SchemaModel{Name: "Operator"}},
 							},
 						},
 						Options: SchemaModelOptions{},
 						Collections: []*SchemaNestedCollection{
 							{
 								Name: "components",
-								Type: &Model{ /* "Component"*/ },
+								Type: &SchemaModel{Name: "Component"},
 							},
 						},
 					},
@@ -387,6 +387,32 @@ func TestParseSchema(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "err_ary_embedded_model",
+			wantErr: true,
+		},
+		{
+			name:    "err_embedded_model",
+			wantErr: true,
+		},
+		{
+			name: "struct",
+			want: &Schema{
+				Structs: []*SchemaStruct{
+					{
+						Name:    "Person",
+						Comment: "A sample struct",
+						Fields: []*SchemaField{
+							{
+								Name: "display_name",
+								Type: &String{},
+							},
+						},
+					},
+				},
+				Options: SchemaOptions{},
+			},
+		},
+		{
 			name: "model_named_user",
 			want: &Schema{
 				Models: []*SchemaModel{
@@ -408,6 +434,11 @@ func TestParseSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				if p := recover(); p != nil && !tt.wantErr {
+					t.Fatal("panic", p)
+				}
+			}()
 			r, err := os.Open(path.Join("testfixtures", "schema", tt.name+".firemodel"))
 			if err != nil {
 				t.Fatal(err)
