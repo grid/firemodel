@@ -172,12 +172,6 @@ export interface QuerySnapshotExpanded<DataType = firestore.DocumentData> {
 export interface DocumentReference<DataType = firestore.DocumentData>
   extends firestore.DocumentReference {
   set(data: DataType, options?: firestore.SetOptions): Promise<void>;
-  // update(data: UpdateData<DataType>): Promise<void>;
-  // update(
-  //   field: string | FieldPath,
-  //   value: any,
-  //   ...moreFieldsAndValues: any[]
-  // ): Promise<void>;
   get(options?: firestore.GetOptions): Promise<DocumentSnapshot<DataType>>;
   onSnapshot(observer: {
     next?: (snapshot: DocumentSnapshot<DataType>) => void;
