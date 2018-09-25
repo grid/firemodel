@@ -9,7 +9,7 @@ enum TestDirection {
 
 // A Test is a test model.
 model TestModel {
-  option firestore.path = "users/{user_id}/test_models";
+  option firestore.path = "users/{user_id}/test_models/{test_model_id}";
   option firestore.autotimestamp = true;
 
   // The name.
@@ -29,6 +29,7 @@ model TestModel {
   array<TestDirection> directions;
   array<TestModel> models;
   array<reference> refs;
+  array<reference<TestTimestamps>> model_refs;
   map meta;
   map<string> meta_strs;
   TestDirection direction;
@@ -39,5 +40,6 @@ model TestModel {
 }
 
 model TestTimestamps {
+  option firestore.path = "timestamps/{test_timestamps_id}";
   option firestore.autotimestamp = true;
 }

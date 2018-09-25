@@ -2,13 +2,12 @@ package cmd
 
 import (
 	// Modeler registrations:
+	"fmt"
+
 	_ "github.com/mickeyreiss/firemodel/langs/go"
 	_ "github.com/mickeyreiss/firemodel/langs/ios"
 	_ "github.com/mickeyreiss/firemodel/langs/ts"
-)
-
-import (
-	"fmt"
+	"github.com/mickeyreiss/firemodel/version"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +18,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "firemodel",
-	Short: "Type-safe, cross-platform models for Firestore",
+	Use:     "firemodel",
+	Short:   "Type-safe, cross-platform models for Firestore",
+	Version: version.Version,
 }
 
 func init() {

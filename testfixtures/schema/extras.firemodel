@@ -6,6 +6,8 @@ model TestModel {
     array<string> primative_ary;
     array<TestModel> model_ary;
     array<TestEnum> enum_ary;
+    array<reference<TestModel>> reference_ary;
+    array<array<string>> nested_ary;
     array generic_ary;
     map<string> primative_map;
     map<TestModel> model_map;
