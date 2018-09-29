@@ -4,7 +4,7 @@ Thanks your help with building Firemodel!
 
 ## Code
 
-Firemodel is written in go 1.10.
+Firemodel is written in go 1.11.
 
     go get -t -u github.com/mickeyreiss/firemodel/...
 
