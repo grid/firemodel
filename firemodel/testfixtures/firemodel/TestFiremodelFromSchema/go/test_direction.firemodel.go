@@ -6,8 +6,12 @@ package firemodel
 type TestDirection string
 
 const (
-	TestDirection_LEFT  TestDirection = "LEFT"
+	// TODO: Add comment to TestDirection_LEFT.
+	TestDirection_LEFT TestDirection = "LEFT"
+	// TODO: Add comment to TestDirection_RIGHT.
 	TestDirection_RIGHT TestDirection = "RIGHT"
-	TestDirection_UP    TestDirection = "UP"
-	TestDirection_DOWN  TestDirection = "DOWN"
+	// TODO: Add comment to TestDirection_UP.
+	TestDirection_UP TestDirection = "UP"
+	// TODO: Add comment to TestDirection_DOWN.
+	TestDirection_DOWN TestDirection = "DOWN"
 )

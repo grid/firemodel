@@ -118,11 +118,15 @@ func (m *GoModeler) writeEnum(enum *firemodel.SchemaEnum, sourceCoder firemodel.
 
 	f.Const().DefsFunc(func(g *jen.Group) {
 		for _, val := range enum.Values {
+			enumSymbol := fmt.Sprintf("%s_%s", strcase.ToCamel(enum.Name), strcase.ToScreamingSnake(val.Name))
+
 			if val.Comment != "" {
 				g.Comment(val.Comment)
+			} else {
+				g.Commentf("TODO: Add comment to %s.", enumSymbol)
 			}
 			g.
-				Id(fmt.Sprintf("%s_%s", enumName, strcase.ToScreamingSnake(val.Name))).
+				Id(enumSymbol).
 				Id(enumName).
 				Op("=").
 				Lit(strcase.ToScreamingSnake(val.Name))
