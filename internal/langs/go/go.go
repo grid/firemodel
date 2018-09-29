@@ -5,7 +5,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
-	"github.com/mickeyreiss/firemodel"
+	"github.com/mickeyreiss/firemodel/firemodel"
 	"github.com/mickeyreiss/firemodel/version"
 	"github.com/pkg/errors"
 )

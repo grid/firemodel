@@ -1,9 +1,9 @@
 package firemodel_test
 
 import (
-	_ "github.com/mickeyreiss/firemodel/langs/go"
-	_ "github.com/mickeyreiss/firemodel/langs/ios"
-	_ "github.com/mickeyreiss/firemodel/langs/ts"
+	_ "github.com/mickeyreiss/firemodel/internal/langs/go"
+	_ "github.com/mickeyreiss/firemodel/internal/langs/ios"
+	_ "github.com/mickeyreiss/firemodel/internal/langs/ts"
 
 	"bytes"
 	"io"
@@ -13,14 +13,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mickeyreiss/firemodel"
+	"github.com/mickeyreiss/firemodel/firemodel"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const fixturesRoot = "testfixtures/firemodel"
 
 func TestFiremodelFromSchema(t *testing.T) {
-	file, err := os.Open("firemodel.example.firemodel")
+	file, err := os.Open("../firemodel.example.firemodel")
 	if err != nil {
 		panic(err)
 	}

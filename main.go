@@ -1,28 +1,64 @@
-package cmd
+package main
 
 import (
-	"github.com/spf13/cobra"
-	"os"
-	"github.com/mickeyreiss/firemodel"
-	"github.com/mickeyreiss/firemodel/internal/tempwriter"
 	"fmt"
+	"os"
+
+	// Modeler registrations:
+	_ "github.com/mickeyreiss/firemodel/internal/langs/go"
+	_ "github.com/mickeyreiss/firemodel/internal/langs/ios"
+	_ "github.com/mickeyreiss/firemodel/internal/langs/ts"
+
 	"github.com/go-errors/errors"
+	"github.com/mickeyreiss/firemodel/firemodel"
+	"github.com/mickeyreiss/firemodel/internal/tempwriter"
+	"github.com/mickeyreiss/firemodel/version"
+	"github.com/spf13/cobra"
 )
 
-var compileReq struct {
-	wipe        bool
-	langOutDirs map[string]*string
-}
+var (
+	req struct {
+		schema string
+	}
+	compileReq struct {
+		wipe        bool
+		langOutDirs map[string]*string
+	}
+)
 
-func init() {
+func main() {
+	rootCmd.AddCommand(showCmd)
+	rootCmd.AddCommand(compileCmd)
+
 	compileCmd.PersistentFlags().StringVar(&req.schema, "schema", "schema.firemodel", "Path to firemodel schema.")
 	compileCmd.PersistentFlags().BoolVarP(&compileReq.wipe, "wipe", "f", false, "Confirms it is ok to rm -rf the output directories. (This is generally something you want, but defaults off for safety.)")
 
 	compileReq.langOutDirs = make(map[string]*string)
+
 	for _, modeler := range firemodel.AllModelers() {
 		compileReq.langOutDirs[modeler] = new(string)
 		compileCmd.PersistentFlags().StringVar(compileReq.langOutDirs[modeler], modeler+"_out", "", fmt.Sprintf("%s output directory", modeler))
 	}
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+	}
+}
+
+var rootCmd = &cobra.Command{
+	Use:     "firemodel",
+	Short:   "Type-safe, cross-platform models for Firestore",
+	Version: version.Version,
+}
+
+var showCmd = &cobra.Command{
+	Use:   "show-languages",
+	Short: "Show all available languages.",
+	Run: func(cmd *cobra.Command, args []string) {
+		for _, language := range firemodel.AllModelers() {
+			fmt.Println(language)
+		}
+	},
 }
 
 var compileCmd = &cobra.Command{
@@ -70,6 +106,5 @@ var compileCmd = &cobra.Command{
 		if err := firemodel.Run(schema, config); err != nil {
 			panic(err)
 		}
-
 	},
 }
