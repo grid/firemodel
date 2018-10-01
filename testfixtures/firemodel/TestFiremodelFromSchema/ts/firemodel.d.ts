@@ -187,16 +187,18 @@ export namespace example {
     url?: URL;
     /** TODO: Add documentation to nested. */
     nested?: ITestModel;
-
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;
     /** Record update timestamp. */
     updatedAt?: firestore.Timestamp;
+    /** Sync version */
+    version?: number;
+    /** Deletion tombstone */
+    tombstone?: boolean;
   }
 
   /** TODO: Add documentation to TestTimestamps. */
   export interface ITestTimestamps {
-
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;
     /** Record update timestamp. */
