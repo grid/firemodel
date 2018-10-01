@@ -320,13 +320,13 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   /** TODO: Add documentation to {{.Name}}. */
   {{- end}}
   export enum {{.Name | ToCamel}} {
-    {{- range .Values}}
+		{{- range $idx, $el := .Values}}
     {{- if .Comment}}
     /** {{.Comment}} */
     {{- else}}
     /** TODO: Add documentation to {{.Name}}. */
     {{- end}}
-    {{.Name}} = "{{.Name | ToScreamingSnake}}",
+    {{.Name}} = {{$idx}},
     {{- end}}
   }`
 )

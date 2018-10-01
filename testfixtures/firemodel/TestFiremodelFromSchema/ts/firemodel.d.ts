@@ -136,13 +136,13 @@ export namespace example {
   /** TODO: Add documentation to TestDirection. */
   export enum TestDirection {
     /** TODO: Add documentation to left. */
-    left = "LEFT",
+    left = 0,
     /** TODO: Add documentation to right. */
-    right = "RIGHT",
+    right = 1,
     /** TODO: Add documentation to up. */
-    up = "UP",
+    up = 2,
     /** TODO: Add documentation to down. */
-    down = "DOWN",
+    down = 3,
   }
 
   /** A Test is a test model. */
