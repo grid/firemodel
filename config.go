@@ -94,6 +94,14 @@ func (options SchemaModelOptions) GetAutoTimestamp() bool {
 	return false
 }
 
+func (options SchemaModelOptions) GetAutoVersion() bool {
+	if autoVersion, ok := options.Get("firestore")["autoversion"]; ok && autoVersion != "false" {
+
+		return true
+	}
+	return false
+}
+
 type SchemaEnum struct {
 	Name    string
 	Comment string

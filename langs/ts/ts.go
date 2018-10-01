@@ -303,11 +303,17 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type}};
     {{- end}}
     {{- if .Options | getModelOption "firestore" "autotimestamp" false}}
-
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;
     /** Record update timestamp. */
     updatedAt?: firestore.Timestamp;
+		{{- end}}
+
+    {{- if .Options | getModelOption "firestore" "autoversion" false}}
+    /** Sync version */
+    version?: number;
+    /** Deletion tombstone */
+    tombstone?: boolean;
     {{- end}}
   }`
 

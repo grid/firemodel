@@ -11,6 +11,7 @@ enum TestDirection {
 model TestModel {
   option firestore.path = "users/{user_id}/test_models/{test_model_id}";
   option firestore.autotimestamp = true;
+  option firestore.autoversion = true;
 
   // The name.
   string name;

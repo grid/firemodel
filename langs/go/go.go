@@ -177,6 +177,20 @@ func (m *GoModeler) fields(model *firemodel.SchemaModel) func(g *jen.Group) {
 				Qual("time", "Time").
 				Tag(map[string]string{"firestore": "updatedAt,serverTimestamp"})
 		}
+		// if model.Options.GetAutoVersion() {
+		// 	g.Line()
+		// 	g.Comment("Version number")
+		// 	g.
+		// 		Id("Version").
+		// 		Qual("time", "Time").                                          // What's this?
+		// 		Tag(map[string]string{"firestore": "version,serverTimestamp"}) // ?
+		//
+		// 	g.Comment("Tombstone")
+		// 	g.
+		// 		Id("Tombstone").
+		// 		Qual("time", "Time").                                            // What's this?
+		// 		Tag(map[string]string{"firestore": "tombstone,serverTimestamp"}) // ?
+		// }
 	}
 }
 
