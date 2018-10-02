@@ -6,12 +6,12 @@ package firemodel
 type TestDirection string
 
 const (
-	// TODO: Add comment to TestDirection_left in firemodel schema.
-	TestDirection_left TestDirection = "LEFT"
-	// TODO: Add comment to TestDirection_right in firemodel schema.
-	TestDirection_right TestDirection = "RIGHT"
-	// TODO: Add comment to TestDirection_up in firemodel schema.
-	TestDirection_up TestDirection = "UP"
-	// TODO: Add comment to TestDirection_down in firemodel schema.
-	TestDirection_down TestDirection = "DOWN"
+	// TODO: Add comment to TestDirection_LEFT in firemodel schema.
+	TestDirection_LEFT TestDirection = "LEFT"
+	// TODO: Add comment to TestDirection_RIGHT in firemodel schema.
+	TestDirection_RIGHT TestDirection = "RIGHT"
+	// TODO: Add comment to TestDirection_UP in firemodel schema.
+	TestDirection_UP TestDirection = "UP"
+	// TODO: Add comment to TestDirection_DOWN in firemodel schema.
+	TestDirection_DOWN TestDirection = "DOWN"
 )
