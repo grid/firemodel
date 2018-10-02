@@ -46,6 +46,7 @@ var (
 	)
 	_ = template.Must(tpl.New("model").Parse(model))
 	_ = template.Must(tpl.New("enum").Parse(enum))
+	_ = template.Must(tpl.New("struct").Parse(structTpl))
 )
 
 func interfaceName(sym string) string {
@@ -82,7 +83,7 @@ func toTypescriptType(firetype firemodel.SchemaFieldType) string {
 		} else {
 			return "any[]"
 		}
-	case *firemodel.Model:
+	case *firemodel.Struct:
 		return interfaceName(firetype.T.Name)
 	case *firemodel.File:
 		return "IFile"
@@ -271,6 +272,9 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   {{- range .Enums -}}
   {{- template "enum" .}}
   {{- end}}
+  {{- range .Structs -}}
+  {{- template "struct" .}}
+  {{- end}}
   {{- range .Models -}}
   {{- template "model" .}}
   {{- end}}
@@ -282,23 +286,23 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   /** {{.Comment}} */
   {{- else}}
 
-  /** TODO: Add documentation to {{.Name}}. */
+  /** TODO: Add documentation to {{.Name}} in firemodel schema. */
   {{- end}}
   export interface {{.Name | interfaceName | ToCamel}} {
     {{- range .Collections}}
     {{- if .Comment}}
     /** {{.Comment}} */
     {{- else }}
-    /** TODO: Add documentation to {{.Name}}. */
+    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
-    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type.T.Name | interfaceName | ToCamel}}>;
+    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type.Name | interfaceName | ToCamel}}>;
     {{- end}}
 
     {{- range .Fields}}
     {{- if .Comment}}
     /** {{.Comment}} */
     {{- else }}
-    /** TODO: Add documentation to {{.Name}}. */
+    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
     {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type}};
     {{- end}}
@@ -317,22 +321,41 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- end}}
   }`
 
+	structTpl = `
+  {{- if .Comment}}
+
+  /** {{.Comment}} */
+  {{- else}}
+
+  /** TODO: Add documentation to {{.Name}} in firemodel schema. */
+  {{- end}}
+  export interface {{.Name | interfaceName | ToCamel}} {
+    {{- range .Fields}}
+    {{- if .Comment}}
+    /** {{.Comment}} */
+    {{- else }}
+    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
+    {{- end}}
+    {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type}};
+    {{- end}}
+  }`
+
 	enum = `
   {{- if .Comment}}
 
   /** {{.Comment}} */
   {{- else}}
 
-  /** TODO: Add documentation to {{.Name}}. */
+  /** TODO: Add documentation to {{.Name}} in firemodel schema. */
   {{- end}}
   export enum {{.Name | ToCamel}} {
     {{- range .Values}}
     {{- if .Comment}}
     /** {{.Comment}} */
     {{- else}}
-    /** TODO: Add documentation to {{.Name}}. */
+    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
-    {{.Name}} = "{{.Name | ToScreamingSnake}}",
+    {{.Name}} = '{{.Name | ToScreamingSnake}}',
     {{- end}}
   }`
 )

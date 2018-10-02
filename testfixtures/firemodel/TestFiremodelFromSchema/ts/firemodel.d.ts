@@ -133,21 +133,29 @@ export namespace example {
     name: string;
   }
 
-  /** TODO: Add documentation to TestDirection. */
+  /** TODO: Add documentation to TestDirection in firemodel schema. */
   export enum TestDirection {
-    /** TODO: Add documentation to left. */
-    left = "LEFT",
-    /** TODO: Add documentation to right. */
-    right = "RIGHT",
-    /** TODO: Add documentation to up. */
-    up = "UP",
-    /** TODO: Add documentation to down. */
-    down = "DOWN",
+    /** TODO: Add documentation to left in firemodel schema. */
+    left = 'LEFT',
+    /** TODO: Add documentation to right in firemodel schema. */
+    right = 'RIGHT',
+    /** TODO: Add documentation to up in firemodel schema. */
+    up = 'UP',
+    /** TODO: Add documentation to down in firemodel schema. */
+    down = 'DOWN',
+  }
+
+  /** TODO: Add documentation to TestStruct in firemodel schema. */
+  export interface ITestStruct {
+    /** TODO: Add documentation to where in firemodel schema. */
+    where?: string;
+    /** TODO: Add documentation to how_much in firemodel schema. */
+    howMuch?: number;
   }
 
   /** A Test is a test model. */
   export interface ITestModel {
-    /** TODO: Add documentation to nested_collection. */
+    /** TODO: Add documentation to nested_collection in firemodel schema. */
     nestedCollection: CollectionReference<ITestModel>;
     /** The name. */
     name?: string;
@@ -159,34 +167,35 @@ export namespace example {
     birthdate?: firestore.Timestamp;
     /** True if it is good. */
     isGood?: boolean;
-    /** TODO: Add documentation to data. */
+    /** TODO: Add documentation to data in firemodel schema. */
     data?: firestore.Blob;
-    /** TODO: Add documentation to friend. */
+    /** TODO: Add documentation to friend in firemodel schema. */
     friend?: DocumentReference<ITestModel>;
-    /** TODO: Add documentation to location. */
+    /** TODO: Add documentation to location in firemodel schema. */
     location?: firestore.GeoPoint;
-    /** TODO: Add documentation to colors. */
+    /** TODO: Add documentation to colors in firemodel schema. */
     colors?: string[];
-    /** TODO: Add documentation to directions. */
+    /** TODO: Add documentation to directions in firemodel schema. */
     directions?: TestDirection[];
-    /** TODO: Add documentation to models. */
-    models?: ITestModel[];
-    /** TODO: Add documentation to refs. */
+    /** TODO: Add documentation to models in firemodel schema. */
+    models?: ITestStruct[];
+    /** TODO: Add documentation to refs in firemodel schema. */
     refs?: firestore.DocumentReference[];
-    /** TODO: Add documentation to model_refs. */
+    /** TODO: Add documentation to model_refs in firemodel schema. */
     modelRefs?: DocumentReference<ITestTimestamps>[];
-    /** TODO: Add documentation to meta. */
+    /** TODO: Add documentation to meta in firemodel schema. */
     meta?: { [key: string]: any; };
-    /** TODO: Add documentation to meta_strs. */
+    /** TODO: Add documentation to meta_strs in firemodel schema. */
     metaStrs?: { [key: string]: string; };
-    /** TODO: Add documentation to direction. */
+    /** TODO: Add documentation to direction in firemodel schema. */
     direction?: TestDirection;
-    /** TODO: Add documentation to test_file. */
+    /** TODO: Add documentation to test_file in firemodel schema. */
     testFile?: IFile;
-    /** TODO: Add documentation to url. */
+    /** TODO: Add documentation to url in firemodel schema. */
     url?: URL;
-    /** TODO: Add documentation to nested. */
-    nested?: ITestModel;
+    /** TODO: Add documentation to nested in firemodel schema. */
+    nested?: ITestStruct;
+
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;
     /** Record update timestamp. */
@@ -197,7 +206,7 @@ export namespace example {
     tombstone?: boolean;
   }
 
-  /** TODO: Add documentation to TestTimestamps. */
+  /** TODO: Add documentation to TestTimestamps in firemodel schema. */
   export interface ITestTimestamps {
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;

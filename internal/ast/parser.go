@@ -64,11 +64,17 @@ type ASTElement struct {
 	Model   *ASTModel  `parser:"  'model' @@"`
 	Enum    *ASTEnum   `parser:"| 'enum' @@"`
 	Option  *ASTOption `parser:"| 'option' @@"`
+	Struct  *ASTStruct `parser:"| 'struct' @@"`
 }
 
 type ASTModel struct {
 	Identifier ASTIdentifier      `parser:"@Ident"`
 	Elements   []*ASTModelElement `parser:"'{' { @@ } '}'"`
+}
+
+type ASTStruct struct {
+	Identifier ASTIdentifier       `parser:"@Ident"`
+	Elements   []*ASTStructElement `parser:"'{' { @@ } '}'"`
 }
 
 type ASTIdentifier string
@@ -98,6 +104,10 @@ func (id ASTIdentifier) IsReserved() bool {
 		return false
 	}
 	return true
+}
+
+type ASTStructElement struct {
+	Field *ASTField `parser:"@@"`
 }
 
 type ASTModelElement struct {

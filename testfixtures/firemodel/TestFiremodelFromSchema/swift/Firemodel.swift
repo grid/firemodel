@@ -3,15 +3,15 @@
 import Foundation
 import Pring
 
-// TODO: Add documentation to TestDirection.
+// TODO: Add documentation to TestDirection in firemodel schema.
 @objc enum TestDirection: Int {
-    // TODO: Add documentation to left.
+    // TODO: Add documentation to Left in firemodel schema.
     case left
-    // TODO: Add documentation to right.
+    // TODO: Add documentation to Right in firemodel schema.
     case right
-    // TODO: Add documentation to up.
+    // TODO: Add documentation to Up in firemodel schema.
     case up
-    // TODO: Add documentation to down.
+    // TODO: Add documentation to Down in firemodel schema.
     case down
 }
 
@@ -50,11 +50,19 @@ extension TestDirection: CustomDebugStringConvertible {
     var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
 
-// A Test is a test model.
-@objcMembers class TestModel: Pring.Object {static var userId: String = ""
-static var testModelId: String = ""
-  override class var path: String { return "users/\(userId)/test_models/\(testModelId)" }
+// TODO: Add documentation to TestStruct in firemodel schema.
+class TestStruct: Pring.Object {
+  // TODO: Add documentation to where in firemodel schema.
+  var where: String?
+  // TODO: Add documentation to how_much in firemodel schema.
+  var howMuch: Int = 0
+}
 
+// A Test is a test model.
+@objcMembers class TestModel: Pring.Object {
+    static var userId: String = ""
+static var testModelId: String = ""
+    override class var path: String { return "users/\(userId)/test_models/\(testModelId)" }
     // The name.
     dynamic var name: String?
     // The age.
@@ -62,44 +70,46 @@ static var testModelId: String = ""
     // The number pi.
     dynamic var pi: Float = 0.0
     // The birth date.
-    dynamic var birthdate: Date = Date()
+    dynamic var birthdate: Date?
     // True if it is good.
     dynamic var isGood: Bool = false
-    // TODO: Add documentation to data.
+    // TODO: Add documentation to data in firemodel schema.
     dynamic var data: Data?
-    // TODO: Add documentation to friend.
+    // TODO: Add documentation to friend in firemodel schema.
     dynamic var friend: Pring.Reference<TestModel> = .init()
-    // TODO: Add documentation to location.
+    // TODO: Add documentation to location in firemodel schema.
     dynamic var location: Pring.GeoPoint?
-    // TODO: Add documentation to colors.
+    // TODO: Add documentation to colors in firemodel schema.
     dynamic var colors: [String]?
-    // TODO: Add documentation to directions.
+    // TODO: Add documentation to directions in firemodel schema.
     dynamic var directions: [TestDirection]?
-    // TODO: Add documentation to models.
-    dynamic var models: [TestModel]?
-    // TODO: Add documentation to refs.
+    // TODO: Add documentation to models in firemodel schema.
+    dynamic var models: [TestStruct]?
+    // TODO: Add documentation to refs in firemodel schema.
     dynamic var refs: [Pring.AnyReference]?
-    // TODO: Add documentation to modelRefs.
+    // TODO: Add documentation to modelRefs in firemodel schema.
     dynamic var modelRefs: [Pring.Reference<TestTimestamps>]?
-    // TODO: Add documentation to meta.
-    dynamic var meta: [AnyHashable: Any] = [:]
-    // TODO: Add documentation to metaStrs.
+    // TODO: Add documentation to meta in firemodel schema.
+    dynamic var meta: [String: Any] = [:]
+    // TODO: Add documentation to metaStrs in firemodel schema.
     dynamic var metaStrs: [String: String] = [:]
-    // TODO: Add documentation to direction.
+    // TODO: Add documentation to direction in firemodel schema.
     dynamic var direction: TestDirection?
-    // TODO: Add documentation to testFile.
+    // TODO: Add documentation to testFile in firemodel schema.
     dynamic var testFile: Pring.File?
-    // TODO: Add documentation to url.
+    // TODO: Add documentation to url in firemodel schema.
     dynamic var url: URL?
-    // TODO: Add documentation to nested.
-    dynamic var nested: TestModel?
-    // TODO: Add documentation to nested_collection.
+    // TODO: Add documentation to nested in firemodel schema.
+    dynamic var nested: TestStruct?
+    // TODO: Add documentation to nested_collection in firemodel schema.
     dynamic var nestedCollection: Pring.NestedCollection<TestModel> = []
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
         case "direction":
             return self.direction?.firestoreValue
+        case "nested":
+            return self.nested?.rawValue
         default:
             break
         }
@@ -109,7 +119,12 @@ static var testModelId: String = ""
     override func decode(_ key: String, value: Any?) -> Bool {
         switch key {
         case "direction":
-            self.direction = Direction(firestoreValue: value)
+            self.direction = TestDirection(firestoreValue: value)
+        case "nested":
+          if let value = value as? [String: Any] {
+            self.nested = TestStruct(id: self.id, value: value)
+            return true
+          }
         default:
             break
         }
@@ -117,8 +132,8 @@ static var testModelId: String = ""
     }
 }
 
-// TODO: Add documentation to TestTimestamps.
-@objcMembers class TestTimestamps: Pring.Object {static var testTimestampsId: String = ""
-  override class var path: String { return "timestamps/\(testTimestampsId)" }
-
+// TODO: Add documentation to TestTimestamps in firemodel schema.
+@objcMembers class TestTimestamps: Pring.Object {
+    static var testTimestampsId: String = ""
+    override class var path: String { return "timestamps/\(testTimestampsId)" }
 }

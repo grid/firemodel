@@ -2,7 +2,6 @@ package ios
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"text/template"
 
@@ -35,24 +34,60 @@ var (
 	tpl = template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"firemodelVersion":      func() string { return version.Version },
-			"toSwiftType":           toSwiftType,
-			"toScreamingSnake":      strcase.ToScreamingSnake,
-			"toCamel":               strcase.ToCamel,
-			"toLowerCamel":          strcase.ToLowerCamel,
-			"filterFieldsEnumsOnly": filterFieldsEnumsOnly,
-			"firestorePath":         firestorePath,
+			"firemodelVersion":         func() string { return version.Version },
+			"toSwiftType":              toSwiftType,
+			"toScreamingSnake":         strcase.ToScreamingSnake,
+			"toCamel":                  strcase.ToCamel,
+			"toLowerCamel":             strcase.ToLowerCamel,
+			"filterFieldsEnumsOnly":    filterFieldsEnumsOnly,
+			"filterFieldsNonEnumsOnly": filterFieldsNonEnumsOnly,
+			"filterFieldsStructsOnly":  filterFieldsStructsOnly,
+			"hasFieldsOrStructs":       hasFieldsOrStructs,
+			"firestorePath":            firestorePath,
 		}).
 		Parse(file),
 	)
 	_ = template.Must(tpl.New("model").Parse(model))
 	_ = template.Must(tpl.New("enum").Parse(enum))
+	_ = template.Must(tpl.New("struct").Parse(structTpl))
 )
+
+func hasFieldsOrStructs(in []*firemodel.SchemaField) bool {
+	if len(filterFieldsStructsOnly(in)) > 0 {
+		return true
+	}
+	if len(filterFieldsStructsOnly(in)) > 0 {
+		return true
+	}
+	return false
+}
 
 func filterFieldsEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
 	var out []*firemodel.SchemaField
 	for _, i := range in {
 		if _, ok := i.Type.(*firemodel.Enum); !ok {
+			continue
+		}
+		out = append(out, i)
+	}
+	return out
+}
+
+func filterFieldsNonEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
+	var out []*firemodel.SchemaField
+	for _, i := range in {
+		if _, ok := i.Type.(*firemodel.Enum); ok {
+			continue
+		}
+		out = append(out, i)
+	}
+	return out
+}
+
+func filterFieldsStructsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
+	var out []*firemodel.SchemaField
+	for _, i := range in {
+		if _, ok := i.Type.(*firemodel.Struct); !ok {
 			continue
 		}
 		out = append(out, i)
@@ -69,7 +104,11 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 	case *firemodel.Double:
 		return "Float = 0.0"
 	case *firemodel.Timestamp:
-		return "Date = Date()"
+		if root {
+			return "Date?"
+		} else {
+			return "Date"
+		}
 	case *firemodel.URL:
 		if root {
 			return "URL?"
@@ -115,7 +154,7 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 		} else {
 			return "Pring.File"
 		}
-	case *firemodel.Model:
+	case *firemodel.Struct:
 		if root {
 			return fmt.Sprintf("%s?", firetype.T.Name)
 		} else {
@@ -131,7 +170,7 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 		if firetype.T != nil {
 			return fmt.Sprintf("[String: %s] = [:]", toSwiftType(false, firetype.T))
 		} else {
-			return "[AnyHashable: Any] = [:]"
+			return "[String: Any] = [:]"
 		}
 	default:
 		err := errors.Errorf("firemodel/ios: unknown type %s", firetype)
@@ -146,7 +185,7 @@ func firestorePath(model firemodel.SchemaModel) string {
 	}
 
 	if len(args) == 0 {
-		log.Printf("ios: warning: no firestore path for %s", model.Name)
+		fmt.Printf("warning: no firestore path for %s", model.Name)
 		return ""
 	}
 
@@ -162,7 +201,7 @@ func firestorePath(model firemodel.SchemaModel) string {
 	}
 	path := fmt.Sprintf(format, argsWrappedInInterpolationParens...)
 
-	fmt.Fprintf(&out, "  override class var path: String { return \"%s\" }\n", path)
+	fmt.Fprintf(&out, "    override class var path: String { return \"%s\" }", path)
 
 	return out.String()
 }
@@ -175,6 +214,9 @@ import Pring
 {{range .Enums -}}
 {{template "enum" .}}
 {{- end}}
+{{range .Structs -}}
+{{template "struct" .}}
+{{- end}}
 {{- range .Models -}}
 {{- template "model" .}}
 {{- end -}}`
@@ -183,15 +225,15 @@ import Pring
 {{- if .Comment}}
 // {{.Comment}}
 {{- else}}
-// TODO: Add documentation to {{.Name | toCamel}}.
+// TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objcMembers class {{.Name | toCamel}}: Pring.Object {
-    {{- . | firestorePath -}}
+    {{. | firestorePath}}
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}
     {{- else }}
-    // TODO: Add documentation to {{.Name | toLowerCamel}}.
+    // TODO: Add documentation to {{.Name | toLowerCamel}} in firemodel schema.
     {{- end}}
     dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
     {{- end}}
@@ -199,18 +241,22 @@ import Pring
     {{- if .Comment}}
     // {{.Comment}}
     {{- else }}
-    // TODO: Add documentation to {{.Name}}.
+    // TODO: Add documentation to {{.Name}} in firemodel schema.
     {{- end}}
-    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.T.Name}}> = []
+    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
     {{- end}}
-    {{- if .Fields | filterFieldsEnumsOnly}}
+    {{- if .Fields | hasFieldsOrStructs }}
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
-        {{range .Fields | filterFieldsEnumsOnly -}}
+        {{- range .Fields | filterFieldsEnumsOnly}}
         case "{{.Name | toLowerCamel}}":
             return self.{{.Name | toLowerCamel}}?.firestoreValue
-            {{- end}}
+        {{- end}}
+        {{- range .Fields | filterFieldsStructsOnly}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.rawValue
+        {{- end}}
         default:
             break
         }
@@ -219,10 +265,17 @@ import Pring
 
     override func decode(_ key: String, value: Any?) -> Bool {
         switch key {
-        {{range .Fields | filterFieldsEnumsOnly -}}
+        {{- range .Fields | filterFieldsEnumsOnly}}
         case "{{.Name | toLowerCamel}}":
-            self.{{.Name | toLowerCamel}} = {{.Name | toCamel }}(firestoreValue: value)
-            {{- end}}
+            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false }}(firestoreValue: value)
+        {{- end}}
+        {{- range .Fields | filterFieldsStructsOnly}}
+        case "{{.Name | toLowerCamel}}":
+          if let value = value as? [String: Any] {
+            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false}}(id: self.id, value: value)
+            return true
+          }
+          {{- end}}
         default:
             break
         }
@@ -235,20 +288,20 @@ import Pring
 {{- if .Comment}}
 // {{.Comment}}
 {{- else}}
-// TODO: Add documentation to {{.Name}}.
+// TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objc enum {{.Name | toCamel }}: Int {
     {{- range .Values}}
     {{- if .Comment}}
     // {{.Comment}}
     {{- else}}
-    // TODO: Add documentation to {{.Name}}.
+    // TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
     {{- end}}
     case {{.Name | toLowerCamel}}
     {{- end}}
 }
 
-extension {{.Name}}: CustomDebugStringConvertible {
+extension {{.Name | toCamel}}: CustomDebugStringConvertible {
     init?(firestoreValue value: Any?) {
         guard let value = value as? String else {
             return nil
@@ -273,6 +326,23 @@ extension {{.Name}}: CustomDebugStringConvertible {
     }
 
     var debugDescription: String { return firestoreValue ?? "<INVALID>" }
+}`
+
+	structTpl = `
+{{- if .Comment}}
+// {{.Comment}}
+{{- else}}
+// TODO: Add documentation to {{.Name}} in firemodel schema.
+{{- end}}
+class {{.Name | toCamel }}: Pring.Object {
+  {{- range .Fields}}
+  {{- if .Comment}}
+  // {{.Comment}}
+  {{- else}}
+  // TODO: Add documentation to {{.Name}} in firemodel schema.
+  {{- end}}
+  var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
+  {{- end}}
 }
 `
 )
