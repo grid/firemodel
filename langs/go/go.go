@@ -217,12 +217,14 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 			g.Comment("Version number.")
 			g.
 				Id("Version").
-				Tag(map[string]string{"firestore": "version,int64"})
+				Qual("", "int64").
+				Tag(map[string]string{"firestore": "version"})
 
 			g.Comment("Deletion tombstone.")
 			g.
 				Id("Tombstone").
-				Tag(map[string]string{"firestore": "tombstone,boolean"})
+				Qual("", "bool").
+				Tag(map[string]string{"firestore": "tombstone"})
 		}
 	}
 }
