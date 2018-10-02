@@ -136,13 +136,13 @@ export namespace example {
   /** TODO: Add documentation to TestDirection in firemodel schema. */
   export enum TestDirection {
     /** TODO: Add documentation to left in firemodel schema. */
-    left = "LEFT",
+    left = 'LEFT',
     /** TODO: Add documentation to right in firemodel schema. */
-    right = "RIGHT",
+    right = 'RIGHT',
     /** TODO: Add documentation to up in firemodel schema. */
-    up = "UP",
+    up = 'UP',
     /** TODO: Add documentation to down in firemodel schema. */
-    down = "DOWN",
+    down = 'DOWN',
   }
 
   /** TODO: Add documentation to TestStruct in firemodel schema. */

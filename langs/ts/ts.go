@@ -349,7 +349,7 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- else}}
     /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
-    {{.Name}} = "{{.Name | ToScreamingSnake}}",
+    {{.Name}} = '{{.Name | ToScreamingSnake}}',
     {{- end}}
   }`
 )
