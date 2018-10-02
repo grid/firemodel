@@ -195,7 +195,6 @@ export namespace example {
     url?: URL;
     /** TODO: Add documentation to nested in firemodel schema. */
     nested?: ITestStruct;
-
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;
     /** Record update timestamp. */

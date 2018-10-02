@@ -57,6 +57,11 @@ type TestModel struct {
 	CreatedAt time.Time `firestore:"createdAt,serverTimestamp"`
 	// Update timestamp.
 	UpdatedAt time.Time `firestore:"updatedAt,serverTimestamp"`
+
+	// Version number.
+	Version `firestore:"version,int64"`
+	// Deletion tombstone.
+	Tombstone `firestore:"tombstone,boolean"`
 }
 
 // TestModelPath returns the path to a particular TestModel in Firestore.
