@@ -29,19 +29,31 @@ Define a schema for all of the document types you work with.
 ```
 // An Aircraft is a machine that flies.
 model Aircraft {
-  // The airplane's official registration. 
+  // The airplane's official registration.
   string tailnumber;
-  // The plane's current altitude. 
+  // The plane's current altitude.
   integer altitude;
   // The airplane's current autopilot setting.
   AutoPilotMode ap;
+  // The state of the door on the left.
+  Door left_door;
+  // The state of the door on the right.
+  Door right_door;
 }
 
 enum AutoPilotMode {
   manual,
   heading,
   alt,
-  fullAuto,
+  full_auto,
+}
+
+// Door is compound state.
+// (Saved as an embedded object/map/dict in firestore.)
+struct Door {
+  bool is_closed;
+  bool is_armed;
+  bool is_secured;
 }
 ```
 
@@ -53,8 +65,12 @@ You can define as many models and enums as you'd like. See the [example](firemod
 
 Open up a terminal, and generate your models:
 
-    firemodel compile --go_out=./gen/go --ts_out=./.gen/ts --ios_out=./.gen/ios --schema=schema.firemodel
-    
+    firemodel compile \
+        --schema=schema.firemodel \
+        --go_out=./gen/go \
+        --ts_out=./.gen/ts \
+        --ios_out=./.gen/ios
+
 This generated some Swift, some typescript and some go code. You'll find it in `.gen` directory, as requested. You can now incorporate these generated files into your project.
 
 This is the standard firemodel workflow. Whenever you need to update your data model, you'll update the schema and regenerate the models. 
@@ -101,8 +117,8 @@ You can also define Enums:
 
 ```
 enum TodoState {
-  TODO,
-  DONE,
+  todo,
+  done,
 }
 ```
 
@@ -114,21 +130,26 @@ model Todo {
 }
 ```
 
-Enums are not real. They end up getting represented in each language, and in firestore itself as strings.
+Enums are not real. They end up as strings in firestore.
 
-You can also embed a model type:
+You can also make a struct type and embed it:
 
 ```
-model Child {}
+struct Amount {
+  integer units;
+  string currency;
+}
 
-model Parent {
-  Child daughter;
+model Product {
+  Amount price;
 }
 ```
 
-Embedded models are not real. They end up getting stored as a `Map` in firestore.
+Structs are not real. They end up getting stored as a `Map` in firestore.
 
-`collection` provides a nested collection. Collections are not real; they are not even fields. Collections do not get stored directly in firestore.
+`collection` provides a nested collection. Collections are somewhat real; they
+are not actually fields, but, rather, they provide access to the first-class
+feature in firestore.
 
 ### Generics
 
@@ -148,7 +169,11 @@ model Thing {
 }
 ```
 
-Generic generic types are not currently supported: `array<reference<T>>`.
+Generic generic types are supported:
+
+    model Thing {
+      array<reference<T>>
+    }
 
 ### Options
 
@@ -173,4 +198,3 @@ Here are the currently supported options:
 | `ts.namespace` | The TypeScript namespace for generated interfaces. | `option ts.namespace = "SomeApp";` |
 | `go.package` | The name of the go package for generated code. | `option go.package = "myapp";` |
 
- 
