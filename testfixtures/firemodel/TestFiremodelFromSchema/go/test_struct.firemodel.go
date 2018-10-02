@@ -2,7 +2,7 @@
 
 package firemodel
 
-// TODO: Add comment to TestStruct
+// TODO: Add comment to TestStruct in firemodel schema.
 type TestStruct struct {
 	// TODO: Add comment to TestStruct.where.
 	Where string `firestore:"where"`

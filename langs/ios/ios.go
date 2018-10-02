@@ -225,7 +225,7 @@ import Pring
 {{- if .Comment}}
 // {{.Comment}}
 {{- else}}
-// TODO: Add documentation to {{.Name | toCamel}}.
+// TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objcMembers class {{.Name | toCamel}}: Pring.Object {
     {{. | firestorePath}}
@@ -233,7 +233,7 @@ import Pring
     {{- if .Comment}}
     // {{.Comment}}
     {{- else }}
-    // TODO: Add documentation to {{.Name | toLowerCamel}}.
+    // TODO: Add documentation to {{.Name | toLowerCamel}} in firemodel schema.
     {{- end}}
     dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
     {{- end}}
@@ -241,7 +241,7 @@ import Pring
     {{- if .Comment}}
     // {{.Comment}}
     {{- else }}
-    // TODO: Add documentation to {{.Name}}.
+    // TODO: Add documentation to {{.Name}} in firemodel schema.
     {{- end}}
     dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
     {{- end}}
@@ -288,14 +288,14 @@ import Pring
 {{- if .Comment}}
 // {{.Comment}}
 {{- else}}
-// TODO: Add documentation to {{.Name | toCamel}}.
+// TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objc enum {{.Name | toCamel }}: Int {
     {{- range .Values}}
     {{- if .Comment}}
     // {{.Comment}}
     {{- else}}
-    // TODO: Add documentation to {{.Name | toCamel}}.
+    // TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
     {{- end}}
     case {{.Name | toLowerCamel}}
     {{- end}}
@@ -332,14 +332,14 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
 {{- if .Comment}}
 // {{.Comment}}
 {{- else}}
-// TODO: Add documentation to {{.Name}}.
+// TODO: Add documentation to {{.Name}} in firemodel schema.
 {{- end}}
 class {{.Name | toCamel }}: Pring.Object {
   {{- range .Fields}}
   {{- if .Comment}}
   // {{.Comment}}
   {{- else}}
-  // TODO: Add documentation to {{.Name}}.
+  // TODO: Add documentation to {{.Name}} in firemodel schema.
   {{- end}}
   var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
   {{- end}}

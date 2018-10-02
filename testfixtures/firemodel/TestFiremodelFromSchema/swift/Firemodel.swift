@@ -3,15 +3,15 @@
 import Foundation
 import Pring
 
-// TODO: Add documentation to TestDirection.
+// TODO: Add documentation to TestDirection in firemodel schema.
 @objc enum TestDirection: Int {
-    // TODO: Add documentation to Left.
+    // TODO: Add documentation to Left in firemodel schema.
     case left
-    // TODO: Add documentation to Right.
+    // TODO: Add documentation to Right in firemodel schema.
     case right
-    // TODO: Add documentation to Up.
+    // TODO: Add documentation to Up in firemodel schema.
     case up
-    // TODO: Add documentation to Down.
+    // TODO: Add documentation to Down in firemodel schema.
     case down
 }
 
@@ -50,11 +50,11 @@ extension TestDirection: CustomDebugStringConvertible {
     var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
 
-// TODO: Add documentation to TestStruct.
+// TODO: Add documentation to TestStruct in firemodel schema.
 class TestStruct: Pring.Object {
-  // TODO: Add documentation to where.
+  // TODO: Add documentation to where in firemodel schema.
   var where: String?
-  // TODO: Add documentation to how_much.
+  // TODO: Add documentation to how_much in firemodel schema.
   var howMuch: Int = 0
 }
 
@@ -73,35 +73,35 @@ static var testModelId: String = ""
     dynamic var birthdate: Date?
     // True if it is good.
     dynamic var isGood: Bool = false
-    // TODO: Add documentation to data.
+    // TODO: Add documentation to data in firemodel schema.
     dynamic var data: Data?
-    // TODO: Add documentation to friend.
+    // TODO: Add documentation to friend in firemodel schema.
     dynamic var friend: Pring.Reference<TestModel> = .init()
-    // TODO: Add documentation to location.
+    // TODO: Add documentation to location in firemodel schema.
     dynamic var location: Pring.GeoPoint?
-    // TODO: Add documentation to colors.
+    // TODO: Add documentation to colors in firemodel schema.
     dynamic var colors: [String]?
-    // TODO: Add documentation to directions.
+    // TODO: Add documentation to directions in firemodel schema.
     dynamic var directions: [TestDirection]?
-    // TODO: Add documentation to models.
+    // TODO: Add documentation to models in firemodel schema.
     dynamic var models: [TestStruct]?
-    // TODO: Add documentation to refs.
+    // TODO: Add documentation to refs in firemodel schema.
     dynamic var refs: [Pring.AnyReference]?
-    // TODO: Add documentation to modelRefs.
+    // TODO: Add documentation to modelRefs in firemodel schema.
     dynamic var modelRefs: [Pring.Reference<TestTimestamps>]?
-    // TODO: Add documentation to meta.
+    // TODO: Add documentation to meta in firemodel schema.
     dynamic var meta: [String: Any] = [:]
-    // TODO: Add documentation to metaStrs.
+    // TODO: Add documentation to metaStrs in firemodel schema.
     dynamic var metaStrs: [String: String] = [:]
-    // TODO: Add documentation to direction.
+    // TODO: Add documentation to direction in firemodel schema.
     dynamic var direction: TestDirection?
-    // TODO: Add documentation to testFile.
+    // TODO: Add documentation to testFile in firemodel schema.
     dynamic var testFile: Pring.File?
-    // TODO: Add documentation to url.
+    // TODO: Add documentation to url in firemodel schema.
     dynamic var url: URL?
-    // TODO: Add documentation to nested.
+    // TODO: Add documentation to nested in firemodel schema.
     dynamic var nested: TestStruct?
-    // TODO: Add documentation to nested_collection.
+    // TODO: Add documentation to nested_collection in firemodel schema.
     dynamic var nestedCollection: Pring.NestedCollection<TestModel> = []
 
     override func encode(_ key: String, value: Any?) -> Any? {
@@ -132,7 +132,7 @@ static var testModelId: String = ""
     }
 }
 
-// TODO: Add documentation to TestTimestamps.
+// TODO: Add documentation to TestTimestamps in firemodel schema.
 @objcMembers class TestTimestamps: Pring.Object {
     static var testTimestampsId: String = ""
     override class var path: String { return "timestamps/\(testTimestampsId)" }
