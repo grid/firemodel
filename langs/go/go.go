@@ -68,7 +68,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 	f.
 		Type().
 		Id(model.Name).
-		StructFunc(m.fields(model.Name, model.Fields, model.Options.GetAutoTimestamp()))
+		StructFunc(m.fields(model.Name, model.Fields, model.Options.GetAutoTimestamp(), model.Options.GetAutoVersion()))
 
 	if format, args, err := model.Options.GetFirestorePath(); format != "" {
 		f.
@@ -163,7 +163,7 @@ func (m *GoModeler) writeStruct(structType *firemodel.SchemaStruct, sourceCoder 
 	} else {
 		f.Comment(structType.Comment)
 	}
-	f.Type().Id(structName).StructFunc(m.fields(structName, structType.Fields, false))
+	f.Type().Id(structName).StructFunc(m.fields(structName, structType.Fields, false, false))
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(structType.Name), fileExtension))
 	if err != nil {
@@ -185,7 +185,7 @@ func (m *GoModeler) packageName() string {
 	return m.pkg
 }
 
-func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, addTimestampFields bool) func(g *jen.Group) {
+func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, addTimestampFields bool, addVersionFields bool) func(g *jen.Group) {
 	return func(g *jen.Group) {
 		for _, field := range fields {
 			if field.Comment == "" {
@@ -212,20 +212,18 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 				Qual("time", "Time").
 				Tag(map[string]string{"firestore": "updatedAt,serverTimestamp"})
 		}
-		// if model.Options.GetAutoVersion() {
-		// 	g.Line()
-		// 	g.Comment("Version number")
-		// 	g.
-		// 		Id("Version").
-		// 		Qual("time", "Time").                                          // What's this?
-		// 		Tag(map[string]string{"firestore": "version,serverTimestamp"}) // ?
-		//
-		// 	g.Comment("Tombstone")
-		// 	g.
-		// 		Id("Tombstone").
-		// 		Qual("time", "Time").                                            // What's this?
-		// 		Tag(map[string]string{"firestore": "tombstone,serverTimestamp"}) // ?
-		// }
+		if addVersionFields {
+			g.Line()
+			g.Comment("Version number.")
+			g.
+				Id("Version").
+				Tag(map[string]string{"firestore": "version,int64"})
+
+			g.Comment("Deletion tombstone.")
+			g.
+				Id("Tombstone").
+				Tag(map[string]string{"firestore": "tombstone,boolean"})
+		}
 	}
 }
 
