@@ -185,7 +185,7 @@ func firestorePath(model firemodel.SchemaModel) string {
 	}
 
 	if len(args) == 0 {
-		fmt.Printf("warning: no firestore path for %s", model.Name)
+		fmt.Printf("warning: no firestore path for %s\n", model.Name)
 		return ""
 	}
 
