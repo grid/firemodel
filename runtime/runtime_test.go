@@ -98,7 +98,7 @@ func TestURL_Set(t *testing.T) {
 				tt.raw.Set(tt.args)
 				got := tt.raw
 				if !reflect.DeepEqual(*got, *tt.exp) {
-					t.Errorf("URL.Set() = %v, want %v", *got, * tt.exp)
+					t.Errorf("URL.Set() = %v, want %v", *got, *tt.exp)
 				}
 			}
 		})
