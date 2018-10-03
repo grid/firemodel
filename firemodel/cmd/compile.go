@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"os"
-	"github.com/mickeyreiss/firemodel"
-	"github.com/mickeyreiss/firemodel/internal/tempwriter"
 	"fmt"
 	"github.com/go-errors/errors"
+	"github.com/mickeyreiss/firemodel"
+	"github.com/mickeyreiss/firemodel/internal/tempwriter"
+	"github.com/spf13/cobra"
+	"os"
 )
 
 var compileReq struct {
