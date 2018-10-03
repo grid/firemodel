@@ -51,7 +51,7 @@ extension TestDirection: CustomDebugStringConvertible {
 }
 
 // TODO: Add documentation to TestStruct in firemodel schema.
-class TestStruct: Pring.Object {
+@objcMembers class TestStruct: Pring.Object {
   // TODO: Add documentation to where in firemodel schema.
   var where: String?
   // TODO: Add documentation to how_much in firemodel schema.

@@ -334,7 +334,7 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
 {{- else}}
 // TODO: Add documentation to {{.Name}} in firemodel schema.
 {{- end}}
-class {{.Name | toCamel }}: Pring.Object {
+@objcMembers class {{.Name | toCamel }}: Pring.Object {
   {{- range .Fields}}
   {{- if .Comment}}
   // {{.Comment}}
