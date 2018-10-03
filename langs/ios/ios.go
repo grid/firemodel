@@ -34,16 +34,16 @@ var (
 	tpl = template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"firemodelVersion":         func() string { return version.Version },
-			"toSwiftType":              toSwiftType,
-			"toScreamingSnake":         strcase.ToScreamingSnake,
-			"toCamel":                  strcase.ToCamel,
-			"toLowerCamel":             strcase.ToLowerCamel,
-			"filterFieldsEnumsOnly":    filterFieldsEnumsOnly,
-			"filterFieldsNonEnumsOnly": filterFieldsNonEnumsOnly,
-			"filterFieldsStructsOnly":  filterFieldsStructsOnly,
-			"requiresCustomEncodeDecode":       requiresCustomEncodeDecode,
-			"firestorePath":            firestorePath,
+			"firemodelVersion":           func() string { return version.Version },
+			"toSwiftType":                toSwiftType,
+			"toScreamingSnake":           strcase.ToScreamingSnake,
+			"toCamel":                    strcase.ToCamel,
+			"toLowerCamel":               strcase.ToLowerCamel,
+			"filterFieldsEnumsOnly":      filterFieldsEnumsOnly,
+			"filterFieldsNonEnumsOnly":   filterFieldsNonEnumsOnly,
+			"filterFieldsStructsOnly":    filterFieldsStructsOnly,
+			"requiresCustomEncodeDecode": requiresCustomEncodeDecode,
+			"firestorePath":              firestorePath,
 		}).
 		Parse(file),
 	)

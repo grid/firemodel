@@ -1,11 +1,11 @@
 package tempwriter
 
 import (
+	"io"
+	"io/ioutil"
 	"os"
 	"path"
-	"io/ioutil"
 	"path/filepath"
-	"io"
 )
 
 func New(prefix string, wipe bool) *TempWriter {
