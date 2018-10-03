@@ -34,16 +34,16 @@ var (
 	tpl = template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"firemodelVersion":         func() string { return version.Version },
-			"toSwiftType":              toSwiftType,
-			"toScreamingSnake":         strcase.ToScreamingSnake,
-			"toCamel":                  strcase.ToCamel,
-			"toLowerCamel":             strcase.ToLowerCamel,
-			"filterFieldsEnumsOnly":    filterFieldsEnumsOnly,
-			"filterFieldsNonEnumsOnly": filterFieldsNonEnumsOnly,
-			"filterFieldsStructsOnly":  filterFieldsStructsOnly,
-			"requiresCustomEncodeDecode":       requiresCustomEncodeDecode,
-			"firestorePath":            firestorePath,
+			"firemodelVersion":           func() string { return version.Version },
+			"toSwiftType":                toSwiftType,
+			"toScreamingSnake":           strcase.ToScreamingSnake,
+			"toCamel":                    strcase.ToCamel,
+			"toLowerCamel":               strcase.ToLowerCamel,
+			"filterFieldsEnumsOnly":      filterFieldsEnumsOnly,
+			"filterFieldsNonEnumsOnly":   filterFieldsNonEnumsOnly,
+			"filterFieldsStructsOnly":    filterFieldsStructsOnly,
+			"requiresCustomEncodeDecode": requiresCustomEncodeDecode,
+			"firestorePath":              firestorePath,
 		}).
 		Parse(file),
 	)
@@ -145,7 +145,12 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 		}
 	case *firemodel.Array:
 		if firetype.T != nil {
-			return fmt.Sprintf("[%s]?", toSwiftType(false, firetype.T))
+			switch firetype.T.(type) {
+			case *firemodel.Reference:
+				return fmt.Sprintf("[%s] = .init()", toSwiftType(false, firetype.T))
+			default:
+				return fmt.Sprintf("[%s]?", toSwiftType(false, firetype.T))
+			}
 		}
 		return "[Any]"
 	case *firemodel.File:

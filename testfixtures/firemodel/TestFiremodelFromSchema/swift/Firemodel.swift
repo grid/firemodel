@@ -86,9 +86,9 @@ static var testModelId: String = ""
     // TODO: Add documentation to models in firemodel schema.
     dynamic var models: [TestStruct]?
     // TODO: Add documentation to refs in firemodel schema.
-    dynamic var refs: [Pring.AnyReference]?
+    dynamic var refs: [Pring.AnyReference] = .init()
     // TODO: Add documentation to modelRefs in firemodel schema.
-    dynamic var modelRefs: [Pring.Reference<TestTimestamps>]?
+    dynamic var modelRefs: [Pring.Reference<TestTimestamps>] = .init()
     // TODO: Add documentation to meta in firemodel schema.
     dynamic var meta: [String: Any] = [:]
     // TODO: Add documentation to metaStrs in firemodel schema.
