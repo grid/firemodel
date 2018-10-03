@@ -133,8 +133,8 @@ export namespace example {
     name: string;
   }
 
-  /** TODO: Add documentation to TestDirection in firemodel schema. */
-  export enum TestDirection {
+  /** TODO: Add documentation to TestEnum in firemodel schema. */
+  export enum TestEnum {
     /** TODO: Add documentation to left in firemodel schema. */
     left = 'LEFT',
     /** TODO: Add documentation to right in firemodel schema. */
@@ -176,7 +176,7 @@ export namespace example {
     /** TODO: Add documentation to colors in firemodel schema. */
     colors?: string[];
     /** TODO: Add documentation to directions in firemodel schema. */
-    directions?: TestDirection[];
+    directions?: TestEnum[];
     /** TODO: Add documentation to models in firemodel schema. */
     models?: ITestStruct[];
     /** TODO: Add documentation to refs in firemodel schema. */
@@ -188,7 +188,7 @@ export namespace example {
     /** TODO: Add documentation to meta_strs in firemodel schema. */
     metaStrs?: { [key: string]: string; };
     /** TODO: Add documentation to direction in firemodel schema. */
-    direction?: TestDirection;
+    direction?: TestEnum;
     /** TODO: Add documentation to test_file in firemodel schema. */
     testFile?: IFile;
     /** TODO: Add documentation to url in firemodel schema. */
@@ -209,5 +209,11 @@ export namespace example {
     createdAt?: firestore.Timestamp;
     /** Record update timestamp. */
     updatedAt?: firestore.Timestamp;
+  }
+
+  /** TODO: Add documentation to Test in firemodel schema. */
+  export interface ITest {
+    /** TODO: Add documentation to direction in firemodel schema. */
+    direction?: TestEnum;
   }
 }

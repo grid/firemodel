@@ -42,7 +42,7 @@ var (
 			"filterFieldsEnumsOnly":    filterFieldsEnumsOnly,
 			"filterFieldsNonEnumsOnly": filterFieldsNonEnumsOnly,
 			"filterFieldsStructsOnly":  filterFieldsStructsOnly,
-			"hasFieldsOrStructs":       hasFieldsOrStructs,
+			"requiresCustomEncodeDecode":       requiresCustomEncodeDecode,
 			"firestorePath":            firestorePath,
 		}).
 		Parse(file),
@@ -52,8 +52,8 @@ var (
 	_ = template.Must(tpl.New("struct").Parse(structTpl))
 )
 
-func hasFieldsOrStructs(in []*firemodel.SchemaField) bool {
-	if len(filterFieldsStructsOnly(in)) > 0 {
+func requiresCustomEncodeDecode(in []*firemodel.SchemaField) bool {
+	if len(filterFieldsEnumsOnly(in)) > 0 {
 		return true
 	}
 	if len(filterFieldsStructsOnly(in)) > 0 {
@@ -245,7 +245,7 @@ import Pring
     {{- end}}
     dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
     {{- end}}
-    {{- if .Fields | hasFieldsOrStructs }}
+    {{- if .Fields | requiresCustomEncodeDecode }}
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
