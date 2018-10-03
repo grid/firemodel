@@ -42,7 +42,7 @@ var (
 			"filterFieldsEnumsOnly":    filterFieldsEnumsOnly,
 			"filterFieldsNonEnumsOnly": filterFieldsNonEnumsOnly,
 			"filterFieldsStructsOnly":  filterFieldsStructsOnly,
-			"hasFieldsOrStructs":       hasFieldsOrStructs,
+			"requiresCustomEncodeDecode":       requiresCustomEncodeDecode,
 			"firestorePath":            firestorePath,
 		}).
 		Parse(file),
@@ -52,8 +52,8 @@ var (
 	_ = template.Must(tpl.New("struct").Parse(structTpl))
 )
 
-func hasFieldsOrStructs(in []*firemodel.SchemaField) bool {
-	if len(filterFieldsStructsOnly(in)) > 0 {
+func requiresCustomEncodeDecode(in []*firemodel.SchemaField) bool {
+	if len(filterFieldsEnumsOnly(in)) > 0 {
 		return true
 	}
 	if len(filterFieldsStructsOnly(in)) > 0 {
@@ -185,7 +185,7 @@ func firestorePath(model firemodel.SchemaModel) string {
 	}
 
 	if len(args) == 0 {
-		fmt.Printf("warning: no firestore path for %s", model.Name)
+		fmt.Printf("warning: no firestore path for %s\n", model.Name)
 		return ""
 	}
 
@@ -245,7 +245,7 @@ import Pring
     {{- end}}
     dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
     {{- end}}
-    {{- if .Fields | hasFieldsOrStructs }}
+    {{- if .Fields | requiresCustomEncodeDecode }}
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
@@ -334,7 +334,7 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
 {{- else}}
 // TODO: Add documentation to {{.Name}} in firemodel schema.
 {{- end}}
-class {{.Name | toCamel }}: Pring.Object {
+@objcMembers class {{.Name | toCamel }}: Pring.Object {
   {{- range .Fields}}
   {{- if .Comment}}
   // {{.Comment}}

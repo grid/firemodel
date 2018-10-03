@@ -1,6 +1,6 @@
 option ts.namespace = "example";
 
-enum TestDirection {
+enum TestEnum {
     left,
     right,
     up,
@@ -32,13 +32,13 @@ model TestModel {
   reference<TestModel> friend;
   geopoint location;
   array<string> colors;
-  array<TestDirection> directions;
+  array<TestEnum> directions;
   array<TestStruct> models;
   array<reference> refs;
   array<reference<TestTimestamps>> model_refs;
   map meta;
   map<string> meta_strs;
-  TestDirection direction;
+  TestEnum direction;
   File test_file;
   URL url;
   TestStruct nested;
@@ -48,4 +48,8 @@ model TestModel {
 model TestTimestamps {
   option firestore.path = "timestamps/{test_timestamps_id}";
   option firestore.autotimestamp = true;
+}
+
+model Test {
+  TestEnum direction;
 }

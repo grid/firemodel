@@ -17,7 +17,7 @@ func init() {
 type Modeler struct{}
 
 func (m *Modeler) Model(schema *firemodel.Schema, sourceCoder firemodel.SourceCoder) error {
-	f, err := sourceCoder.NewFile("firemodel.d.ts")
+	f, err := sourceCoder.NewFile("firemodel.ts")
 	if err != nil {
 		return errors.Wrapf(err, "firemodel/ts: create typescript file")
 	}
