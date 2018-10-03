@@ -3,8 +3,8 @@
 import Foundation
 import Pring
 
-// TODO: Add documentation to TestDirection in firemodel schema.
-@objc enum TestDirection: Int {
+// TODO: Add documentation to TestEnum in firemodel schema.
+@objc enum TestEnum: Int {
     // TODO: Add documentation to Left in firemodel schema.
     case left
     // TODO: Add documentation to Right in firemodel schema.
@@ -15,7 +15,7 @@ import Pring
     case down
 }
 
-extension TestDirection: CustomDebugStringConvertible {
+extension TestEnum: CustomDebugStringConvertible {
     init?(firestoreValue value: Any?) {
         guard let value = value as? String else {
             return nil
@@ -82,7 +82,7 @@ static var testModelId: String = ""
     // TODO: Add documentation to colors in firemodel schema.
     dynamic var colors: [String]?
     // TODO: Add documentation to directions in firemodel schema.
-    dynamic var directions: [TestDirection]?
+    dynamic var directions: [TestEnum]?
     // TODO: Add documentation to models in firemodel schema.
     dynamic var models: [TestStruct]?
     // TODO: Add documentation to refs in firemodel schema.
@@ -94,7 +94,7 @@ static var testModelId: String = ""
     // TODO: Add documentation to metaStrs in firemodel schema.
     dynamic var metaStrs: [String: String] = [:]
     // TODO: Add documentation to direction in firemodel schema.
-    dynamic var direction: TestDirection?
+    dynamic var direction: TestEnum?
     // TODO: Add documentation to testFile in firemodel schema.
     dynamic var testFile: Pring.File?
     // TODO: Add documentation to url in firemodel schema.
@@ -119,7 +119,7 @@ static var testModelId: String = ""
     override func decode(_ key: String, value: Any?) -> Bool {
         switch key {
         case "direction":
-            self.direction = TestDirection(firestoreValue: value)
+            self.direction = TestEnum(firestoreValue: value)
         case "nested":
           if let value = value as? [String: Any] {
             self.nested = TestStruct(id: self.id, value: value)
@@ -136,4 +136,11 @@ static var testModelId: String = ""
 @objcMembers class TestTimestamps: Pring.Object {
     static var testTimestampsId: String = ""
     override class var path: String { return "timestamps/\(testTimestampsId)" }
+}
+
+// TODO: Add documentation to Test in firemodel schema.
+@objcMembers class Test: Pring.Object {
+    
+    // TODO: Add documentation to direction in firemodel schema.
+    dynamic var direction: TestEnum?
 }

@@ -33,7 +33,7 @@ type TestModel struct {
 	// TODO: Add comment to TestModel.colors.
 	Colors []string `firestore:"colors"`
 	// TODO: Add comment to TestModel.directions.
-	Directions []TestDirection `firestore:"directions"`
+	Directions []TestEnum `firestore:"directions"`
 	// TODO: Add comment to TestModel.models.
 	Models []*TestStruct `firestore:"models"`
 	// TODO: Add comment to TestModel.refs.
@@ -45,7 +45,7 @@ type TestModel struct {
 	// TODO: Add comment to TestModel.meta_strs.
 	MetaStrs map[string]string `firestore:"metaStrs"`
 	// TODO: Add comment to TestModel.direction.
-	Direction TestDirection `firestore:"direction"`
+	Direction TestEnum `firestore:"direction"`
 	// TODO: Add comment to TestModel.test_file.
 	TestFile *runtime.File `firestore:"testFile"`
 	// TODO: Add comment to TestModel.url.
