@@ -143,4 +143,24 @@ static var testModelId: String = ""
     
     // TODO: Add documentation to direction in firemodel schema.
     dynamic var direction: TestEnum?
+
+    override func encode(_ key: String, value: Any?) -> Any? {
+        switch key {
+        case "direction":
+            return self.direction?.firestoreValue
+        default:
+            break
+        }
+        return nil
+    }
+
+    override func decode(_ key: String, value: Any?) -> Bool {
+        switch key {
+        case "direction":
+            self.direction = TestEnum(firestoreValue: value)
+        default:
+            break
+        }
+        return false
+    }
 }
