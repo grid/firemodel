@@ -197,7 +197,7 @@ func firestorePath(model firemodel.SchemaModel) string {
 	var out strings.Builder
 
 	for _, arg := range args {
-		fmt.Fprintf(&out, "static var %s: String = \"\"\n", strcase.ToLowerCamel(arg))
+		fmt.Fprintf(&out, "    static var %s: String = \"\"\n", strcase.ToLowerCamel(arg))
 	}
 
 	argsWrappedInInterpolationParens := make([]interface{}, len(args))
@@ -233,7 +233,7 @@ import Pring
 // TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objcMembers class {{.Name | toCamel}}: Pring.Object {
-    {{. | firestorePath}}
+{{. | firestorePath}}
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}

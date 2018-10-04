@@ -61,7 +61,7 @@ extension TestEnum: CustomDebugStringConvertible {
 // A Test is a test model.
 @objcMembers class TestModel: Pring.Object {
     static var userId: String = ""
-static var testModelId: String = ""
+    static var testModelId: String = ""
     override class var path: String { return "users/\(userId)/test_models/\(testModelId)" }
     // The name.
     dynamic var name: String?
@@ -140,7 +140,7 @@ static var testModelId: String = ""
 
 // TODO: Add documentation to Test in firemodel schema.
 @objcMembers class Test: Pring.Object {
-    
+
     // TODO: Add documentation to direction in firemodel schema.
     dynamic var direction: TestEnum?
 
