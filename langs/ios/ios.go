@@ -145,7 +145,12 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 		}
 	case *firemodel.Array:
 		if firetype.T != nil {
-			return fmt.Sprintf("[%s]?", toSwiftType(false, firetype.T))
+			switch firetype.T.(type) {
+			case *firemodel.Reference:
+				return fmt.Sprintf("[%s] = .init()", toSwiftType(false, firetype.T))
+			default:
+				return fmt.Sprintf("[%s]?", toSwiftType(false, firetype.T))
+			}
 		}
 		return "[Any]"
 	case *firemodel.File:
