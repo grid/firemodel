@@ -34,16 +34,17 @@ var (
 	tpl = template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"firemodelVersion":           func() string { return version.Version },
-			"toSwiftType":                toSwiftType,
-			"toScreamingSnake":           strcase.ToScreamingSnake,
-			"toCamel":                    strcase.ToCamel,
-			"toLowerCamel":               strcase.ToLowerCamel,
-			"filterFieldsEnumsOnly":      filterFieldsEnumsOnly,
-			"filterFieldsNonEnumsOnly":   filterFieldsNonEnumsOnly,
-			"filterFieldsStructsOnly":    filterFieldsStructsOnly,
-			"requiresCustomEncodeDecode": requiresCustomEncodeDecode,
-			"firestorePath":              firestorePath,
+			"firemodelVersion":             func() string { return version.Version },
+			"toSwiftType":                  toSwiftType,
+			"toScreamingSnake":             strcase.ToScreamingSnake,
+			"toCamel":                      strcase.ToCamel,
+			"toLowerCamel":                 strcase.ToLowerCamel,
+			"filterFieldsEnumsOnly":        filterFieldsEnumsOnly,
+			"filterFieldsNonEnumsOnly":     filterFieldsNonEnumsOnly,
+			"filterFieldsStructsOnly":      filterFieldsStructsOnly,
+			"filterFieldsStructArraysOnly": filterFieldsStructArraysOnly,
+			"requiresCustomEncodeDecode":   requiresCustomEncodeDecode,
+			"firestorePath":                firestorePath,
 		}).
 		Parse(file),
 	)
@@ -57,6 +58,9 @@ func requiresCustomEncodeDecode(in []*firemodel.SchemaField) bool {
 		return true
 	}
 	if len(filterFieldsStructsOnly(in)) > 0 {
+		return true
+	}
+	if len(filterFieldsStructArraysOnly(in)) > 0 {
 		return true
 	}
 	return false
@@ -88,6 +92,21 @@ func filterFieldsStructsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaFie
 	var out []*firemodel.SchemaField
 	for _, i := range in {
 		if _, ok := i.Type.(*firemodel.Struct); !ok {
+			continue
+		}
+		out = append(out, i)
+	}
+	return out
+}
+
+func filterFieldsStructArraysOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
+	var out []*firemodel.SchemaField
+	for _, i := range in {
+		t, ok := i.Type.(*firemodel.Array)
+		if !ok {
+			continue
+		}
+		if _, ok := t.T.(*firemodel.Struct); !ok {
 			continue
 		}
 		out = append(out, i)
@@ -258,6 +277,10 @@ import Pring
         case "{{.Name | toLowerCamel}}":
             return self.{{.Name | toLowerCamel}}?.firestoreValue
         {{- end}}
+        {{- range .Fields | filterFieldsStructArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.map { $0.rawValue }
+        {{- end}}
         {{- range .Fields | filterFieldsStructsOnly}}
         case "{{.Name | toLowerCamel}}":
             return self.{{.Name | toLowerCamel}}?.rawValue
@@ -273,6 +296,10 @@ import Pring
         {{- range .Fields | filterFieldsEnumsOnly}}
         case "{{.Name | toLowerCamel}}":
             self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false }}(firestoreValue: value)
+        {{- end}}
+        {{- range .Fields | filterFieldsStructArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?.map { {{.Type.T | toSwiftType false }}(id: self.id, value: $0) }
         {{- end}}
         {{- range .Fields | filterFieldsStructsOnly}}
         case "{{.Name | toLowerCamel}}":

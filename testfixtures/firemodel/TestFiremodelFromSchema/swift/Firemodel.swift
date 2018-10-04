@@ -108,6 +108,8 @@ extension TestEnum: CustomDebugStringConvertible {
         switch key {
         case "direction":
             return self.direction?.firestoreValue
+        case "models":
+            return self.models?.map { $0.rawValue }
         case "nested":
             return self.nested?.rawValue
         default:
@@ -120,6 +122,8 @@ extension TestEnum: CustomDebugStringConvertible {
         switch key {
         case "direction":
             self.direction = TestEnum(firestoreValue: value)
+        case "models":
+            self.models = (value as? [[String: Any]])?.map { TestStruct(id: self.id, value: $0) }
         case "nested":
           if let value = value as? [String: Any] {
             self.nested = TestStruct(id: self.id, value: value)
