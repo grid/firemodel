@@ -367,14 +367,59 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
 // TODO: Add documentation to {{.Name}} in firemodel schema.
 {{- end}}
 @objcMembers class {{.Name | toCamel }}: Pring.Object {
-  {{- range .Fields}}
-  {{- if .Comment}}
-  // {{.Comment}}
-  {{- else}}
-  // TODO: Add documentation to {{.Name}} in firemodel schema.
-  {{- end}}
-  var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
-  {{- end}}
+    {{- range .Fields}}
+    {{- if .Comment}}
+    // {{.Comment}}
+    {{- else}}
+    // TODO: Add documentation to {{.Name}} in firemodel schema.
+    {{- end}}
+    var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
+    {{- end}}
+    {{- if .Fields | requiresCustomEncodeDecode }}
+
+    override func encode(_ key: String, value: Any?) -> Any? {
+        switch key {
+        {{- range .Fields | filterFieldsEnumsOnly}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.firestoreValue
+        {{- end}}
+        {{- range .Fields | filterFieldsStructArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.map { $0.rawValue }
+        {{- end}}
+        {{- range .Fields | filterFieldsStructsOnly}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.rawValue
+        {{- end}}
+        default:
+            break
+        }
+        return nil
+    }
+
+    override func decode(_ key: String, value: Any?) -> Bool {
+        switch key {
+        {{- range .Fields | filterFieldsEnumsOnly}}
+        case "{{.Name | toLowerCamel}}":
+            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false }}(firestoreValue: value)
+        {{- end}}
+        {{- range .Fields | filterFieldsStructArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?.map { {{.Type.T | toSwiftType false }}(id: self.id, value: $0) }
+        {{- end}}
+        {{- range .Fields | filterFieldsStructsOnly}}
+        case "{{.Name | toLowerCamel}}":
+          if let value = value as? [String: Any] {
+            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false}}(id: self.id, value: value)
+            return true
+          }
+          {{- end}}
+        default:
+            break
+        }
+        return false
+    }
+    {{- end}}
 }
 `
 )

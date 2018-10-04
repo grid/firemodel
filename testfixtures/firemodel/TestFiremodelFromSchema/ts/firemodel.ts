@@ -151,6 +151,8 @@ export namespace example {
     where?: string;
     /** TODO: Add documentation to how_much in firemodel schema. */
     howMuch?: number;
+    /** TODO: Add documentation to some_enum in firemodel schema. */
+    someEnum?: TestEnum;
   }
 
   /** A Test is a test model. */

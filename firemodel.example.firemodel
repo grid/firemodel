@@ -10,6 +10,7 @@ enum TestEnum {
 struct TestStruct {
   string where;
   integer how_much;
+  TestEnum some_enum;
 }
 
 // A Test is a test model.

@@ -8,4 +8,6 @@ type TestStruct struct {
 	Where string `firestore:"where"`
 	// TODO: Add comment to TestStruct.how_much.
 	HowMuch int64 `firestore:"howMuch"`
+	// TODO: Add comment to TestStruct.some_enum.
+	SomeEnum TestEnum `firestore:"someEnum"`
 }

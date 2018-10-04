@@ -52,10 +52,32 @@ extension TestEnum: CustomDebugStringConvertible {
 
 // TODO: Add documentation to TestStruct in firemodel schema.
 @objcMembers class TestStruct: Pring.Object {
-  // TODO: Add documentation to where in firemodel schema.
-  var where: String?
-  // TODO: Add documentation to how_much in firemodel schema.
-  var howMuch: Int = 0
+    // TODO: Add documentation to where in firemodel schema.
+    var where: String?
+    // TODO: Add documentation to how_much in firemodel schema.
+    var howMuch: Int = 0
+    // TODO: Add documentation to some_enum in firemodel schema.
+    var someEnum: TestEnum?
+
+    override func encode(_ key: String, value: Any?) -> Any? {
+        switch key {
+        case "someEnum":
+            return self.someEnum?.firestoreValue
+        default:
+            break
+        }
+        return nil
+    }
+
+    override func decode(_ key: String, value: Any?) -> Bool {
+        switch key {
+        case "someEnum":
+            self.someEnum = TestEnum(firestoreValue: value)
+        default:
+            break
+        }
+        return false
+    }
 }
 
 // A Test is a test model.
