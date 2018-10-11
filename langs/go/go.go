@@ -204,13 +204,13 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 			g.
 				Id("CreatedAt").
 				Qual("time", "Time").
-				Tag(map[string]string{"firestore": "createdAt,serverTimestamp"})
+				Tag(map[string]string{"firestore": "createdAt"})
 
 			g.Comment("Update timestamp.")
 			g.
 				Id("UpdatedAt").
 				Qual("time", "Time").
-				Tag(map[string]string{"firestore": "updatedAt,serverTimestamp"})
+				Tag(map[string]string{"firestore": "updatedAt"})
 		}
 	}
 }
