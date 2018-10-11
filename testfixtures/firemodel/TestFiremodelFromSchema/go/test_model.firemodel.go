@@ -54,9 +54,9 @@ type TestModel struct {
 	Nested *TestStruct `firestore:"nested"`
 
 	// Creation timestamp.
-	CreatedAt time.Time `firestore:"createdAt,serverTimestamp"`
+	CreatedAt time.Time `firestore:"createdAt"`
 	// Update timestamp.
-	UpdatedAt time.Time `firestore:"updatedAt,serverTimestamp"`
+	UpdatedAt time.Time `firestore:"updatedAt"`
 }
 
 // TestModelPath returns the path to a particular TestModel in Firestore.
