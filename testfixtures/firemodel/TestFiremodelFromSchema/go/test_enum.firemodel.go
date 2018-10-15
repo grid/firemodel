@@ -15,3 +15,10 @@ const (
 	// TODO: Add comment to TestEnum_DOWN in firemodel schema.
 	TestEnum_DOWN TestEnum = "DOWN"
 )
+
+var TestEnum_Strings = map[TestEnum]string{TestEnum_LEFT: "TestEnum_LEFT", TestEnum_RIGHT: "TestEnum_RIGHT", TestEnum_UP: "TestEnum_UP", TestEnum_DOWN: "TestEnum_DOWN"}
+var TestEnum_Values = map[string]TestEnum{"TestEnum_LEFT": TestEnum_LEFT, "TestEnum_RIGHT": TestEnum_RIGHT, "TestEnum_UP": TestEnum_UP, "TestEnum_DOWN": TestEnum_DOWN}
+
+func (e TestEnum) String() string {
+	return TestEnum_Strings[e]
+}

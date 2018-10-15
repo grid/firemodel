@@ -139,7 +139,19 @@ func (m *GoModeler) writeEnum(enum *firemodel.SchemaEnum, sourceCoder firemodel.
 				Lit(strcase.ToScreamingSnake(val.Name))
 		}
 	})
-
+	f.Var().Id(enumName + "_Strings").Op("=").Map(jen.Id(enumName)).String().ValuesFunc(func(g *jen.Group) {
+		for _, val := range enum.Values {
+			enumValName := fmt.Sprintf("%s_%s", enumName, strcase.ToScreamingSnake(val.Name))
+			g.Id(enumValName).Op(":").Lit(enumValName)
+		}
+	})
+	f.Var().Id(enumName + "_Values").Op("=").Map(jen.String()).Id(enumName).ValuesFunc(func(g *jen.Group) {
+		for _, val := range enum.Values {
+			enumValName := fmt.Sprintf("%s_%s", enumName, strcase.ToScreamingSnake(val.Name))
+			g.Lit(enumValName).Op(":").Id(enumValName)
+		}
+	})
+	f.Func().Params(jen.Id("e").Id(enumName)).Id("String").Params().String().Block(jen.Return(jen.Id(enumName + "_Strings").Index(jen.Id("e"))))
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(enum.Name), fileExtension))
 	if err != nil {
 		return errors.Wrap(err, "firemodel/go: open source code file")
