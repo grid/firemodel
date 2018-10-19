@@ -63,3 +63,9 @@ type TestModel struct {
 func TestModelPath(userId string, testModelId string) string {
 	return fmt.Sprintf("users/%s/test_models/%s", userId, testModelId)
 }
+
+// TestModelRegexPath is a regex that can be use to filter out firestore events of TestModel
+const TestModelRegexPath = "^users/([a-zA-Z0-9]+)/test_models/([a-zA-Z0-9]+)$"
+
+// TestModelRegexNamedPath is a named regex that can be use to filter out firestore events of TestModel
+const TestModelRegexNamedPath = "^users\\/(?P<user_id>[a-zA-Z0-9]+)\\/test_models\\/(?P<test_model_id>[a-zA-Z0-9]+)$"
