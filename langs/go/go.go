@@ -2,6 +2,8 @@ package golang
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
@@ -98,6 +100,24 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 						}
 					})
 			}))
+		f.Commentf("%s is a regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexPath"), model.Name)
+		f.Var().Id(fmt.Sprint(model.Name, "RegexPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
+			regex := format
+			regex = regexp.QuoteMeta(regex)
+			g.Lit(fmt.Sprint("^", strings.Replace(format, "%s", "([a-zA-Z0-9]+)", -1), "$"))
+		})
+
+		f.Commentf("%s is a named regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexNamedPath"), model.Name)
+		f.Var().Id(fmt.Sprint(model.Name, "RegexNamedPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
+			regex := format
+			regex = regexp.QuoteMeta(regex)
+			for _, arg := range args {
+				repl := fmt.Sprint("(?P<", arg, ">[a-zA-Z0-9]+)")
+				regex = strings.Replace(regex, "%s", repl, 1)
+			}
+			g.Lit(fmt.Sprint("^", regex, "$"))
+		})
+
 	}
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))
