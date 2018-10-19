@@ -7,6 +7,7 @@ import (
 	"fmt"
 	runtime "github.com/mickeyreiss/firemodel/runtime"
 	latlng "google.golang.org/genproto/googleapis/type/latlng"
+	"regexp"
 	"time"
 )
 
@@ -65,7 +66,7 @@ func TestModelPath(userId string, testModelId string) string {
 }
 
 // TestModelRegexPath is a regex that can be use to filter out firestore events of TestModel
-const TestModelRegexPath = "^users/([a-zA-Z0-9]+)/test_models/([a-zA-Z0-9]+)$"
+var TestModelRegexPath = regexp.MustCompile("^users/([a-zA-Z0-9]+)/test_models/([a-zA-Z0-9]+)$")
 
 // TestModelRegexNamedPath is a named regex that can be use to filter out firestore events of TestModel
-const TestModelRegexNamedPath = "^users\\/(?P<user_id>[a-zA-Z0-9]+)\\/test_models\\/(?P<test_model_id>[a-zA-Z0-9]+)$"
+var TestModelRegexNamedPath = regexp.MustCompile("^users/(?P<user_id>[a-zA-Z0-9]+)/test_models/(?P<test_model_id>[a-zA-Z0-9]+)$")

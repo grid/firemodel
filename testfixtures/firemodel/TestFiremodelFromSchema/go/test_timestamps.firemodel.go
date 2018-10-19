@@ -4,6 +4,7 @@ package firemodel
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 )
 
@@ -24,7 +25,7 @@ func TestTimestampsPath(testTimestampsId string) string {
 }
 
 // TestTimestampsRegexPath is a regex that can be use to filter out firestore events of TestTimestamps
-const TestTimestampsRegexPath = "^timestamps/([a-zA-Z0-9]+)$"
+var TestTimestampsRegexPath = regexp.MustCompile("^timestamps/([a-zA-Z0-9]+)$")
 
 // TestTimestampsRegexNamedPath is a named regex that can be use to filter out firestore events of TestTimestamps
-const TestTimestampsRegexNamedPath = "^timestamps\\/(?P<test_timestamps_id>[a-zA-Z0-9]+)$"
+var TestTimestampsRegexNamedPath = regexp.MustCompile("^timestamps/(?P<test_timestamps_id>[a-zA-Z0-9]+)$")
