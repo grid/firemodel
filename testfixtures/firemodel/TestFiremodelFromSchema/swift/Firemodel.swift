@@ -82,9 +82,7 @@ extension TestEnum: CustomDebugStringConvertible {
 
 // A Test is a test model.
 @objcMembers class TestModel: Pring.Object {
-    static var userId: String = ""
-    static var testModelId: String = ""
-    override class var path: String { return "users/\(userId)/test_models/\(testModelId)" }
+override class var path: String { return "test_models" }
     // The name.
     dynamic var name: String?
     // The age.
@@ -160,13 +158,11 @@ extension TestEnum: CustomDebugStringConvertible {
 
 // TODO: Add documentation to TestTimestamps in firemodel schema.
 @objcMembers class TestTimestamps: Pring.Object {
-    static var testTimestampsId: String = ""
-    override class var path: String { return "timestamps/\(testTimestampsId)" }
+override class var path: String { return "timestamps" }
 }
 
 // TODO: Add documentation to Test in firemodel schema.
 @objcMembers class Test: Pring.Object {
-
     // TODO: Add documentation to direction in firemodel schema.
     dynamic var direction: TestEnum?
 
