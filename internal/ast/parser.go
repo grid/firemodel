@@ -17,12 +17,12 @@ func ParseSchema(r io.Reader) (*AST, error) {
 	parser := participle.MustBuild(
 		&AST{},
 		participle.Lexer(&lexerDefinition{}),
-		participle.Map(func(token lexer.Token) lexer.Token {
+		participle.Map(func(token lexer.Token) (lexer.Token, error) {
 			if token.Type == scanner.Comment {
 				p := regexp.MustCompile(`//\s*(?P<Comment>.*)`)
 				token.Value = p.FindStringSubmatch(token.Value)[1]
 			}
-			return token
+			return token, nil
 		}),
 	)
 
