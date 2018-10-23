@@ -193,6 +193,7 @@ Here are the currently supported options:
 
 | Option Name | Description | Example |
 | --------- | ------------ | ---- |
+| `firestore.model_name` | Documents's collection name, sans path. | `option firestore.path = "users";` |
 | `firestore.path` | Document's typical location in firestore, specified as a template with variables surrounded with curly braces. | `option firestore.path = "users/{user_id}";` |
 | `firestore.autotimestamp` | Automatically add createdAt and updatedAt fields. | `option firestore.autotimestamp = true;` |
 | `ts.namespace` | The TypeScript namespace for generated interfaces. | `option ts.namespace = "SomeApp";` |

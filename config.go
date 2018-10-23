@@ -56,7 +56,7 @@ var (
 	firestorePathConstantPattern = regexp.MustCompile("^([a-zA-Z0-9_-]+)$")
 )
 
-// GetFirestorePath returns the templetized Firestore path where this model is located in Firestore.
+// GetFirestorePath returns the templatized Firestore path where this model is located in Firestore.
 //
 // This method requires that the model includes an option called firestore.path.
 //
@@ -91,6 +91,20 @@ func (options SchemaModelOptions) GetFirestorePath() (format string, args []stri
 	}
 	format = strings.Join(components, "/")
 	return
+}
+
+func (options SchemaModelOptions) GetFirestoreModelName() (modelName string, err error) {
+	modelName, ok := options.Get("firestore")["model_name"]
+	if !ok {
+		return
+	}
+
+	if len(modelName) == 0 {
+		err = errors.Errorf(`firemodel: invalid model name "%s"`, modelName)
+		return
+	}
+
+	return modelName, nil
 }
 
 func (options SchemaModelOptions) GetAutoTimestamp() bool {

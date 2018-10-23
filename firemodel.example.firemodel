@@ -15,6 +15,7 @@ struct TestStruct {
 
 // A Test is a test model.
 model TestModel {
+  option firestore.model_name = "test_models";
   option firestore.path = "users/{user_id}/test_models/{test_model_id}";
   option firestore.autotimestamp = true;
 
@@ -46,6 +47,7 @@ model TestModel {
 }
 
 model TestTimestamps {
+  option firestore.model_name = "timestamps";
   option firestore.path = "timestamps/{test_timestamps_id}";
   option firestore.autotimestamp = true;
 }

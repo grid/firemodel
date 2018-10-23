@@ -2,7 +2,6 @@ package ios
 
 import (
 	"fmt"
-	"strings"
 	"text/template"
 
 	"github.com/iancoleman/strcase"
@@ -44,7 +43,7 @@ var (
 			"filterFieldsStructsOnly":      filterFieldsStructsOnly,
 			"filterFieldsStructArraysOnly": filterFieldsStructArraysOnly,
 			"requiresCustomEncodeDecode":   requiresCustomEncodeDecode,
-			"firestorePath":                firestorePath,
+			"firestoreModelName":           firestoreModelName,
 		}).
 		Parse(file),
 	)
@@ -202,32 +201,13 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 	}
 }
 
-func firestorePath(model firemodel.SchemaModel) string {
-	format, args, err := model.Options.GetFirestorePath()
+func firestoreModelName(model firemodel.SchemaModel) string {
+	modelName, err := model.Options.GetFirestoreModelName()
 	if err != nil {
 		panic(err)
 	}
 
-	if len(args) == 0 {
-		fmt.Printf("warning: no firestore path for %s\n", model.Name)
-		return ""
-	}
-
-	var out strings.Builder
-
-	for _, arg := range args {
-		fmt.Fprintf(&out, "    static var %s: String = \"\"\n", strcase.ToLowerCamel(arg))
-	}
-
-	argsWrappedInInterpolationParens := make([]interface{}, len(args))
-	for idx, arg := range args {
-		argsWrappedInInterpolationParens[idx] = fmt.Sprintf(`\(%s)`, strcase.ToLowerCamel(arg))
-	}
-	path := fmt.Sprintf(format, argsWrappedInInterpolationParens...)
-
-	fmt.Fprintf(&out, "    override class var path: String { return \"%s\" }", path)
-
-	return out.String()
+	return modelName
 }
 
 const (
@@ -252,7 +232,9 @@ import Pring
 // TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objcMembers class {{.Name | toCamel}}: Pring.Object {
-{{. | firestorePath}}
+	{{- if firestoreModelName . }}
+override class var path: String { return "{{firestoreModelName . }}" }
+	{{- end}}
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}
