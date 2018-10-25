@@ -88,3 +88,10 @@ func TestModelStructToPath(path TestModelPathStruct) string {
 	built := fmt.Sprintf("users/%s/test_models/%s", path.UserId, path.TestModelId)
 	return built
 }
+
+// TestModelWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
+type TestModelWrapper struct {
+	TestModel *TestModel
+	Path      TestModelPathStruct
+	PathStr   string
+}

@@ -150,6 +150,14 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			})
 			g.Return(jen.Id("built"))
 		})
+
+		wrapperName := fmt.Sprint(model.Name, "Wrapper")
+		f.Commentf("%s is a struct wrapper that contains a reference to the firemodel instance and the path", wrapperName)
+		f.Type().Id(wrapperName).StructFunc(func(g *jen.Group) {
+			g.Id(model.Name).Id("*" + model.Name)
+			g.Id("Path").Id(pathStructName)
+			g.Id("PathStr").String()
+		})
 	}
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))

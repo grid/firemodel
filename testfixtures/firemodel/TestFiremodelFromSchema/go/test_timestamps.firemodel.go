@@ -46,3 +46,10 @@ func TestTimestampsStructToPath(path TestTimestampsPathStruct) string {
 	built := fmt.Sprintf("timestamps/%s", path.TestTimestampsId)
 	return built
 }
+
+// TestTimestampsWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
+type TestTimestampsWrapper struct {
+	TestTimestamps *TestTimestamps
+	Path           TestTimestampsPathStruct
+	PathStr        string
+}
