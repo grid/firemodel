@@ -29,3 +29,20 @@ var TestTimestampsRegexPath = regexp.MustCompile("^timestamps/([a-zA-Z0-9]+)$")
 
 // TestTimestampsRegexNamedPath is a named regex that can be use to filter out firestore events of TestTimestamps
 var TestTimestampsRegexNamedPath = regexp.MustCompile("^timestamps/(?P<test_timestamps_id>[a-zA-Z0-9]+)$")
+
+// TestTimestampsPathStruct is a struct that contains parts of a path of TestTimestamps
+type TestTimestampsPathStruct struct {
+	TestTimestampsId string
+}
+
+// TestTimestampsPathToStruct is a function that turns a firestore path into a PathStruct of TestTimestamps
+func TestTimestampsPathToStruct(path string) TestTimestampsPathStruct {
+	parsed := TestTimestampsRegexPath.FindStringSubmatch(path)
+	result := &TestTimestampsPathStruct{TestTimestampsId: parsed[0]}
+}
+
+// TestTimestampsStructToPath is a function that turns a PathStruct of TestTimestamps into a firestore path
+func TestTimestampsStructToPath(path TestTimestampsPathStruct) string {
+	built := fmt.Sprintf("timestamps/%s", path.TestTimestampsId)
+	return built
+}

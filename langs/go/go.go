@@ -118,6 +118,38 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			g.Lit(fmt.Sprint("^", regex, "$"))
 		})
 
+		pathStructName := fmt.Sprint(model.Name, "PathStruct")
+		pathStructFunctionName := fmt.Sprint(model.Name, "PathToStruct")
+		pathStructReverseFunctionName := fmt.Sprint(model.Name, "StructToPath")
+		f.Commentf("%s is a struct that contains parts of a path of %s", pathStructName, model.Name)
+		f.Type().Id(pathStructName).StructFunc(func(g *jen.Group) {
+			for _, arg := range args {
+				g.Id(strcase.ToCamel(arg)).String()
+			}
+		})
+
+		f.Commentf("%s is a function that turns a firestore path into a PathStruct of %s", pathStructFunctionName, model.Name)
+		f.
+			Func().
+			Id(pathStructFunctionName).Params(jen.Id("path").String()).Id(pathStructName).BlockFunc(func(g *jen.Group) {
+			g.Id("parsed").Op(":=").Id(fmt.Sprint(model.Name, "RegexPath")).Dot("FindStringSubmatch").Call(jen.Id("path"))
+			g.Id("result").Op(":=").Op("&").Id(pathStructName).ValuesFunc(func(g *jen.Group) {
+				for i, arg := range args {
+					g.Id(strcase.ToCamel(arg)).Op(":").Id("parsed").Index(jen.Lit(i))
+				}
+			})
+		})
+
+		f.Commentf("%s is a function that turns a PathStruct of %s into a firestore path", pathStructReverseFunctionName, model.Name)
+		f.Func().Id(pathStructReverseFunctionName).Params(jen.Id("path").Id(pathStructName)).String().BlockFunc(func(g *jen.Group) {
+			g.Id("built").Op(":=").Qual("fmt", "Sprintf").CallFunc(func(g *jen.Group) {
+				g.Lit(format)
+				for _, arg := range args {
+					g.Id("path").Dot(strcase.ToCamel(arg))
+				}
+			})
+			g.Return(jen.Id("built"))
+		})
 	}
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))
