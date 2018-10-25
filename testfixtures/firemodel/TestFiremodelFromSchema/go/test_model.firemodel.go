@@ -78,9 +78,10 @@ type TestModelPathStruct struct {
 }
 
 // TestModelPathToStruct is a function that turns a firestore path into a PathStruct of TestModel
-func TestModelPathToStruct(path string) TestModelPathStruct {
+func TestModelPathToStruct(path string) *TestModelPathStruct {
 	parsed := TestModelRegexPath.FindStringSubmatch(path)
 	result := &TestModelPathStruct{UserId: parsed[0], TestModelId: parsed[1]}
+	return result
 }
 
 // TestModelStructToPath is a function that turns a PathStruct of TestModel into a firestore path

@@ -131,13 +131,14 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		f.Commentf("%s is a function that turns a firestore path into a PathStruct of %s", pathStructFunctionName, model.Name)
 		f.
 			Func().
-			Id(pathStructFunctionName).Params(jen.Id("path").String()).Id(pathStructName).BlockFunc(func(g *jen.Group) {
+			Id(pathStructFunctionName).Params(jen.Id("path").String()).Id("*" + pathStructName).BlockFunc(func(g *jen.Group) {
 			g.Id("parsed").Op(":=").Id(fmt.Sprint(model.Name, "RegexPath")).Dot("FindStringSubmatch").Call(jen.Id("path"))
 			g.Id("result").Op(":=").Op("&").Id(pathStructName).ValuesFunc(func(g *jen.Group) {
 				for i, arg := range args {
 					g.Id(strcase.ToCamel(arg)).Op(":").Id("parsed").Index(jen.Lit(i))
 				}
 			})
+			g.Return(jen.Id("result"))
 		})
 
 		f.Commentf("%s is a function that turns a PathStruct of %s into a firestore path", pathStructReverseFunctionName, model.Name)
