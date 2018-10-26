@@ -35,11 +35,11 @@ func ParseSchema(r io.Reader) (*AST, error) {
 
 type lexerDefinition struct{}
 
-func (d *lexerDefinition) Lex(r io.Reader) lexer.Lexer {
+func (d *lexerDefinition) Lex(r io.Reader) (lexer.Lexer, error) {
 	s := &scanner.Scanner{}
 	l := lexer.LexWithScanner(r, s)
 	s.Mode = s.Mode &^ scanner.SkipComments
-	return l
+	return l, nil
 }
 
 func (d *lexerDefinition) Symbols() map[string]rune {

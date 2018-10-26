@@ -70,3 +70,29 @@ var TestModelRegexPath = regexp.MustCompile("^users/([a-zA-Z0-9]+)/test_models/(
 
 // TestModelRegexNamedPath is a named regex that can be use to filter out firestore events of TestModel
 var TestModelRegexNamedPath = regexp.MustCompile("^users/(?P<user_id>[a-zA-Z0-9]+)/test_models/(?P<test_model_id>[a-zA-Z0-9]+)$")
+
+// TestModelPathStruct is a struct that contains parts of a path of TestModel
+type TestModelPathStruct struct {
+	UserId      string
+	TestModelId string
+}
+
+// TestModelPathToStruct is a function that turns a firestore path into a PathStruct of TestModel
+func TestModelPathToStruct(path string) *TestModelPathStruct {
+	parsed := TestModelRegexPath.FindStringSubmatch(path)
+	result := &TestModelPathStruct{UserId: parsed[1], TestModelId: parsed[2]}
+	return result
+}
+
+// TestModelStructToPath is a function that turns a PathStruct of TestModel into a firestore path
+func TestModelStructToPath(path TestModelPathStruct) string {
+	built := fmt.Sprintf("users/%s/test_models/%s", path.UserId, path.TestModelId)
+	return built
+}
+
+// TestModelWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
+type TestModelWrapper struct {
+	TestModel *TestModel
+	Path      TestModelPathStruct
+	PathStr   string
+}
