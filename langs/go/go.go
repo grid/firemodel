@@ -135,7 +135,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			g.Id("parsed").Op(":=").Id(fmt.Sprint(model.Name, "RegexPath")).Dot("FindStringSubmatch").Call(jen.Id("path"))
 			g.Id("result").Op(":=").Op("&").Id(pathStructName).ValuesFunc(func(g *jen.Group) {
 				for i, arg := range args {
-					g.Id(strcase.ToCamel(arg)).Op(":").Id("parsed").Index(jen.Lit(i))
+					g.Id(strcase.ToCamel(arg)).Op(":").Id("parsed").Index(jen.Lit(i + 1))
 				}
 			})
 			g.Return(jen.Id("result"))

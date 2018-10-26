@@ -38,7 +38,7 @@ type TestTimestampsPathStruct struct {
 // TestTimestampsPathToStruct is a function that turns a firestore path into a PathStruct of TestTimestamps
 func TestTimestampsPathToStruct(path string) *TestTimestampsPathStruct {
 	parsed := TestTimestampsRegexPath.FindStringSubmatch(path)
-	result := &TestTimestampsPathStruct{TestTimestampsId: parsed[0]}
+	result := &TestTimestampsPathStruct{TestTimestampsId: parsed[1]}
 	return result
 }
 
