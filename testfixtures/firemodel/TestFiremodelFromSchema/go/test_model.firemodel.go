@@ -85,7 +85,7 @@ func TestModelPathToStruct(path string) *TestModelPathStruct {
 }
 
 // TestModelStructToPath is a function that turns a PathStruct of TestModel into a firestore path
-func TestModelStructToPath(path TestModelPathStruct) string {
+func TestModelStructToPath(path *TestModelPathStruct) string {
 	built := fmt.Sprintf("users/%s/test_models/%s", path.UserId, path.TestModelId)
 	return built
 }
@@ -93,6 +93,18 @@ func TestModelStructToPath(path TestModelPathStruct) string {
 // TestModelWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
 type TestModelWrapper struct {
 	TestModel *TestModel
-	Path      TestModelPathStruct
+	Path      *TestModelPathStruct
 	PathStr   string
+}
+
+// TestModelFromSnapshot is a function that will create an instance of the model from a document snapshot
+func TestModelFromSnapshot(snapshot *firestore.DocumentSnapshot) (*TestModelWrapper, error) {
+	temp, err := snapshot.DataTo(snapshot)
+	if err != nil {
+		return nil, err
+	}
+	path := TestModelPathToStruct(snapshot.Ref.Path)
+	pathStr := TestModelStructToPath(path)
+	wrapper := *TestModelWrapper{Path: path, PathStr: pathStr, TestModel: temp}
+	return wrapper, nil
 }

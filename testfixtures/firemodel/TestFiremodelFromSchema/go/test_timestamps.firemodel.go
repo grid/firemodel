@@ -3,6 +3,7 @@
 package firemodel
 
 import (
+	firestore "cloud.google.com/go/firestore"
 	"fmt"
 	"regexp"
 	"time"
@@ -43,7 +44,7 @@ func TestTimestampsPathToStruct(path string) *TestTimestampsPathStruct {
 }
 
 // TestTimestampsStructToPath is a function that turns a PathStruct of TestTimestamps into a firestore path
-func TestTimestampsStructToPath(path TestTimestampsPathStruct) string {
+func TestTimestampsStructToPath(path *TestTimestampsPathStruct) string {
 	built := fmt.Sprintf("timestamps/%s", path.TestTimestampsId)
 	return built
 }
@@ -51,6 +52,18 @@ func TestTimestampsStructToPath(path TestTimestampsPathStruct) string {
 // TestTimestampsWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
 type TestTimestampsWrapper struct {
 	TestTimestamps *TestTimestamps
-	Path           TestTimestampsPathStruct
+	Path           *TestTimestampsPathStruct
 	PathStr        string
+}
+
+// TestTimestampsFromSnapshot is a function that will create an instance of the model from a document snapshot
+func TestTimestampsFromSnapshot(snapshot *firestore.DocumentSnapshot) (*TestTimestampsWrapper, error) {
+	temp, err := snapshot.DataTo(snapshot)
+	if err != nil {
+		return nil, err
+	}
+	path := TestTimestampsPathToStruct(snapshot.Ref.Path)
+	pathStr := TestTimestampsStructToPath(path)
+	wrapper := *TestTimestampsWrapper{Path: path, PathStr: pathStr, TestTimestamps: temp}
+	return wrapper, nil
 }

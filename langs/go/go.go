@@ -144,7 +144,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		})
 
 		f.Commentf("%s is a function that turns a PathStruct of %s into a firestore path", pathStructReverseFunctionName, model.Name)
-		f.Func().Id(pathStructReverseFunctionName).Params(jen.Id("path").Id(pathStructName)).String().BlockFunc(func(g *jen.Group) {
+		f.Func().Id(pathStructReverseFunctionName).Params(jen.Id("path").Id("*" + pathStructName)).String().BlockFunc(func(g *jen.Group) {
 			g.Id("built").Op(":=").Qual("fmt", "Sprintf").CallFunc(func(g *jen.Group) {
 				g.Lit(format)
 				for _, arg := range args {
@@ -158,9 +158,32 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		f.Commentf("%s is a struct wrapper that contains a reference to the firemodel instance and the path", wrapperName)
 		f.Type().Id(wrapperName).StructFunc(func(g *jen.Group) {
 			g.Id(model.Name).Id("*" + model.Name)
-			g.Id("Path").Id(pathStructName)
+			g.Id("Path").Id("*" + pathStructName)
 			g.Id("PathStr").String()
 		})
+
+		fromSnapshotName := fmt.Sprint(model.Name, "FromSnapshot")
+		f.Commentf("%s is a function that will create an instance of the model from a document snapshot", fromSnapshotName)
+		f.Func().
+			Id(fromSnapshotName).
+			Params(
+				jen.Id("snapshot").
+					Op("*").Qual("cloud.google.com/go/firestore", "DocumentSnapshot")).
+			Params(
+				jen.Id("*"+wrapperName),
+				jen.Error()).
+			BlockFunc(func(g *jen.Group) {
+				g.Id("temp").Op(",").Err().Op(":=").Id("snapshot").Dot("DataTo").Call(jen.Id("snapshot"))
+				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+				g.Id("path").Op(":=").Id(pathStructFunctionName).Call(jen.Id("snapshot.Ref.Path"))
+				g.Id("pathStr").Op(":=").Id(pathStructReverseFunctionName).Call(jen.Id("path"))
+				g.Id("wrapper").Op(":=").Id("*" + wrapperName).ValuesFunc(func(g *jen.Group) {
+					g.Id("Path").Op(":").Id("path")
+					g.Id("PathStr").Op(":").Id("pathStr")
+					g.Id(model.Name).Op(":").Id("temp")
+				})
+				g.Return(jen.Id("wrapper"), jen.Nil())
+			})
 	}
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))
