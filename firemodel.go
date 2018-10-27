@@ -15,6 +15,9 @@ type Modeler interface {
 	Model(schema *Schema, sourceCoder SourceCoder) error
 }
 
+type Client interface {
+}
+
 func Run(
 	schema *Schema,
 	config *Config,

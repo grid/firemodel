@@ -4,6 +4,8 @@ package firemodel
 
 import (
 	firestore "cloud.google.com/go/firestore"
+	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
@@ -54,16 +56,54 @@ type TestTimestampsWrapper struct {
 	TestTimestamps *TestTimestamps
 	Path           *TestTimestampsPathStruct
 	PathStr        string
+	// ---- Internal Stuffs ----
+	client  *clientTestTimestamps
+	pathStr string
+	ref     *firestore.DocumentRef
 }
 
 // TestTimestampsFromSnapshot is a function that will create an instance of the model from a document snapshot
 func TestTimestampsFromSnapshot(snapshot *firestore.DocumentSnapshot) (*TestTimestampsWrapper, error) {
-	temp, err := snapshot.DataTo(snapshot)
+	temp := &TestTimestamps{}
+	err := snapshot.DataTo(temp)
 	if err != nil {
 		return nil, err
 	}
 	path := TestTimestampsPathToStruct(snapshot.Ref.Path)
 	pathStr := TestTimestampsStructToPath(path)
-	wrapper := *TestTimestampsWrapper{Path: path, PathStr: pathStr, TestTimestamps: temp}
+	wrapper := &TestTimestampsWrapper{Path: path, PathStr: pathStr, pathStr: pathStr, ref: snapshot.Ref, TestTimestamps: temp}
 	return wrapper, nil
+}
+
+type clientTestTimestamps struct {
+	client *Client
+}
+
+func (c *clientTestTimestamps) Create(ctx context.Context, path string, model *TestTimestamps) (*TestTimestampsWrapper, error) {
+	ref := c.client.Client.Doc(ctx, path)
+	wrapper := &TestTimestampsWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestTimestampsPathToStruct(path), client: c, TestTimestamps: model}
+	err := wrapper.Set(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return wrapper, nil
+}
+func (c *clientTestTimestamps) GetByPath(ctx context.Context, path string) (*TestTimestampsWrapper, error) {
+	reference := c.client.Client.Doc(path)
+	snapshot, err := reference.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	wrapper, err := TestTimestampsFromSnapshot(snapshot)
+	if err != nil {
+		return nil, err
+	}
+	return wrapper, nil
+}
+func (m *TestTimestampsWrapper) Set(ctx context.Context) error {
+	if m.ref == nil {
+		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
+	}
+	_, err := m.ref.Set(ctx, m.TestTimestamps)
+	return err
 }
