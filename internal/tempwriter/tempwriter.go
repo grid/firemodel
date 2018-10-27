@@ -20,8 +20,6 @@ type TempWriter struct {
 	prefix string
 	files  map[string]*os.File
 	wipe   bool
-
-	clientNames []string
 }
 
 func (w *TempWriter) NewFile(filename string) (io.WriteCloser, error) {
@@ -45,10 +43,9 @@ func (w *TempWriter) Flush() error {
 	if err := os.MkdirAll(w.prefix, 0777); err != nil {
 		panic(err)
 	}
-
 	for filename, f := range w.files {
 		if err := os.Rename(
-			f.Name(), // in tempdir
+			f.Name(),                          // in tempdir
 			filepath.Join(w.prefix, filename), // in target dir
 		); err != nil {
 			return err
