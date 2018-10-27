@@ -79,10 +79,20 @@ type clientTestTimestamps struct {
 	client *Client
 }
 
-func (c *clientTestTimestamps) Create(ctx context.Context, path string, model *TestTimestamps) (*TestTimestampsWrapper, error) {
+func (c *clientTestTimestamps) Set(ctx context.Context, path string, model *TestTimestamps) (*TestTimestampsWrapper, error) {
 	ref := c.client.Client.Doc(path)
+	snapshot, err := ref.Get(ctx)
+	if snapshot.Exists() {
+		temp, err := TestTimestampsFromSnapshot(snapshot)
+		if err != nil {
+			// Don't do anything, just override
+		} else {
+			model.CreatedAt = temp.Data.CreatedAt
+		}
+	}
 	wrapper := &TestTimestampsWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestTimestampsPathToStruct(path), client: c, Data: model}
-	err := wrapper.Set(ctx)
+	wrapper.Data.UpdatedAt = time.Now()
+	err = wrapper.Set(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -120,10 +120,20 @@ type clientTestModel struct {
 	client *Client
 }
 
-func (c *clientTestModel) Create(ctx context.Context, path string, model *TestModel) (*TestModelWrapper, error) {
+func (c *clientTestModel) Set(ctx context.Context, path string, model *TestModel) (*TestModelWrapper, error) {
 	ref := c.client.Client.Doc(path)
+	snapshot, err := ref.Get(ctx)
+	if snapshot.Exists() {
+		temp, err := TestModelFromSnapshot(snapshot)
+		if err != nil {
+			// Don't do anything, just override
+		} else {
+			model.CreatedAt = temp.Data.CreatedAt
+		}
+	}
 	wrapper := &TestModelWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestModelPathToStruct(path), client: c, Data: model}
-	err := wrapper.Set(ctx)
+	wrapper.Data.UpdatedAt = time.Now()
+	err = wrapper.Set(ctx)
 	if err != nil {
 		return nil, err
 	}

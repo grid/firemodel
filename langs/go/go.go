@@ -248,8 +248,33 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			g.Id("client").Op("*").Id("Client")
 		})
 
-		f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Create").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
+		// Disable create for now, only set
+		// f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Create").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
+		// 	g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
+		// 	g.Id("wrapper").Op(":=").Op("&").Id(wrapperName).ValuesFunc(func(g *jen.Group) {
+		// 		g.Id("ref").Op(":").Id("ref")
+		// 		g.Id("pathStr").Op(":").Id("path")
+		// 		g.Id("PathStr").Op(":").Id("path")
+		// 		g.Id("Path").Op(":").Id(pathStructFunctionName).Call(jen.Id("path"))
+		// 		g.Id("client").Op(":").Id("c")
+		// 		g.Id("Data").Op(":").Id("model")
+		// 	})
+		// 	g.Id("wrapper").Dot("Data").Dot("UpdatedAt").Op("=").Qual("time", "Now").Call()
+		// 	g.Id("wrapper").Dot("Data").Dot("CreatedAt").Op("=").Qual("time", "Now").Call()
+		// 	g.Err().Op(":=").Id("wrapper").Dot("Create").Call(jen.Id("ctx"))
+		// 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+		// 	g.Return(jen.Id("wrapper"), jen.Nil())
+		// })
+
+		f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Set").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
 			g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
+			g.Id("snapshot").Op(",").Err().Op(":=").Id("ref").Dot("Get").Call(jen.Id("ctx"))
+			g.If(jen.Id("snapshot").Dot("Exists").Call()).BlockFunc(func(g *jen.Group) {
+				g.Id("temp").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
+				g.If(jen.Err().Op("!=").Nil()).Block(jen.Comment("Don't do anything, just override")).Else().BlockFunc(func(g *jen.Group) {
+					g.Id("model").Dot("CreatedAt").Op("=").Id("temp").Dot("Data").Dot("CreatedAt")
+				})
+			})
 			g.Id("wrapper").Op(":=").Op("&").Id(wrapperName).ValuesFunc(func(g *jen.Group) {
 				g.Id("ref").Op(":").Id("ref")
 				g.Id("pathStr").Op(":").Id("path")
@@ -258,7 +283,8 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 				g.Id("client").Op(":").Id("c")
 				g.Id("Data").Op(":").Id("model")
 			})
-			g.Err().Op(":=").Id("wrapper").Dot("Set").Call(jen.Id("ctx"))
+			g.Id("wrapper").Dot("Data").Dot("UpdatedAt").Op("=").Qual("time", "Now").Call()
+			g.Err().Op("=").Id("wrapper").Dot("Set").Call(jen.Id("ctx"))
 			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
 			g.Return(jen.Id("wrapper"), jen.Nil())
 		})
