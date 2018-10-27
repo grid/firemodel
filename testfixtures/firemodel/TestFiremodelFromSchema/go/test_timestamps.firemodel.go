@@ -53,9 +53,9 @@ func TestTimestampsStructToPath(path *TestTimestampsPathStruct) string {
 
 // TestTimestampsWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
 type TestTimestampsWrapper struct {
-	TestTimestamps *TestTimestamps
-	Path           *TestTimestampsPathStruct
-	PathStr        string
+	Data    *TestTimestamps
+	Path    *TestTimestampsPathStruct
+	PathStr string
 	// ---- Internal Stuffs ----
 	client  *clientTestTimestamps
 	pathStr string
@@ -71,7 +71,7 @@ func TestTimestampsFromSnapshot(snapshot *firestore.DocumentSnapshot) (*TestTime
 	}
 	path := TestTimestampsPathToStruct(snapshot.Ref.Path)
 	pathStr := TestTimestampsStructToPath(path)
-	wrapper := &TestTimestampsWrapper{Path: path, PathStr: pathStr, pathStr: pathStr, ref: snapshot.Ref, TestTimestamps: temp}
+	wrapper := &TestTimestampsWrapper{Path: path, PathStr: pathStr, pathStr: pathStr, ref: snapshot.Ref, Data: temp}
 	return wrapper, nil
 }
 
@@ -80,8 +80,8 @@ type clientTestTimestamps struct {
 }
 
 func (c *clientTestTimestamps) Create(ctx context.Context, path string, model *TestTimestamps) (*TestTimestampsWrapper, error) {
-	ref := c.client.Client.Doc(ctx, path)
-	wrapper := &TestTimestampsWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestTimestampsPathToStruct(path), client: c, TestTimestamps: model}
+	ref := c.client.Client.Doc(path)
+	wrapper := &TestTimestampsWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestTimestampsPathToStruct(path), client: c, Data: model}
 	err := wrapper.Set(ctx)
 	if err != nil {
 		return nil, err
@@ -104,6 +104,6 @@ func (m *TestTimestampsWrapper) Set(ctx context.Context) error {
 	if m.ref == nil {
 		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
 	}
-	_, err := m.ref.Set(ctx, m.TestTimestamps)
+	_, err := m.ref.Set(ctx, m.Data)
 	return err
 }

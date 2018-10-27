@@ -208,7 +208,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		wrapperName := fmt.Sprint(model.Name, "Wrapper")
 		f.Commentf("%s is a struct wrapper that contains a reference to the firemodel instance and the path", wrapperName)
 		f.Type().Id(wrapperName).StructFunc(func(g *jen.Group) {
-			g.Id(model.Name).Id("*" + model.Name)
+			g.Id("Data").Id("*" + model.Name)
 			g.Id("Path").Id("*" + pathStructName)
 			g.Id("PathStr").String()
 			g.Comment("---- Internal Stuffs ----")
@@ -238,7 +238,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 					g.Id("PathStr").Op(":").Id("pathStr")
 					g.Id("pathStr").Op(":").Id("pathStr")
 					g.Id("ref").Op(":").Id("snapshot.Ref")
-					g.Id(model.Name).Op(":").Id("temp")
+					g.Id("Data").Op(":").Id("temp")
 				})
 				g.Return(jen.Id("wrapper"), jen.Nil())
 			})
@@ -249,14 +249,14 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		})
 
 		f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Create").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
-			g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("ctx"), jen.Id("path"))
+			g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
 			g.Id("wrapper").Op(":=").Op("&").Id(wrapperName).ValuesFunc(func(g *jen.Group) {
 				g.Id("ref").Op(":").Id("ref")
 				g.Id("pathStr").Op(":").Id("path")
 				g.Id("PathStr").Op(":").Id("path")
 				g.Id("Path").Op(":").Id(pathStructFunctionName).Call(jen.Id("path"))
 				g.Id("client").Op(":").Id("c")
-				g.Id(model.Name).Op(":").Id("model")
+				g.Id("Data").Op(":").Id("model")
 			})
 			g.Err().Op(":=").Id("wrapper").Dot("Set").Call(jen.Id("ctx"))
 			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
@@ -280,7 +280,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
 				g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
 			})
-			g.Id("_").Op(",").Err().Op(":=").Id("m").Dot("ref").Dot("Set").Call(jen.Id("ctx"), jen.Id("m").Dot(model.Name))
+			g.Id("_").Op(",").Err().Op(":=").Id("m").Dot("ref").Dot("Set").Call(jen.Id("ctx"), jen.Id("m").Dot("Data"))
 			g.Return(jen.Err())
 		})
 	}

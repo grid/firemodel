@@ -94,9 +94,9 @@ func TestModelStructToPath(path *TestModelPathStruct) string {
 
 // TestModelWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
 type TestModelWrapper struct {
-	TestModel *TestModel
-	Path      *TestModelPathStruct
-	PathStr   string
+	Data    *TestModel
+	Path    *TestModelPathStruct
+	PathStr string
 	// ---- Internal Stuffs ----
 	client  *clientTestModel
 	pathStr string
@@ -112,7 +112,7 @@ func TestModelFromSnapshot(snapshot *firestore.DocumentSnapshot) (*TestModelWrap
 	}
 	path := TestModelPathToStruct(snapshot.Ref.Path)
 	pathStr := TestModelStructToPath(path)
-	wrapper := &TestModelWrapper{Path: path, PathStr: pathStr, pathStr: pathStr, ref: snapshot.Ref, TestModel: temp}
+	wrapper := &TestModelWrapper{Path: path, PathStr: pathStr, pathStr: pathStr, ref: snapshot.Ref, Data: temp}
 	return wrapper, nil
 }
 
@@ -121,8 +121,8 @@ type clientTestModel struct {
 }
 
 func (c *clientTestModel) Create(ctx context.Context, path string, model *TestModel) (*TestModelWrapper, error) {
-	ref := c.client.Client.Doc(ctx, path)
-	wrapper := &TestModelWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestModelPathToStruct(path), client: c, TestModel: model}
+	ref := c.client.Client.Doc(path)
+	wrapper := &TestModelWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestModelPathToStruct(path), client: c, Data: model}
 	err := wrapper.Set(ctx)
 	if err != nil {
 		return nil, err
@@ -145,6 +145,6 @@ func (m *TestModelWrapper) Set(ctx context.Context) error {
 	if m.ref == nil {
 		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
 	}
-	_, err := m.ref.Set(ctx, m.TestModel)
+	_, err := m.ref.Set(ctx, m.Data)
 	return err
 }
