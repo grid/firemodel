@@ -143,10 +143,12 @@ override class var path: String { return "test_models" }
         case "direction":
             self.direction = TestEnum(firestoreValue: value)
         case "models":
-            self.models = (value as? [[String: Any]])?.map { TestStruct(id: self.id, value: $0) }
+            self.models = (value as? [[String: Any]])?
+                .enumerated()
+                .map { TestStruct(id: "\($0.offset)", value: $0.element) }
         case "nested":
           if let value = value as? [String: Any] {
-            self.nested = TestStruct(id: self.id, value: value)
+            self.nested = TestStruct(id: "\(0)", value: value)
             return true
           }
         default:

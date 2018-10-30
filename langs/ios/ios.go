@@ -281,12 +281,14 @@ override class var path: String { return "{{firestoreModelName . }}" }
         {{- end}}
         {{- range .Fields | filterFieldsStructArraysOnly}}
         case "{{.Name | toLowerCamel}}":
-            self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?.map { {{.Type.T | toSwiftType false }}(id: self.id, value: $0) }
+            self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?
+                .enumerated()
+                .map { {{.Type.T | toSwiftType false }}(id: "\($0.offset)", value: $0.element) }
         {{- end}}
         {{- range .Fields | filterFieldsStructsOnly}}
         case "{{.Name | toLowerCamel}}":
           if let value = value as? [String: Any] {
-            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false}}(id: self.id, value: value)
+            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false}}(id: "\(0)", value: value)
             return true
           }
           {{- end}}
@@ -387,12 +389,14 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
         {{- end}}
         {{- range .Fields | filterFieldsStructArraysOnly}}
         case "{{.Name | toLowerCamel}}":
-            self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?.map { {{.Type.T | toSwiftType false }}(id: self.id, value: $0) }
+            self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?
+                .enumerated()
+                .map { {{.Type.T | toSwiftType false }}(id: "\($0.offset)", value: "\($0.element)") }
         {{- end}}
         {{- range .Fields | filterFieldsStructsOnly}}
         case "{{.Name | toLowerCamel}}":
           if let value = value as? [String: Any] {
-            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false}}(id: self.id, value: value)
+            self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false}}(id: "\(0)", value: value)
             return true
           }
           {{- end}}
