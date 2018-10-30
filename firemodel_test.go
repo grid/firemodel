@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/visor-tax/firemodel"
 	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/visor-tax/firemodel"
 )
 
 const fixturesRoot = "testfixtures/firemodel"

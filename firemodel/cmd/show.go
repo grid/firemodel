@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/visor-tax/firemodel"
 	"github.com/spf13/cobra"
+	"github.com/visor-tax/firemodel"
 )
 
 var showCmd = &cobra.Command{

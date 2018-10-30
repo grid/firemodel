@@ -4,11 +4,11 @@ import (
 	// Modeler registrations:
 	"fmt"
 
+	"github.com/spf13/cobra"
 	_ "github.com/visor-tax/firemodel/langs/go"
 	_ "github.com/visor-tax/firemodel/langs/ios"
 	_ "github.com/visor-tax/firemodel/langs/ts"
 	"github.com/visor-tax/firemodel/version"
-	"github.com/spf13/cobra"
 )
 
 var (

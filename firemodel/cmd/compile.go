@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/go-errors/errors"
+	"github.com/spf13/cobra"
 	"github.com/visor-tax/firemodel"
 	"github.com/visor-tax/firemodel/internal/tempwriter"
-	"github.com/spf13/cobra"
 	"os"
 )
 

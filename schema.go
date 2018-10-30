@@ -4,8 +4,8 @@ import (
 	"io"
 
 	"github.com/iancoleman/strcase"
-	"github.com/visor-tax/firemodel/internal/ast"
 	"github.com/pkg/errors"
+	"github.com/visor-tax/firemodel/internal/ast"
 )
 
 func ParseSchema(r io.Reader) (*Schema, error) {

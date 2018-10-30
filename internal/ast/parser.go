@@ -146,7 +146,7 @@ func (ft *ASTFieldType) String() string {
 	if ft.Generic != nil {
 		return fmt.Sprintf("%s<%s>", ft.Base, ft.Generic)
 	} else {
-		return fmt.Sprintf("%s", ft.Base)
+		return fmt.Sprint(ft.Base)
 	}
 }
 

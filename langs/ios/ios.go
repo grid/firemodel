@@ -5,9 +5,9 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 	"github.com/visor-tax/firemodel"
 	"github.com/visor-tax/firemodel/version"
-	"github.com/pkg/errors"
 )
 
 func init() {
@@ -181,13 +181,13 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 		if root {
 			return fmt.Sprintf("%s?", firetype.T.Name)
 		} else {
-			return fmt.Sprintf("%s", firetype.T.Name)
+			return firetype.T.Name
 		}
 	case *firemodel.Enum:
 		if root {
 			return fmt.Sprintf("%s?", strcase.ToCamel(firetype.T.Name))
 		} else {
-			return fmt.Sprintf("%s", strcase.ToCamel(firetype.T.Name))
+			return strcase.ToCamel(firetype.T.Name)
 		}
 	case *firemodel.Map:
 		if firetype.T != nil {

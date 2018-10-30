@@ -5,9 +5,9 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 	"github.com/visor-tax/firemodel"
 	"github.com/visor-tax/firemodel/version"
-	"github.com/pkg/errors"
 )
 
 func init() {
