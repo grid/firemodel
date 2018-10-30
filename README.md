@@ -1,4 +1,4 @@
-# firemodel [![CircleCI](https://circleci.com/gh/mickeyreiss/firemodel.svg?style=svg)](https://circleci.com/gh/mickeyreiss/firemodel)
+# firemodel [![CircleCI](https://circleci.com/gh/visor-tax/firemodel.svg?style=svg)](https://circleci.com/gh/visor-tax/firemodel)
 
 > Type-safe, cross-platform models for [Firestore](https://firebase.google.com/docs/firestore/).
 
@@ -14,7 +14,7 @@ Firemodel currently supports iOS (Swift+Pring), TypeScript and Go.
 
 Install firemodel with go get:
 
-    go get github.com/mickeyreiss/firemodel/firemodel
+    go get github.com/visor-tax/firemodel/firemodel
 
 Now that you have the tool, you're ready to define a schema!
 

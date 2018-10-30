@@ -4,10 +4,10 @@ import (
 	// Modeler registrations:
 	"fmt"
 
-	_ "github.com/mickeyreiss/firemodel/langs/go"
-	_ "github.com/mickeyreiss/firemodel/langs/ios"
-	_ "github.com/mickeyreiss/firemodel/langs/ts"
-	"github.com/mickeyreiss/firemodel/version"
+	_ "github.com/visor-tax/firemodel/langs/go"
+	_ "github.com/visor-tax/firemodel/langs/ios"
+	_ "github.com/visor-tax/firemodel/langs/ts"
+	"github.com/visor-tax/firemodel/version"
 	"github.com/spf13/cobra"
 )
 

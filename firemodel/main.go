@@ -1,6 +1,6 @@
 package main
 
-import "github.com/mickeyreiss/firemodel/firemodel/cmd"
+import "github.com/visor-tax/firemodel/firemodel/cmd"
 
 func main() {
 	cmd.Execute()

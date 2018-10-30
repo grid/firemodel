@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"github.com/iancoleman/strcase"
-	"github.com/mickeyreiss/firemodel/internal/ast"
+	"github.com/visor-tax/firemodel/internal/ast"
 	"github.com/pkg/errors"
 )
 

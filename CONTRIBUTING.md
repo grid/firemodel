@@ -6,7 +6,7 @@ Thanks your help with building Firemodel!
 
 Firemodel is written in go 1.10.
 
-    go get -t -u github.com/mickeyreiss/firemodel/...
+    go get -t -u github.com/visor-tax/firemodel/...
 
 There are no other system dependencies required to develop or build firemodel.
 

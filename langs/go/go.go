@@ -7,8 +7,8 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
-	"github.com/mickeyreiss/firemodel"
-	"github.com/mickeyreiss/firemodel/version"
+	"github.com/visor-tax/firemodel"
+	"github.com/visor-tax/firemodel/version"
 	"github.com/pkg/errors"
 )
 
@@ -451,7 +451,7 @@ func (m *GoModeler) goType(firetype firemodel.SchemaFieldType) func(s *jen.State
 	case *firemodel.String:
 		return func(s *jen.Statement) { s.String() }
 	case *firemodel.URL:
-		return func(s *jen.Statement) { s.Qual("github.com/mickeyreiss/firemodel/runtime", "URL") }
+		return func(s *jen.Statement) { s.Qual("github.com/visor-tax/firemodel/runtime", "URL") }
 	case *firemodel.Enum:
 		return func(s *jen.Statement) { s.Id(firetype.T.Name) }
 	case *firemodel.Bytes:
@@ -468,7 +468,7 @@ func (m *GoModeler) goType(firetype firemodel.SchemaFieldType) func(s *jen.State
 		}
 		return func(s *jen.Statement) { s.Index().Interface() }
 	case *firemodel.File:
-		return func(s *jen.Statement) { s.Op("*").Qual("github.com/mickeyreiss/firemodel/runtime", "File") }
+		return func(s *jen.Statement) { s.Op("*").Qual("github.com/visor-tax/firemodel/runtime", "File") }
 	case *firemodel.Map:
 		if firetype.T != nil {
 			return func(s *jen.Statement) { s.Map(jen.String()).Do(m.goType(firetype.T)) }

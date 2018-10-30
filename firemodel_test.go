@@ -1,9 +1,9 @@
 package firemodel_test
 
 import (
-	_ "github.com/mickeyreiss/firemodel/langs/go"
-	_ "github.com/mickeyreiss/firemodel/langs/ios"
-	_ "github.com/mickeyreiss/firemodel/langs/ts"
+	_ "github.com/visor-tax/firemodel/langs/go"
+	_ "github.com/visor-tax/firemodel/langs/ios"
+	_ "github.com/visor-tax/firemodel/langs/ts"
 
 	"bytes"
 	"io"
@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mickeyreiss/firemodel"
+	"github.com/visor-tax/firemodel"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 

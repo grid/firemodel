@@ -46,7 +46,7 @@ for goos in "darwin" "linux" "windows"; do
 
   GOOS=${goos?} \
     go build \
-    -ldflags "-X github.com/mickeyreiss/firemodel/version.Version=${NEW_TAG?}" \
+    -ldflags "-X github.com/visor-tax/firemodel/version.Version=${NEW_TAG?}" \
     -o "./.build/firemodel-${goos?}-${GOARCH?}" ./firemodel/main.go
 done
 

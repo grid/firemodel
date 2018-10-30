@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/go-errors/errors"
-	"github.com/mickeyreiss/firemodel"
-	"github.com/mickeyreiss/firemodel/internal/tempwriter"
+	"github.com/visor-tax/firemodel"
+	"github.com/visor-tax/firemodel/internal/tempwriter"
 	"github.com/spf13/cobra"
 	"os"
 )

@@ -4,7 +4,7 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.11
-    working_directory: /go/src/github.com/mickeyreiss/firemodel
+    working_directory: /go/src/github.com/visor-tax/firemodel
     steps:
       - checkout
       - run: go get -v -t -d ./...
