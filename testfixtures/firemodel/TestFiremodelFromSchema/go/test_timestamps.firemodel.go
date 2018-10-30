@@ -3,6 +3,9 @@
 package firemodel
 
 import (
+	firestore "cloud.google.com/go/firestore"
+	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
@@ -43,14 +46,74 @@ func TestTimestampsPathToStruct(path string) *TestTimestampsPathStruct {
 }
 
 // TestTimestampsStructToPath is a function that turns a PathStruct of TestTimestamps into a firestore path
-func TestTimestampsStructToPath(path TestTimestampsPathStruct) string {
+func TestTimestampsStructToPath(path *TestTimestampsPathStruct) string {
 	built := fmt.Sprintf("timestamps/%s", path.TestTimestampsId)
 	return built
 }
 
 // TestTimestampsWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
 type TestTimestampsWrapper struct {
-	TestTimestamps *TestTimestamps
-	Path           TestTimestampsPathStruct
-	PathStr        string
+	Data    *TestTimestamps
+	Path    *TestTimestampsPathStruct
+	PathStr string
+	// ---- Internal Stuffs ----
+	client  *clientTestTimestamps
+	pathStr string
+	ref     *firestore.DocumentRef
+}
+
+// TestTimestampsFromSnapshot is a function that will create an instance of the model from a document snapshot
+func TestTimestampsFromSnapshot(snapshot *firestore.DocumentSnapshot) (*TestTimestampsWrapper, error) {
+	temp := &TestTimestamps{}
+	err := snapshot.DataTo(temp)
+	if err != nil {
+		return nil, err
+	}
+	path := TestTimestampsPathToStruct(snapshot.Ref.Path)
+	pathStr := TestTimestampsStructToPath(path)
+	wrapper := &TestTimestampsWrapper{Path: path, PathStr: pathStr, pathStr: pathStr, ref: snapshot.Ref, Data: temp}
+	return wrapper, nil
+}
+
+type clientTestTimestamps struct {
+	client *Client
+}
+
+func (c *clientTestTimestamps) Set(ctx context.Context, path string, model *TestTimestamps) (*TestTimestampsWrapper, error) {
+	ref := c.client.Client.Doc(path)
+	snapshot, err := ref.Get(ctx)
+	if snapshot.Exists() {
+		temp, err := TestTimestampsFromSnapshot(snapshot)
+		if err != nil {
+			// Don't do anything, just override
+		} else {
+			model.CreatedAt = temp.Data.CreatedAt
+		}
+	}
+	wrapper := &TestTimestampsWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestTimestampsPathToStruct(path), client: c, Data: model}
+	wrapper.Data.UpdatedAt = time.Now()
+	err = wrapper.Set(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return wrapper, nil
+}
+func (c *clientTestTimestamps) GetByPath(ctx context.Context, path string) (*TestTimestampsWrapper, error) {
+	reference := c.client.Client.Doc(path)
+	snapshot, err := reference.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	wrapper, err := TestTimestampsFromSnapshot(snapshot)
+	if err != nil {
+		return nil, err
+	}
+	return wrapper, nil
+}
+func (m *TestTimestampsWrapper) Set(ctx context.Context) error {
+	if m.ref == nil {
+		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
+	}
+	_, err := m.ref.Set(ctx, m.Data)
+	return err
 }
