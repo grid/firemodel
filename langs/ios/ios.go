@@ -391,7 +391,7 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
         case "{{.Name | toLowerCamel}}":
             self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?
                 .enumerated()
-                .map { {{.Type.T | toSwiftType false }}(id: "\($0.offset)", value: "\($0.element)") }
+                .map { {{.Type.T | toSwiftType false }}(id: "\($0.offset)", value: $0.element) }
         {{- end}}
         {{- range .Fields | filterFieldsStructsOnly}}
         case "{{.Name | toLowerCamel}}":
