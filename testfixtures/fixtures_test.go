@@ -13,15 +13,16 @@ func TestRegexPath(t *testing.T) {
 		exp  bool
 	}{
 		{"empty", "", false},
-		{"fully qualified", "/projects/some-project/databases/(default)/documents/users/123/test_models/abc", true},
-		{"doc only", "/users/123/test_models/abc", true},
-		{"fully qualified no leading slash", "projects/some-project/databases/(default)/documents/users/123/test_models/abc", true},
-		{"doc only no leading slash", "users/123/test_models/abc", true},
+		{"fully qualified", "projects/some-project/databases/(default)/documents/users/123/test_models/abc", true},
+		{"doc only", "users/123/test_models/abc", true},
+		{"doc only leading slash", "/users/123/test_models/abc", true},
 
 		{"prefix match, not real match", "users/123", false},
 		{"prefix match, not real match", "/users/123", false},
 		{"prefix match, not real match", "/users/123/", false},
 		{"prefix match, not real match", "users/123/", false},
+
+		{"root match, not real match", "users/123/test_models/abc/some-unrelated/child", false},
 
 		{"non match", "/othermodel/random", false},
 		{"roundtrip", firemodels.TestModelPath("userid", "testmodelid"), true},
