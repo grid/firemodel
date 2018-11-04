@@ -68,10 +68,10 @@ func TestModelPath(userId string, testModelId string) string {
 }
 
 // TestModelRegexPath is a regex that can be use to filter out firestore events of TestModel
-var TestModelRegexPath = regexp.MustCompile("(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?users/([a-zA-Z0-9]+)/test_models/([a-zA-Z0-9]+)")
+var TestModelRegexPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?users/([a-zA-Z0-9]+)/test_models/([a-zA-Z0-9]+)$")
 
 // TestModelRegexNamedPath is a named regex that can be use to filter out firestore events of TestModel
-var TestModelRegexNamedPath = regexp.MustCompile("(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?users/(?P<user_id>[a-zA-Z0-9]+)/test_models/(?P<test_model_id>[a-zA-Z0-9]+)")
+var TestModelRegexNamedPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?users/(?P<user_id>[a-zA-Z0-9]+)/test_models/(?P<test_model_id>[a-zA-Z0-9]+)$")
 
 // TestModelPathStruct is a struct that contains parts of a path of TestModel
 type TestModelPathStruct struct {

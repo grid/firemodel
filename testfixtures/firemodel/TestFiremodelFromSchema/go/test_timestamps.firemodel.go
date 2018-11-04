@@ -28,10 +28,10 @@ func TestTimestampsPath(testTimestampsId string) string {
 }
 
 // TestTimestampsRegexPath is a regex that can be use to filter out firestore events of TestTimestamps
-var TestTimestampsRegexPath = regexp.MustCompile("(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?timestamps/([a-zA-Z0-9]+)")
+var TestTimestampsRegexPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?timestamps/([a-zA-Z0-9]+)$")
 
 // TestTimestampsRegexNamedPath is a named regex that can be use to filter out firestore events of TestTimestamps
-var TestTimestampsRegexNamedPath = regexp.MustCompile("(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?timestamps/(?P<test_timestamps_id>[a-zA-Z0-9]+)")
+var TestTimestampsRegexNamedPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?timestamps/(?P<test_timestamps_id>[a-zA-Z0-9]+)$")
 
 // TestTimestampsPathStruct is a struct that contains parts of a path of TestTimestamps
 type TestTimestampsPathStruct struct {
