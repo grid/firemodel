@@ -108,7 +108,7 @@ override class var path: String { return "test_models" }
     // TODO: Add documentation to refs in firemodel schema.
     dynamic var refs: [Pring.AnyReference] = .init()
     // TODO: Add documentation to modelRefs in firemodel schema.
-    dynamic var modelRefs: [Pring.Reference<TestTimestamps>] = .init()
+    dynamic var modelRefs: [Any] = .init()
     // TODO: Add documentation to meta in firemodel schema.
     dynamic var meta: [String: Any] = [:]
     // TODO: Add documentation to metaStrs in firemodel schema.
