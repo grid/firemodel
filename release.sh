@@ -28,7 +28,9 @@ git fetch --tags origin
 echo "10 most recent releases:"
 hub release --include-drafts --limit=10
 
-read -r -p "Enter tag for new release: " NEW_TAG
+if [[ -z "${NEW_TAG}" ]]; then
+  read -r -p "Enter tag for new release: " NEW_TAG
+fi
 
 echo "${NEW_TAG?}"
 
