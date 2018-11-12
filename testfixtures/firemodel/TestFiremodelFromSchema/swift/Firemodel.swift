@@ -55,7 +55,7 @@ extension TestEnum: CustomDebugStringConvertible {
     // TODO: Add documentation to where in firemodel schema.
     var where: String?
     // TODO: Add documentation to how_much in firemodel schema.
-    var howMuch: Int = 0
+    var howMuch: Int?
     // TODO: Add documentation to some_enum in firemodel schema.
     var someEnum: TestEnum?
 
@@ -86,13 +86,13 @@ override class var path: String { return "test_models" }
     // The name.
     dynamic var name: String?
     // The age.
-    dynamic var age: Int = 0
+    dynamic var age: Int?
     // The number pi.
-    dynamic var pi: Float = 0.0
+    dynamic var pi: Float?
     // The birth date.
     dynamic var birthdate: Date?
     // True if it is good.
-    dynamic var isGood: Bool = false
+    dynamic var isGood: Bool?
     // TODO: Add documentation to data in firemodel schema.
     dynamic var data: Data?
     // TODO: Add documentation to friend in firemodel schema.
@@ -101,6 +101,12 @@ override class var path: String { return "test_models" }
     dynamic var location: Pring.GeoPoint?
     // TODO: Add documentation to colors in firemodel schema.
     dynamic var colors: [String]?
+    // TODO: Add documentation to numbers in firemodel schema.
+    dynamic var numbers: [Int]?
+    // TODO: Add documentation to bools in firemodel schema.
+    dynamic var bools: [Bool]?
+    // TODO: Add documentation to doubles in firemodel schema.
+    dynamic var doubles: [Float]?
     // TODO: Add documentation to directions in firemodel schema.
     dynamic var directions: [TestEnum]?
     // TODO: Add documentation to models in firemodel schema.

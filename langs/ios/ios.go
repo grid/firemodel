@@ -116,11 +116,23 @@ func filterFieldsStructArraysOnly(in []*firemodel.SchemaField) []*firemodel.Sche
 func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 	switch firetype := firetype.(type) {
 	case *firemodel.Boolean:
-		return "Bool = false"
+		if root {
+			return "Bool?"
+		} else {
+			return "Bool"
+		}
 	case *firemodel.Integer:
-		return "Int = 0"
+		if root {
+			return "Int?"
+		} else {
+			return "Int"
+		}
 	case *firemodel.Double:
-		return "Float = 0.0"
+		if root {
+			return "Float?"
+		} else {
+			return "Float"
+		}
 	case *firemodel.Timestamp:
 		if root {
 			return "Date?"
