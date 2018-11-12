@@ -38,6 +38,7 @@ model TestModel {
   array<double> doubles;
   array<TestEnum> directions;
   array<TestStruct> models;
+  array<TestStruct> models2;
   array<reference> refs;
   array<reference<TestTimestamps>> model_refs;
   map meta;

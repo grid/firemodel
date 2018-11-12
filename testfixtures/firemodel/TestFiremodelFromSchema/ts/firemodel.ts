@@ -187,6 +187,8 @@ export namespace example {
     directions?: TestEnum[];
     /** TODO: Add documentation to models in firemodel schema. */
     models?: ITestStruct[];
+    /** TODO: Add documentation to models_2 in firemodel schema. */
+    models2?: ITestStruct[];
     /** TODO: Add documentation to refs in firemodel schema. */
     refs?: firestore.DocumentReference[];
     /** TODO: Add documentation to model_refs in firemodel schema. */
