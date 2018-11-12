@@ -177,6 +177,12 @@ export namespace example {
     location?: firestore.GeoPoint;
     /** TODO: Add documentation to colors in firemodel schema. */
     colors?: string[];
+    /** TODO: Add documentation to numbers in firemodel schema. */
+    numbers?: number[];
+    /** TODO: Add documentation to bools in firemodel schema. */
+    bools?: boolean[];
+    /** TODO: Add documentation to doubles in firemodel schema. */
+    doubles?: number[];
     /** TODO: Add documentation to directions in firemodel schema. */
     directions?: TestEnum[];
     /** TODO: Add documentation to models in firemodel schema. */

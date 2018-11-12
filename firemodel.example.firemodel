@@ -33,6 +33,9 @@ model TestModel {
   reference<TestModel> friend;
   geopoint location;
   array<string> colors;
+  array<integer> numbers;
+  array<boolean> bools;
+  array<double> doubles;
   array<TestEnum> directions;
   array<TestStruct> models;
   array<reference> refs;
