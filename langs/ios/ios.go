@@ -150,7 +150,10 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 			if root {
 				return fmt.Sprintf("Pring.Reference<%s> = .init()", strcase.ToCamel(firetype.T.Name))
 			} else {
-				return fmt.Sprintf("Pring.Reference<%s>", strcase.ToCamel(firetype.T.Name))
+				// HACK: Pring does not decode [Reference<T>] correctly. Use [Any] until this is fixed.
+				//       https://github.com/1amageek/Pring/issues/49
+				//return fmt.Sprintf("Pring.Reference<%s>", strcase.ToCamel(firetype.T.Name))
+				return "Any"
 			}
 		} else {
 			return "Pring.AnyReference"

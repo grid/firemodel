@@ -154,19 +154,19 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		f.Commentf("%s is a regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexPath"), model.Name)
 		f.Var().Id(fmt.Sprint(model.Name, "RegexPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
 			regex := regexp.QuoteMeta(format)
-			start := "(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
-			g.Lit(fmt.Sprint(start, strings.Replace(regex, "%s", "([a-zA-Z0-9]+)", -1)))
+			start := "^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
+			g.Lit(fmt.Sprint(start, strings.Replace(regex, "%s", "([a-zA-Z0-9]+)", -1), "$"))
 		})
 
 		f.Commentf("%s is a named regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexNamedPath"), model.Name)
 		f.Var().Id(fmt.Sprint(model.Name, "RegexNamedPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
 			regex := regexp.QuoteMeta(format)
-			start := "(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
+			start := "^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
 			for _, arg := range args {
 				repl := fmt.Sprint("(?P<", arg, ">[a-zA-Z0-9]+)")
 				regex = strings.Replace(regex, "%s", repl, 1)
 			}
-			g.Lit(fmt.Sprint(start, regex))
+			g.Lit(fmt.Sprint(start, regex, "$"))
 		})
 
 		pathStructName := fmt.Sprint(model.Name, "PathStruct")
