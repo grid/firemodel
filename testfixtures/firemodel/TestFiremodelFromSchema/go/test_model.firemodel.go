@@ -35,6 +35,12 @@ type TestModel struct {
 	Location *latlng.LatLng `firestore:"location"`
 	// TODO: Add comment to TestModel.colors.
 	Colors []string `firestore:"colors"`
+	// TODO: Add comment to TestModel.numbers.
+	Numbers []int64 `firestore:"numbers"`
+	// TODO: Add comment to TestModel.bools.
+	Bools []bool `firestore:"bools"`
+	// TODO: Add comment to TestModel.doubles.
+	Doubles []float64 `firestore:"doubles"`
 	// TODO: Add comment to TestModel.directions.
 	Directions []TestEnum `firestore:"directions"`
 	// TODO: Add comment to TestModel.models.
