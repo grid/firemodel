@@ -14,3 +14,28 @@ jobs:
           name: Install golangci-lint
           command: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sudo sh -s -- -b $GOPATH/bin v1.11.2
       - run: golangci-lint run
+
+    deploy:
+      docker:
+      - image: circleci/golang:1.11
+      working_directory: /go/src/github.com/visor-tax/firemodel
+      steps:
+        - curl -sSfL https://github.com/github/hub/releases/download/v2.6.0/hub-linux-amd64-2.6.0.tgz | sudo tar -xvz -C /usr/local/ --strip-components=1
+        - checkout
+        - "VERSION=${CIRCLE_TAG:-${CIRCLE_SHA1?}} ./release.sh"
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - mr/auto-deploy
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*/
