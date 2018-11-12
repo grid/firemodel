@@ -45,6 +45,8 @@ type TestModel struct {
 	Directions []TestEnum `firestore:"directions"`
 	// TODO: Add comment to TestModel.models.
 	Models []*TestStruct `firestore:"models"`
+	// TODO: Add comment to TestModel.models_2.
+	Models2 []*TestStruct `firestore:"models2"`
 	// TODO: Add comment to TestModel.refs.
 	Refs []*firestore.DocumentRef `firestore:"refs"`
 	// TODO: Add comment to TestModel.model_refs.

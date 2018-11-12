@@ -111,6 +111,8 @@ override class var path: String { return "test_models" }
     dynamic var directions: [TestEnum]?
     // TODO: Add documentation to models in firemodel schema.
     dynamic var models: [TestStruct]?
+    // TODO: Add documentation to models2 in firemodel schema.
+    dynamic var models2: [TestStruct]?
     // TODO: Add documentation to refs in firemodel schema.
     dynamic var refs: [Pring.AnyReference] = .init()
     // TODO: Add documentation to modelRefs in firemodel schema.
@@ -136,6 +138,8 @@ override class var path: String { return "test_models" }
             return self.direction?.firestoreValue
         case "models":
             return self.models?.map { $0.rawValue }
+        case "models2":
+            return self.models2?.map { $0.rawValue }
         case "nested":
             return self.nested?.rawValue
         default:
@@ -151,7 +155,11 @@ override class var path: String { return "test_models" }
         case "models":
             self.models = (value as? [[String: Any]])?
                 .enumerated()
-                .map { TestStruct(id: "\($0.offset)", value: $0.element) }
+                .map { TestStruct(id: "models.\($0.offset)", value: $0.element) }
+        case "models2":
+            self.models2 = (value as? [[String: Any]])?
+                .enumerated()
+                .map { TestStruct(id: "models2.\($0.offset)", value: $0.element) }
         case "nested":
           if let value = value as? [String: Any] {
             self.nested = TestStruct(id: "\(0)", value: value)
