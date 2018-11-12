@@ -117,19 +117,19 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 	switch firetype := firetype.(type) {
 	case *firemodel.Boolean:
 		if root {
-			return "Bool?"
+			return "Bool = false"
 		} else {
 			return "Bool"
 		}
 	case *firemodel.Integer:
 		if root {
-			return "Int?"
+			return "Int = 0"
 		} else {
 			return "Int"
 		}
 	case *firemodel.Double:
 		if root {
-			return "Float?"
+			return "Float = 0"
 		} else {
 			return "Float"
 		}
