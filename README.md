@@ -75,7 +75,7 @@ This generated some Swift, some typescript and some go code. You'll find it in `
 
 This is the standard firemodel workflow. Whenever you need to update your data model, you'll update the schema and regenerate the models. 
 
-## 3. Use the models
+### 3. Use the models
 
 The models are designed to be idiomatic for their target languages and the official Firestone SDKs. 
 

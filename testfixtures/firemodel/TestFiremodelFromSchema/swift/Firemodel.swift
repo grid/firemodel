@@ -55,7 +55,7 @@ extension TestEnum: CustomDebugStringConvertible {
     // TODO: Add documentation to where in firemodel schema.
     var where: String?
     // TODO: Add documentation to how_much in firemodel schema.
-    var howMuch: Int?
+    var howMuch: Int = 0
     // TODO: Add documentation to some_enum in firemodel schema.
     var someEnum: TestEnum?
 
@@ -86,13 +86,13 @@ override class var path: String { return "test_models" }
     // The name.
     dynamic var name: String?
     // The age.
-    dynamic var age: Int?
+    dynamic var age: Int = 0
     // The number pi.
-    dynamic var pi: Float?
+    dynamic var pi: Float = 0
     // The birth date.
     dynamic var birthdate: Date?
     // True if it is good.
-    dynamic var isGood: Bool?
+    dynamic var isGood: Bool = false
     // TODO: Add documentation to data in firemodel schema.
     dynamic var data: Data?
     // TODO: Add documentation to friend in firemodel schema.
