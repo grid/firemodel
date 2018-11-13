@@ -71,7 +71,7 @@ func toTypescriptType(firetype firemodel.SchemaFieldType) string {
 		return "firestore.Blob"
 	case *firemodel.Reference:
 		if firetype.T != nil {
-			return fmt.Sprintf("DocumentReference<%s>", interfaceName(firetype.T.Name))
+			return fmt.Sprintf("firestore.DocumentReference<%s>", interfaceName(firetype.T.Name))
 		} else {
 			return "firestore.DocumentReference"
 		}
@@ -173,7 +173,7 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- else }}
     /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
-    {{.Name | ToLowerCamel}}: CollectionReference<{{.Type.Name | interfaceName | ToCamel}}>;
+    {{.Name | ToLowerCamel}}: firestore.CollectionReference<{{.Type.Name | interfaceName | ToCamel}}>;
     {{- end}}
 
     {{- range .Fields}}
