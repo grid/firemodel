@@ -5,5 +5,5 @@ package firemodel
 // TODO: Add comment to Test in firemodel schema.
 type Test struct {
 	// TODO: Add comment to Test.direction.
-	Direction TestEnum `firestore:"direction"`
+	Direction TestEnum `firestore:"direction,omitempty"`
 }
