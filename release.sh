@@ -20,7 +20,13 @@ fi
 echo "Preflight…"
 
 go test ./... || (echo "error: Tests failed."; exit 1)
-hub ci-status || (echo "error: CI check failed"; exit 1)
+
+while [[ "$(hub ci-status)" == "pending" ]]; do
+  echo "Waiting for CI…";
+  sleep 1
+done
+
+hub ci-status || (echo "error: CI failed"; exit 1)
 
 echo Fetching latest tags…
 git fetch --tags origin
@@ -52,7 +58,7 @@ for goos in "darwin" "linux" "windows"; do
     -o "./.build/firemodel-${goos?}-${GOARCH?}" ./firemodel/main.go
 done
 
-read -r -p "Push to GitHub? [yes/no] " PUSH_TAG
+read -r -p "Release on GitHub? [yes/no] " PUSH_TAG
 
 case "${PUSH_TAG?}" in
   y | yes | YES)
@@ -64,14 +70,13 @@ case "${PUSH_TAG?}" in
     hub release \
       create \
       --message="${NEW_TAG?}" \
-      --draft \
       --attach=.build/firemodel-darwin-amd64 \
       --attach=.build/firemodel-linux-amd64 \
       --attach=.build/firemodel-windows-amd64 \
       --browse \
       "${NEW_TAG?}"
 
-    echo "If everything looks good, publish this release manually on GitHub."
+    say "Released firemodel ${NEW_TAG?}"
     ;;
   *)
     echo "Skipping tag push."
