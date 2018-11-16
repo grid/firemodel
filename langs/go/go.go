@@ -417,7 +417,7 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 			g.
 				Id(strcase.ToCamel(field.Name)).
 				Do(m.goType(field.Type)).
-				Tag(map[string]string{"firestore": strcase.ToLowerCamel(field.Name)})
+				Tag(map[string]string{"firestore": strcase.ToLowerCamel(field.Name) + ",omitempty"})
 		}
 		if addTimestampFields {
 			g.Line()

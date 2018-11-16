@@ -18,51 +18,51 @@ import (
 // Firestore document location: /users/{user_id}/test_models/{test_model_id}
 type TestModel struct {
 	// The name.
-	Name string `firestore:"name"`
+	Name string `firestore:"name,omitempty"`
 	// The age.
-	Age int64 `firestore:"age"`
+	Age int64 `firestore:"age,omitempty"`
 	// The number pi.
-	Pi float64 `firestore:"pi"`
+	Pi float64 `firestore:"pi,omitempty"`
 	// The birth date.
-	Birthdate time.Time `firestore:"birthdate"`
+	Birthdate time.Time `firestore:"birthdate,omitempty"`
 	// True if it is good.
-	IsGood bool `firestore:"isGood"`
+	IsGood bool `firestore:"isGood,omitempty"`
 	// TODO: Add comment to TestModel.data.
-	Data []byte `firestore:"data"`
+	Data []byte `firestore:"data,omitempty"`
 	// TODO: Add comment to TestModel.friend.
-	Friend *firestore.DocumentRef `firestore:"friend"`
+	Friend *firestore.DocumentRef `firestore:"friend,omitempty"`
 	// TODO: Add comment to TestModel.location.
-	Location *latlng.LatLng `firestore:"location"`
+	Location *latlng.LatLng `firestore:"location,omitempty"`
 	// TODO: Add comment to TestModel.colors.
-	Colors []string `firestore:"colors"`
+	Colors []string `firestore:"colors,omitempty"`
 	// TODO: Add comment to TestModel.numbers.
-	Numbers []int64 `firestore:"numbers"`
+	Numbers []int64 `firestore:"numbers,omitempty"`
 	// TODO: Add comment to TestModel.bools.
-	Bools []bool `firestore:"bools"`
+	Bools []bool `firestore:"bools,omitempty"`
 	// TODO: Add comment to TestModel.doubles.
-	Doubles []float64 `firestore:"doubles"`
+	Doubles []float64 `firestore:"doubles,omitempty"`
 	// TODO: Add comment to TestModel.directions.
-	Directions []TestEnum `firestore:"directions"`
+	Directions []TestEnum `firestore:"directions,omitempty"`
 	// TODO: Add comment to TestModel.models.
-	Models []*TestStruct `firestore:"models"`
+	Models []*TestStruct `firestore:"models,omitempty"`
 	// TODO: Add comment to TestModel.models_2.
-	Models2 []*TestStruct `firestore:"models2"`
+	Models2 []*TestStruct `firestore:"models2,omitempty"`
 	// TODO: Add comment to TestModel.refs.
-	Refs []*firestore.DocumentRef `firestore:"refs"`
+	Refs []*firestore.DocumentRef `firestore:"refs,omitempty"`
 	// TODO: Add comment to TestModel.model_refs.
-	ModelRefs []*firestore.DocumentRef `firestore:"modelRefs"`
+	ModelRefs []*firestore.DocumentRef `firestore:"modelRefs,omitempty"`
 	// TODO: Add comment to TestModel.meta.
-	Meta map[string]interface{} `firestore:"meta"`
+	Meta map[string]interface{} `firestore:"meta,omitempty"`
 	// TODO: Add comment to TestModel.meta_strs.
-	MetaStrs map[string]string `firestore:"metaStrs"`
+	MetaStrs map[string]string `firestore:"metaStrs,omitempty"`
 	// TODO: Add comment to TestModel.direction.
-	Direction TestEnum `firestore:"direction"`
+	Direction TestEnum `firestore:"direction,omitempty"`
 	// TODO: Add comment to TestModel.test_file.
-	TestFile *runtime.File `firestore:"testFile"`
+	TestFile *runtime.File `firestore:"testFile,omitempty"`
 	// TODO: Add comment to TestModel.url.
-	Url runtime.URL `firestore:"url"`
+	Url runtime.URL `firestore:"url,omitempty"`
 	// TODO: Add comment to TestModel.nested.
-	Nested *TestStruct `firestore:"nested"`
+	Nested *TestStruct `firestore:"nested,omitempty"`
 
 	// Creation timestamp.
 	CreatedAt time.Time `firestore:"createdAt"`
