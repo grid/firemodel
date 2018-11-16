@@ -61,10 +61,10 @@ type AST struct {
 
 type ASTElement struct {
 	Comment string     `parser:"{ @Comment }"`
-	Model   *ASTModel  `parser:"  'model' @@"`
+	Model   *ASTModel  `parser:"(  'model' @@"`
 	Enum    *ASTEnum   `parser:"| 'enum' @@"`
 	Option  *ASTOption `parser:"| 'option' @@"`
-	Struct  *ASTStruct `parser:"| 'struct' @@"`
+	Struct  *ASTStruct `parser:"| 'struct' @@ )"`
 }
 
 type ASTModel struct {
