@@ -7,7 +7,7 @@ type TestStruct struct {
 	// TODO: Add comment to TestStruct.where.
 	Where string `firestore:"where,omitempty"`
 	// TODO: Add comment to TestStruct.how_much.
-	HowMuch int64 `firestore:"howMuch,omitempty"`
+	HowMuch int64 `firestore:"howMuch"`
 	// TODO: Add comment to TestStruct.some_enum.
 	SomeEnum TestEnum `firestore:"someEnum,omitempty"`
 }
