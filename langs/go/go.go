@@ -406,6 +406,20 @@ func (m *GoModeler) packageName() string {
 	return m.pkg
 }
 
+func (m *GoModeler) fieldTags(field *firemodel.SchemaField) string {
+	switch field.Type.(type) {
+	// "false" and "0" should be written
+	case *firemodel.Boolean,
+		*firemodel.Integer,
+		*firemodel.Double:
+		return strcase.ToLowerCamel(field.Name)
+
+	default:
+		return strcase.ToLowerCamel(field.Name) + ",omitempty"
+	}
+
+}
+
 func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, addTimestampFields bool) func(g *jen.Group) {
 	return func(g *jen.Group) {
 		for _, field := range fields {
@@ -414,10 +428,11 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 			} else {
 				g.Comment(field.Comment)
 			}
+
 			g.
 				Id(strcase.ToCamel(field.Name)).
 				Do(m.goType(field.Type)).
-				Tag(map[string]string{"firestore": strcase.ToLowerCamel(field.Name) + ",omitempty"})
+				Tag(map[string]string{"firestore": m.fieldTags(field)})
 		}
 		if addTimestampFields {
 			g.Line()

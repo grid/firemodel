@@ -20,13 +20,13 @@ type TestModel struct {
 	// The name.
 	Name string `firestore:"name,omitempty"`
 	// The age.
-	Age int64 `firestore:"age,omitempty"`
+	Age int64 `firestore:"age"`
 	// The number pi.
-	Pi float64 `firestore:"pi,omitempty"`
+	Pi float64 `firestore:"pi"`
 	// The birth date.
 	Birthdate time.Time `firestore:"birthdate,omitempty"`
 	// True if it is good.
-	IsGood bool `firestore:"isGood,omitempty"`
+	IsGood bool `firestore:"isGood"`
 	// TODO: Add comment to TestModel.data.
 	Data []byte `firestore:"data,omitempty"`
 	// TODO: Add comment to TestModel.friend.
