@@ -18,56 +18,56 @@ import (
 // Firestore document location: /users/{user_id}/test_models/{test_model_id}
 type TestModel struct {
 	// The name.
-	Name string `firestore:"name,omitempty"`
+	Name string `firestore:"name,omitempty" json:"name,omitempty"`
 	// The age.
-	Age int64 `firestore:"age"`
+	Age int64 `firestore:"age" json:"age"`
 	// The number pi.
-	Pi float64 `firestore:"pi"`
+	Pi float64 `firestore:"pi" json:"pi"`
 	// The birth date.
-	Birthdate time.Time `firestore:"birthdate,omitempty"`
+	Birthdate time.Time `firestore:"birthdate,omitempty" json:"birthdate,omitempty"`
 	// True if it is good.
-	IsGood bool `firestore:"isGood"`
+	IsGood bool `firestore:"isGood" json:"isGood"`
 	// TODO: Add comment to TestModel.data.
-	Data []byte `firestore:"data,omitempty"`
+	Data []byte `firestore:"data,omitempty" json:"data,omitempty"`
 	// TODO: Add comment to TestModel.friend.
-	Friend *firestore.DocumentRef `firestore:"friend,omitempty"`
+	Friend *firestore.DocumentRef `firestore:"friend,omitempty" json:"friend,omitempty"`
 	// TODO: Add comment to TestModel.location.
-	Location *latlng.LatLng `firestore:"location,omitempty"`
+	Location *latlng.LatLng `firestore:"location,omitempty" json:"location,omitempty"`
 	// TODO: Add comment to TestModel.colors.
-	Colors []string `firestore:"colors,omitempty"`
+	Colors []string `firestore:"colors,omitempty" json:"colors,omitempty"`
 	// TODO: Add comment to TestModel.numbers.
-	Numbers []int64 `firestore:"numbers,omitempty"`
+	Numbers []int64 `firestore:"numbers,omitempty" json:"numbers,omitempty"`
 	// TODO: Add comment to TestModel.bools.
-	Bools []bool `firestore:"bools,omitempty"`
+	Bools []bool `firestore:"bools,omitempty" json:"bools,omitempty"`
 	// TODO: Add comment to TestModel.doubles.
-	Doubles []float64 `firestore:"doubles,omitempty"`
+	Doubles []float64 `firestore:"doubles,omitempty" json:"doubles,omitempty"`
 	// TODO: Add comment to TestModel.directions.
-	Directions []TestEnum `firestore:"directions,omitempty"`
+	Directions []TestEnum `firestore:"directions,omitempty" json:"directions,omitempty"`
 	// TODO: Add comment to TestModel.models.
-	Models []*TestStruct `firestore:"models,omitempty"`
+	Models []*TestStruct `firestore:"models,omitempty" json:"models,omitempty"`
 	// TODO: Add comment to TestModel.models_2.
-	Models2 []*TestStruct `firestore:"models2,omitempty"`
+	Models2 []*TestStruct `firestore:"models2,omitempty" json:"models2,omitempty"`
 	// TODO: Add comment to TestModel.refs.
-	Refs []*firestore.DocumentRef `firestore:"refs,omitempty"`
+	Refs []*firestore.DocumentRef `firestore:"refs,omitempty" json:"refs,omitempty"`
 	// TODO: Add comment to TestModel.model_refs.
-	ModelRefs []*firestore.DocumentRef `firestore:"modelRefs,omitempty"`
+	ModelRefs []*firestore.DocumentRef `firestore:"modelRefs,omitempty" json:"modelRefs,omitempty"`
 	// TODO: Add comment to TestModel.meta.
-	Meta map[string]interface{} `firestore:"meta,omitempty"`
+	Meta map[string]interface{} `firestore:"meta,omitempty" json:"meta,omitempty"`
 	// TODO: Add comment to TestModel.meta_strs.
-	MetaStrs map[string]string `firestore:"metaStrs,omitempty"`
+	MetaStrs map[string]string `firestore:"metaStrs,omitempty" json:"metaStrs,omitempty"`
 	// TODO: Add comment to TestModel.direction.
-	Direction TestEnum `firestore:"direction,omitempty"`
+	Direction TestEnum `firestore:"direction,omitempty" json:"direction,omitempty"`
 	// TODO: Add comment to TestModel.test_file.
-	TestFile *runtime.File `firestore:"testFile,omitempty"`
+	TestFile *runtime.File `firestore:"testFile,omitempty" json:"testFile,omitempty"`
 	// TODO: Add comment to TestModel.url.
-	Url runtime.URL `firestore:"url,omitempty"`
+	Url runtime.URL `firestore:"url,omitempty" json:"url,omitempty"`
 	// TODO: Add comment to TestModel.nested.
-	Nested *TestStruct `firestore:"nested,omitempty"`
+	Nested *TestStruct `firestore:"nested,omitempty" json:"nested,omitempty"`
 
 	// Creation timestamp.
-	CreatedAt time.Time `firestore:"createdAt"`
+	CreatedAt time.Time `firestore:"createdAt" json:"createdAt"`
 	// Update timestamp.
-	UpdatedAt time.Time `firestore:"updatedAt"`
+	UpdatedAt time.Time `firestore:"updatedAt" json:"updatedAt"`
 }
 
 // TestModelPath returns the path to a particular TestModel in Firestore.
