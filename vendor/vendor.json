@@ -69,6 +69,12 @@
 			"revisionTime": "2018-09-29T10:23:56Z"
 		},
 		{
+			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "d8f796af33cc11cb798c1aaeb27a4ebc5099927d",
+			"revisionTime": "2018-08-30T19:11:22Z"
+		},
+		{
 			"checksumSHA1": "kxja3mICEw4DKBlGQdK4tmIAkCQ=",
 			"path": "github.com/go-errors/errors",
 			"revision": "d98b870cc4e05f1545532a80e9909be8216095b6",
@@ -691,6 +697,10 @@
 			"path": "google.golang.org/grpc/tap",
 			"revision": "4cad6a62833044625feecb561a3e882be34097cc",
 			"revisionTime": "2019-01-22T18:48:59Z"
+		},
+		{
+			"path": "gotest.tools/asser",
+			"revision": ""
 		}
 	],
 	"rootPath": "github.com/visor-tax/firemodel"
