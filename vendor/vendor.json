@@ -1,0 +1,55 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Lk4LXbJY+fOrlrexjdU/BdCXF0U=",
+			"path": "cloud.google.com/go/firestore",
+			"revision": "0167c0f1050d4bc9f5657b28b8df2d397e0e1893",
+			"revisionTime": "2019-01-17T01:24:43Z"
+		},
+		{
+			"checksumSHA1": "V0ApMIFaIw9ncA+wlSP1MwNfIzw=",
+			"path": "github.com/alecthomas/participle",
+			"revision": "9e1f84006b7e7fe0dfd734ef683809978105e790",
+			"revisionTime": "2018-11-23T21:50:32Z"
+		},
+		{
+			"checksumSHA1": "TO7Dqw3l2onpfrWvE2LITsOT0cc=",
+			"path": "github.com/alecthomas/participle/lexer",
+			"revision": "9e1f84006b7e7fe0dfd734ef683809978105e790",
+			"revisionTime": "2018-11-23T21:50:32Z"
+		},
+		{
+			"checksumSHA1": "tEXFaAVMQBMndCoJeQTQQJO+Zfo=",
+			"path": "github.com/dave/jennifer/jen",
+			"revision": "e2c46c587b5f3cf3dec985fd8f7e8232f9e40ac9",
+			"revisionTime": "2018-09-29T10:23:56Z"
+		},
+		{
+			"checksumSHA1": "kxja3mICEw4DKBlGQdK4tmIAkCQ=",
+			"path": "github.com/go-errors/errors",
+			"revision": "d98b870cc4e05f1545532a80e9909be8216095b6",
+			"revisionTime": "2018-08-13T16:29:53Z"
+		},
+		{
+			"checksumSHA1": "NxoJ1sUeTWZNbveibhY5mJB5Xak=",
+			"path": "github.com/iancoleman/strcase",
+			"revision": "3605ed457bf7f8caa1371b4fafadadc026673479",
+			"revisionTime": "2018-07-26T02:35:41Z"
+		},
+		{
+			"checksumSHA1": "DTy0iJ2w5C+FDsN9EnzfhNmvS+o=",
+			"path": "github.com/pkg/errors",
+			"revision": "059132a15dd08d6704c67711dae0cf35ab991756",
+			"revisionTime": "2018-10-23T23:59:46Z"
+		},
+		{
+			"checksumSHA1": "WYd7aI5YkeiRSv5pqr12emezBIg=",
+			"path": "github.com/spf13/cobra",
+			"revision": "d2d81d9a96e23f0255397222bb0b4e3165e492dc",
+			"revisionTime": "2018-11-27T13:31:06Z"
+		}
+	],
+	"rootPath": "github.com/visor-tax/firemodel"
+}

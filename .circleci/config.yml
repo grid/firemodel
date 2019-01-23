@@ -8,6 +8,7 @@ jobs:
     steps:
       - checkout
       - run: go get -v -t -d ./...
+      - run: govendor sync
       - run: go test -v ./...
       - run: diff -u <(echo -n) <(gofmt -d -s .)
       - run:
