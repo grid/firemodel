@@ -447,7 +447,7 @@ func TestParseSchema(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, got, tt.want)
+			assert.DeepEqual(t, got, tt.want)
 		})
 	}
 }
