@@ -1,8 +1,9 @@
 package firemodel
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"gotest.tools/assert"
 
 	"os"
 	"path"
@@ -89,7 +90,7 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "friend",
-								Type: &Reference{T: &SchemaModel{Name: "Friend"}},
+								Type: &Reference{},
 							},
 							{
 								Name: "location",
@@ -97,7 +98,7 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "colors",
-								Type: &Array{T: &String{}},
+								Type: &Array{},
 							},
 							{
 								Name: "meta",
@@ -143,11 +144,11 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "struct_ary",
-								Type: &Array{T: &Reference{T: &SchemaModel{Name: "TestModel"}}},
+								Type: &Array{T: &Struct{T: &SchemaStruct{Name: "TestStruct"}}},
 							},
 							{
 								Name: "enum_ary",
-								Type: &Array{T: &Enum{T: &SchemaEnum{Name: "TestModel"}}},
+								Type: &Array{T: &Enum{T: &SchemaEnum{Name: "TestEnum"}}},
 							},
 							{
 								Name: "reference_ary",
@@ -167,11 +168,11 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "struct_map",
-								Type: &Map{T: &Struct{T: &SchemaStruct{Name: "TestModel"}}},
+								Type: &Map{T: &Struct{T: &SchemaStruct{Name: "TestStruct"}}},
 							},
 							{
 								Name: "enum_map",
-								Type: &Map{T: &Enum{T: &SchemaEnum{Name: "TestModel"}}},
+								Type: &Map{T: &Enum{T: &SchemaEnum{Name: "TestEnum"}}},
 							},
 							{
 								Name: "generic_map",
@@ -238,7 +239,9 @@ func TestParseSchema(t *testing.T) {
 							{
 								Comment: "The direction.",
 								Name:    "dir",
-								Type:    &Enum{ /*Direction*/ },
+								Type: &Enum{
+									T: &SchemaEnum{Name: "Direction"},
+								},
 							},
 						},
 						Options: SchemaModelOptions{},
