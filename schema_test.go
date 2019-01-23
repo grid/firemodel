@@ -3,11 +3,10 @@ package firemodel
 import (
 	"testing"
 
+	"gotest.tools/assert"
+
 	"os"
 	"path"
-
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-test/deep"
 )
 
 func TestParseSchema(t *testing.T) {
@@ -91,7 +90,7 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "friend",
-								Type: &Reference{T: &SchemaModel{Name: "Friend"}},
+								Type: &Reference{},
 							},
 							{
 								Name: "location",
@@ -99,7 +98,7 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "colors",
-								Type: &Array{T: &String{}},
+								Type: &Array{},
 							},
 							{
 								Name: "meta",
@@ -145,11 +144,11 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "struct_ary",
-								Type: &Array{T: &Reference{T: &SchemaModel{Name: "TestModel"}}},
+								Type: &Array{T: &Struct{T: &SchemaStruct{Name: "TestStruct"}}},
 							},
 							{
 								Name: "enum_ary",
-								Type: &Array{T: &Enum{T: &SchemaEnum{Name: "TestModel"}}},
+								Type: &Array{T: &Enum{T: &SchemaEnum{Name: "TestEnum"}}},
 							},
 							{
 								Name: "reference_ary",
@@ -169,11 +168,11 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "struct_map",
-								Type: &Map{T: &Struct{T: &SchemaStruct{Name: "TestModel"}}},
+								Type: &Map{T: &Struct{T: &SchemaStruct{Name: "TestStruct"}}},
 							},
 							{
 								Name: "enum_map",
-								Type: &Map{T: &Enum{T: &SchemaEnum{Name: "TestModel"}}},
+								Type: &Map{T: &Enum{T: &SchemaEnum{Name: "TestEnum"}}},
 							},
 							{
 								Name: "generic_map",
@@ -240,7 +239,9 @@ func TestParseSchema(t *testing.T) {
 							{
 								Comment: "The direction.",
 								Name:    "dir",
-								Type:    &Enum{ /*Direction*/ },
+								Type: &Enum{
+									T: &SchemaEnum{Name: "Direction"},
+								},
 							},
 						},
 						Options: SchemaModelOptions{},
@@ -449,12 +450,7 @@ func TestParseSchema(t *testing.T) {
 				return
 			}
 
-			if diff := deep.Equal(got, tt.want); diff != nil {
-				t.Logf("ParseSchema() => %#v", spew.NewFormatter(got))
-				for _, diff := range diff {
-					t.Error(diff)
-				}
-			}
+			assert.DeepEqual(t, got, tt.want)
 		})
 	}
 }
