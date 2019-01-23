@@ -1,13 +1,11 @@
 package firemodel
 
 import (
+	"gotest.tools/assert"
 	"testing"
 
 	"os"
 	"path"
-
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-test/deep"
 )
 
 func TestParseSchema(t *testing.T) {
@@ -449,12 +447,7 @@ func TestParseSchema(t *testing.T) {
 				return
 			}
 
-			if diff := deep.Equal(got, tt.want); diff != nil {
-				t.Logf("ParseSchema() => %#v", spew.NewFormatter(got))
-				for _, diff := range diff {
-					t.Error(diff)
-				}
-			}
+			assert.Equal(t, got, tt.want)
 		})
 	}
 }
