@@ -325,7 +325,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
 				g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
 			})
-			g.Err().Op(":=").Id("tx").Dot("Set").Call(jen.Id("m").Dot("ref"), jen.Id("m").Dot("Data"), jen.Qual("cloud.google.com/go/firestore", "MergeAll"))
+			g.Err().Op(":=").Id("tx").Dot("Set").Call(jen.Id("m").Dot("ref"), jen.Id("m").Dot("Data"))
 			g.Return(jen.Err())
 		})
 

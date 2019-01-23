@@ -182,6 +182,6 @@ func (m *TestModelWrapper) SetTx(ctx context.Context, tx *firestore.Transaction)
 	if m.ref == nil {
 		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
 	}
-	err := tx.Set(m.ref, m.Data, firestore.MergeAll)
+	err := tx.Set(m.ref, m.Data)
 	return err
 }
