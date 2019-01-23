@@ -7,8 +7,7 @@ jobs:
     working_directory: /go/src/github.com/visor-tax/firemodel
     steps:
       - checkout
-      - run: go get -u github.com/kardianos/govendor
-      - run: govendor sync
+      - run: go get -v -t -d ./...
       - run: go test -v ./...
       - run: diff -u <(echo -n) <(gofmt -d -s .)
       - run:
