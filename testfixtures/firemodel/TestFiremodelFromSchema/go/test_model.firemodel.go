@@ -159,10 +159,29 @@ func (c *clientTestModel) GetByPath(ctx context.Context, path string) (*TestMode
 	}
 	return wrapper, nil
 }
+func (c *clientTestModel) GetByPathTx(ctx context.Context, tx *firestore.Transaction, path string) (*TestModelWrapper, error) {
+	reference := c.client.Client.Doc(path)
+	snapshot, err := tx.Get(reference)
+	if err != nil {
+		return nil, err
+	}
+	wrapper, err := TestModelFromSnapshot(snapshot)
+	if err != nil {
+		return nil, err
+	}
+	return wrapper, nil
+}
 func (m *TestModelWrapper) Set(ctx context.Context) error {
 	if m.ref == nil {
 		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
 	}
 	_, err := m.ref.Set(ctx, m.Data)
+	return err
+}
+func (m *TestModelWrapper) SetTx(ctx context.Context, tx *firestore.Transaction) error {
+	if m.ref == nil {
+		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
+	}
+	err := tx.Set(m.ref, m.Data)
 	return err
 }
