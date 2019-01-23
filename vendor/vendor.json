@@ -33,6 +33,24 @@
 			"revisionTime": "2019-01-17T01:24:43Z"
 		},
 		{
+			"checksumSHA1": "Z5IRf5Puwj7MAHHtyF17r0MB1oY=",
+			"path": "cloud.google.com/go/internal/btree",
+			"revision": "0167c0f1050d4bc9f5657b28b8df2d397e0e1893",
+			"revisionTime": "2019-01-17T01:24:43Z"
+		},
+		{
+			"checksumSHA1": "uEMHCnjV49wlYNefZLKg+woDi1M=",
+			"path": "cloud.google.com/go/internal/fields",
+			"revision": "0167c0f1050d4bc9f5657b28b8df2d397e0e1893",
+			"revisionTime": "2019-01-17T01:24:43Z"
+		},
+		{
+			"checksumSHA1": "FSifvUBJjm4OsSU5rp5s5+bqvN0=",
+			"path": "cloud.google.com/go/internal/version",
+			"revision": "0167c0f1050d4bc9f5657b28b8df2d397e0e1893",
+			"revisionTime": "2019-01-17T01:24:43Z"
+		},
+		{
 			"checksumSHA1": "V0ApMIFaIw9ncA+wlSP1MwNfIzw=",
 			"path": "github.com/alecthomas/participle",
 			"revision": "9e1f84006b7e7fe0dfd734ef683809978105e790",
