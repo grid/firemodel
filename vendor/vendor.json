@@ -81,6 +81,12 @@
 			"revisionTime": "2018-08-13T16:29:53Z"
 		},
 		{
+			"checksumSHA1": "TI+QiWWuz4SQKW/MyRRYhjzdq2A=",
+			"path": "github.com/go-test/deep",
+			"revision": "57af0be209c537ba1d9c2a4b285ab7aea0897e51",
+			"revisionTime": "2018-05-09T20:02:13Z"
+		},
+		{
 			"checksumSHA1": "Y2MOwzNZfl4NRNDbLCZa6sgx7O0=",
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "347cf4a86c1cb8d262994d8ef5924d4576c5b331",
@@ -701,6 +707,12 @@
 		{
 			"path": "gotest.tools/asser",
 			"revision": ""
+		},
+		{
+			"checksumSHA1": "cwsDUdPwcVsaIr+GL1GphLhEjiw=",
+			"path": "gotest.tools/assert",
+			"revision": "3e72e375af50e717449a24195321bcfa9601b65a",
+			"revisionTime": "2018-12-01T04:25:15Z"
 		}
 	],
 	"rootPath": "github.com/visor-tax/firemodel"
