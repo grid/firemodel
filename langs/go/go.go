@@ -300,6 +300,19 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
 				g.Return(jen.Id("wrapper"), jen.Nil())
 			})
+
+		f.Func().Params(jen.Id("c").Id("*"+clientName)).Id(getCommandByPathName+"Tx").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("tx").Op("*").Qual("cloud.google.com/go/firestore", "Transaction"), jen.Id("path").String()).Params(
+			jen.Id("*"+wrapperName),
+			jen.Error()).
+			BlockFunc(func(g *jen.Group) {
+				g.Id("reference").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
+				g.Id("snapshot").Op(",").Err().Op(":=").Id("tx").Dot("Get").Call(jen.Id("reference"))
+				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+				g.Id("wrapper").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
+				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+				g.Return(jen.Id("wrapper"), jen.Nil())
+			})
+
 		f.Func().Params(jen.Id("m").Id("*" + wrapperName)).Id("Set").Params(jen.Id("ctx").Qual("context", "Context")).Params(jen.Id("error")).BlockFunc(func(g *jen.Group) {
 			g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
 				g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
@@ -307,6 +320,15 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			g.Id("_").Op(",").Err().Op(":=").Id("m").Dot("ref").Dot("Set").Call(jen.Id("ctx"), jen.Id("m").Dot("Data"))
 			g.Return(jen.Err())
 		})
+
+		f.Func().Params(jen.Id("m").Id("*"+wrapperName)).Id("SetTx").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("tx").Op("*").Qual("cloud.google.com/go/firestore", "Transaction")).Params(jen.Id("error")).BlockFunc(func(g *jen.Group) {
+			g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
+				g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
+			})
+			g.Err().Op(":=").Id("tx").Dot("Set").Call(jen.Id("m").Dot("ref"), jen.Id("m").Dot("Data"), jen.Qual("cloud.google.com/go/firestore", "MergeAll"))
+			g.Return(jen.Err())
+		})
+
 	}
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))

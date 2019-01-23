@@ -3,12 +3,13 @@
 package firemodel
 
 import (
-	firestore "cloud.google.com/go/firestore"
 	"context"
 	"errors"
 	"fmt"
 	"regexp"
 	"time"
+
+	firestore "cloud.google.com/go/firestore"
 )
 
 // TODO: Add comment to TestTimestamps in firemodel schema.
@@ -110,10 +111,29 @@ func (c *clientTestTimestamps) GetByPath(ctx context.Context, path string) (*Tes
 	}
 	return wrapper, nil
 }
+func (c *clientTestTimestamps) GetByPathTx(ctx context.Context, tx *firestore.Transaction, path string) (*TestTimestampsWrapper, error) {
+	reference := c.client.Client.Doc(path)
+	snapshot, err := tx.Get(reference)
+	if err != nil {
+		return nil, err
+	}
+	wrapper, err := TestTimestampsFromSnapshot(snapshot)
+	if err != nil {
+		return nil, err
+	}
+	return wrapper, nil
+}
 func (m *TestTimestampsWrapper) Set(ctx context.Context) error {
 	if m.ref == nil {
 		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
 	}
 	_, err := m.ref.Set(ctx, m.Data)
+	return err
+}
+func (m *TestTimestampsWrapper) SetTx(ctx context.Context, tx *firestore.Transaction) error {
+	if m.ref == nil {
+		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
+	}
+	err := tx.Set(m.ref, m.Data, firestore.MergeAll)
 	return err
 }
