@@ -142,6 +142,8 @@ override class var path: String { return "test_models" }
             return self.models2?.map { $0.rawValue }
         case "nested":
             return self.nested?.rawValue
+        case "directions":
+            return self.directions?.map { $0.firestoreValue }
         default:
             break
         }
@@ -165,6 +167,9 @@ override class var path: String { return "test_models" }
             self.nested = TestStruct(id: "\(0)", value: value)
             return true
           }
+        case "directions":
+            self.directions = (value as? [String])?.compactMap { TestEnum(firestoreValue: $0) }
+			return true
         default:
             break
         }

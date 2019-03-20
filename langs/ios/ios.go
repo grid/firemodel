@@ -42,6 +42,7 @@ var (
 			"filterFieldsNonEnumsOnly":     filterFieldsNonEnumsOnly,
 			"filterFieldsStructsOnly":      filterFieldsStructsOnly,
 			"filterFieldsStructArraysOnly": filterFieldsStructArraysOnly,
+			"filterFieldsEnumArraysOnly":   filterFieldsEnumArraysOnly,
 			"requiresCustomEncodeDecode":   requiresCustomEncodeDecode,
 			"firestoreModelName":           firestoreModelName,
 		}).
@@ -106,6 +107,21 @@ func filterFieldsStructArraysOnly(in []*firemodel.SchemaField) []*firemodel.Sche
 			continue
 		}
 		if _, ok := t.T.(*firemodel.Struct); !ok {
+			continue
+		}
+		out = append(out, i)
+	}
+	return out
+}
+
+func filterFieldsEnumArraysOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
+	var out []*firemodel.SchemaField
+	for _, i := range in {
+		t, ok := i.Type.(*firemodel.Array)
+		if !ok {
+			continue
+		}
+		if _, ok := t.T.(*firemodel.Enum); !ok {
 			continue
 		}
 		out = append(out, i)
@@ -282,6 +298,10 @@ override class var path: String { return "{{firestoreModelName . }}" }
         case "{{.Name | toLowerCamel}}":
             return self.{{.Name | toLowerCamel}}?.rawValue
         {{- end}}
+        {{- range .Fields | filterFieldsEnumArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.map { $0.firestoreValue }
+        {{- end}}
         default:
             break
         }
@@ -307,6 +327,11 @@ override class var path: String { return "{{firestoreModelName . }}" }
             return true
           }
           {{- end}}
+        {{- range .Fields | filterFieldsEnumArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            self.{{.Name | toLowerCamel}} = (value as? [String])?.compactMap { {{.Type.T | toSwiftType false }}(firestoreValue: $0) }
+			return true
+        {{- end}}
         default:
             break
         }
@@ -390,6 +415,10 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
         case "{{.Name | toLowerCamel}}":
             return self.{{.Name | toLowerCamel}}?.rawValue
         {{- end}}
+        {{- range .Fields | filterFieldsEnumArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            return self.{{.Name | toLowerCamel}}?.map { $0.firestoreValue }
+        {{- end}}
         default:
             break
         }
@@ -415,6 +444,11 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
             return true
           }
           {{- end}}
+        {{- range .Fields | filterFieldsEnumArraysOnly}}
+        case "{{.Name | toLowerCamel}}":
+            self.{{.Name | toLowerCamel}} = (value as? [String])?.compactMap { {{.Type.T | toSwiftType false }}(firestoreValue: $0) }
+			return true
+        {{- end}}
         default:
             break
         }
