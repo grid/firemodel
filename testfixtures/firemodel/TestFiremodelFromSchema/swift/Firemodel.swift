@@ -84,53 +84,53 @@ extension TestEnum: CustomDebugStringConvertible {
 @objcMembers class TestModel: Pring.Object {
 override class var path: String { return "test_models" }
     // The name.
-    dynamic var name: String?
+    var name: String?
     // The age.
-    dynamic var age: Int = 0
+    var age: Int = 0
     // The number pi.
-    dynamic var pi: Float = 0
+    var pi: Float = 0
     // The birth date.
-    dynamic var birthdate: Date?
+    var birthdate: Date?
     // True if it is good.
-    dynamic var isGood: Bool = false
+    var isGood: Bool = false
     // TODO: Add documentation to data in firemodel schema.
-    dynamic var data: Data?
+    var data: Data?
     // TODO: Add documentation to friend in firemodel schema.
-    dynamic var friend: Pring.Reference<TestModel> = .init()
+    var friend: Pring.Reference<TestModel> = .init()
     // TODO: Add documentation to location in firemodel schema.
-    dynamic var location: Pring.GeoPoint?
+    var location: Pring.GeoPoint?
     // TODO: Add documentation to colors in firemodel schema.
-    dynamic var colors: [String]?
+    var colors: [String]?
     // TODO: Add documentation to numbers in firemodel schema.
-    dynamic var numbers: [Int]?
+    var numbers: [Int]?
     // TODO: Add documentation to bools in firemodel schema.
-    dynamic var bools: [Bool]?
+    var bools: [Bool]?
     // TODO: Add documentation to doubles in firemodel schema.
-    dynamic var doubles: [Float]?
+    var doubles: [Float]?
     // TODO: Add documentation to directions in firemodel schema.
-    dynamic var directions: [TestEnum]?
+    var directions: [TestEnum]?
     // TODO: Add documentation to models in firemodel schema.
-    dynamic var models: [TestStruct]?
+    var models: [TestStruct]?
     // TODO: Add documentation to models2 in firemodel schema.
-    dynamic var models2: [TestStruct]?
+    var models2: [TestStruct]?
     // TODO: Add documentation to refs in firemodel schema.
-    dynamic var refs: [Pring.AnyReference] = .init()
+    var refs: [Pring.AnyReference] = .init()
     // TODO: Add documentation to modelRefs in firemodel schema.
-    dynamic var modelRefs: [Any] = .init()
+    var modelRefs: [Any] = .init()
     // TODO: Add documentation to meta in firemodel schema.
-    dynamic var meta: [String: Any] = [:]
+    var meta: [String: Any] = [:]
     // TODO: Add documentation to metaStrs in firemodel schema.
-    dynamic var metaStrs: [String: String] = [:]
+    var metaStrs: [String: String] = [:]
     // TODO: Add documentation to direction in firemodel schema.
-    dynamic var direction: TestEnum?
+    var direction: TestEnum?
     // TODO: Add documentation to testFile in firemodel schema.
-    dynamic var testFile: Pring.File?
+    var testFile: Pring.File?
     // TODO: Add documentation to url in firemodel schema.
-    dynamic var url: URL?
+    var url: URL?
     // TODO: Add documentation to nested in firemodel schema.
-    dynamic var nested: TestStruct?
+    var nested: TestStruct?
     // TODO: Add documentation to nested_collection in firemodel schema.
-    dynamic var nestedCollection: Pring.NestedCollection<TestModel> = []
+    var nestedCollection: Pring.NestedCollection<TestModel> = []
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {
@@ -185,7 +185,7 @@ override class var path: String { return "timestamps" }
 // TODO: Add documentation to Test in firemodel schema.
 @objcMembers class Test: Pring.Object {
     // TODO: Add documentation to direction in firemodel schema.
-    dynamic var direction: TestEnum?
+    var direction: TestEnum?
 
     override func encode(_ key: String, value: Any?) -> Any? {
         switch key {

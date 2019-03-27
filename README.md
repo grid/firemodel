@@ -2,7 +2,7 @@
 
 > Type-safe, cross-platform models for [Firestore](https://firebase.google.com/docs/firestore/).
 
-Google's Firestore offering us a fantastic way to add "real time" to your product in need minutes. For simple products, what they provide of the box makes a lot of sense. You get dynamic, reflection-based API wrappers that for in with your existing code.
+Google's Firestore offering is a fantastic way to add "real time" to your product in mere minutes. For simple products, what they provide out of the box makes a lot of sense. You get dynamic, reflection-based API wrappers that fit in with your existing code.
 
 This approach breaks down, however, as you start to build against a complex or quickly changing data model, or when multiple developers need to interact with the same schema across multiple codebases.
 
