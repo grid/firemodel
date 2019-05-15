@@ -272,7 +272,7 @@ override class var path: String { return "{{firestoreModelName . }}" }
     {{- else }}
     // TODO: Add documentation to {{.Name | toLowerCamel}} in firemodel schema.
     {{- end}}
-    var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
+    dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
     {{- end}}
     {{- range .Collections}}
     {{- if .Comment}}
@@ -280,7 +280,7 @@ override class var path: String { return "{{firestoreModelName . }}" }
     {{- else }}
     // TODO: Add documentation to {{.Name}} in firemodel schema.
     {{- end}}
-    var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
+    dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
     {{- end}}
     {{- if .Fields | requiresCustomEncodeDecode }}
 
