@@ -17,9 +17,9 @@ import (
 type TestTimestamps struct {
 
 	// Creation timestamp.
-	CreatedAt time.Time `firestore:"createdAt"`
+	CreatedAt time.Time `firestore:"createdAt" json:"createdAt"`
 	// Update timestamp.
-	UpdatedAt time.Time `firestore:"updatedAt"`
+	UpdatedAt time.Time `firestore:"updatedAt" json:"updatedAt"`
 }
 
 // TestTimestampsPath returns the path to a particular TestTimestamps in Firestore.

@@ -454,7 +454,7 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 			g.
 				Id(strcase.ToCamel(field.Name)).
 				Do(m.goType(field.Type)).
-				Tag(map[string]string{"firestore": m.fieldTags(field)})
+				Tag(map[string]string{"firestore": m.fieldTags(field), "json": m.fieldTags(field)})
 		}
 		if addTimestampFields {
 			g.Line()
@@ -462,13 +462,13 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 			g.
 				Id("CreatedAt").
 				Qual("time", "Time").
-				Tag(map[string]string{"firestore": "createdAt"})
+				Tag(map[string]string{"firestore": "createdAt", "json": "createdAt"})
 
 			g.Comment("Update timestamp.")
 			g.
 				Id("UpdatedAt").
 				Qual("time", "Time").
-				Tag(map[string]string{"firestore": "updatedAt"})
+				Tag(map[string]string{"firestore": "updatedAt", "json": "updatedAt"})
 		}
 	}
 }

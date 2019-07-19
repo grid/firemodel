@@ -5,9 +5,9 @@ package firemodel
 // TODO: Add comment to TestStruct in firemodel schema.
 type TestStruct struct {
 	// TODO: Add comment to TestStruct.where.
-	Where string `firestore:"where,omitempty"`
+	Where string `firestore:"where,omitempty" json:"where,omitempty"`
 	// TODO: Add comment to TestStruct.how_much.
-	HowMuch int64 `firestore:"howMuch"`
+	HowMuch int64 `firestore:"howMuch" json:"howMuch"`
 	// TODO: Add comment to TestStruct.some_enum.
-	SomeEnum TestEnum `firestore:"someEnum,omitempty"`
+	SomeEnum TestEnum `firestore:"someEnum,omitempty" json:"someEnum,omitempty"`
 }
