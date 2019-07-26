@@ -13,7 +13,7 @@ import (
 
 var (
 	req struct {
-		schema string
+		schemas []string
 	}
 )
 

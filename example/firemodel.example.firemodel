@@ -49,13 +49,3 @@ model TestModel {
   TestStruct nested;
   collection<TestModel> nested_collection;
 }
-
-model TestTimestamps {
-  option firestore.model_name = "timestamps";
-  option firestore.path = "timestamps/{test_timestamps_id}";
-  option firestore.autotimestamp = true;
-}
-
-model Test {
-  TestEnum direction;
-}

@@ -66,14 +66,16 @@ You can define as many models and enums as you'd like. See the [example](firemod
 Open up a terminal, and generate your models:
 
     firemodel compile \
-        --schema=schema.firemodel \
+        --schema='*.firemodel' \
         --go_out=./gen/go \
         --ts_out=./.gen/ts \
         --ios_out=./.gen/ios
 
 This generated some Swift, some typescript and some go code. You'll find it in `.gen` directory, as requested. You can now incorporate these generated files into your project.
 
-This is the standard firemodel workflow. Whenever you need to update your data model, you'll update the schema and regenerate the models. 
+> Note: It is possible to split up your schema into multiple files. The `--schema` flag is parsed using [`filepath.Glob`](https://godoc.org/path/filepath#Glob). You can specify `--schema` multiple times. The order of schemas or cross-file references does not matter; all schema files are parsed in a single namespace.
+
+This is the standard firemodel workflow. Whenever you need to update your data model, you'll update the schema and regenerate the models.
 
 ### 3. Use the models
 

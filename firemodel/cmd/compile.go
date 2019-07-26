@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/go-errors/errors"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/visor-tax/firemodel"
 	"github.com/visor-tax/firemodel/internal/tempwriter"
+	"io"
 	"os"
+	"path/filepath"
 )
 
 var compileReq struct {
@@ -15,7 +17,7 @@ var compileReq struct {
 }
 
 func init() {
-	compileCmd.PersistentFlags().StringVar(&req.schema, "schema", "schema.firemodel", "Path to firemodel schema.")
+	compileCmd.PersistentFlags().StringSliceVar(&req.schemas, "schema", []string{"schema.firemodel"}, "Path to firemodel schema.")
 	compileCmd.PersistentFlags().BoolVarP(&compileReq.wipe, "wipe", "f", false, "Confirms it is ok to rm -rf the output directories. (This is generally something you want, but defaults off for safety.)")
 
 	compileReq.langOutDirs = make(map[string]*string)
@@ -40,11 +42,35 @@ var compileCmd = &cobra.Command{
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
-		r, err := os.Open(req.schema)
-		if err != nil {
-			panic(err)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var rs []io.Reader
+		for _, schema := range req.schemas {
+			paths, err := filepath.Glob(schema)
+			if err != nil {
+				return err
+			}
+			if paths == nil {
+				return errors.Errorf("No files match glob pattern %+s", schema)
+			}
+			for _, path := range paths {
+				info, err := os.Stat(path)
+				if err != nil {
+					return err
+				} else if info.IsDir() {
+					return errors.Errorf("%+s is a directory", info.Name())
+				} else if rr, err := os.Open(path); err != nil {
+					return err
+				} else {
+					rs = append(rs, rr)
+				}
+			}
 		}
+		// Sanity check.
+		if len(rs) == 0 {
+			panic(errors.New("No readable schema files provided."))
+		}
+
+		r := io.MultiReader(rs...)
 
 		schema, err := firemodel.ParseSchema(r)
 		if err != nil {
@@ -71,5 +97,6 @@ var compileCmd = &cobra.Command{
 			panic(err)
 		}
 
+		return nil
 	},
 }
