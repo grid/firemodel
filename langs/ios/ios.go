@@ -259,8 +259,6 @@ import Pring
 	model = `
 {{- if .Comment}}
 // {{.Comment}}
-{{- else}}
-// TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objcMembers class {{.Name | toCamel}}: Pring.Object {
 	{{- if firestoreModelName . }}
@@ -269,16 +267,12 @@ override class var path: String { return "{{firestoreModelName . }}" }
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}
-    {{- else }}
-    // TODO: Add documentation to {{.Name | toLowerCamel}} in firemodel schema.
     {{- end}}
     dynamic var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
     {{- end}}
     {{- range .Collections}}
     {{- if .Comment}}
     // {{.Comment}}
-    {{- else }}
-    // TODO: Add documentation to {{.Name}} in firemodel schema.
     {{- end}}
     dynamic var {{.Name | toLowerCamel}}: Pring.NestedCollection<{{.Type.Name}}> = []
     {{- end}}
@@ -343,15 +337,11 @@ override class var path: String { return "{{firestoreModelName . }}" }
 	enum = `
 {{- if .Comment}}
 // {{.Comment}}
-{{- else}}
-// TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
 {{- end}}
 @objc enum {{.Name | toCamel }}: Int {
     {{- range .Values}}
     {{- if .Comment}}
     // {{.Comment}}
-    {{- else}}
-    // TODO: Add documentation to {{.Name | toCamel}} in firemodel schema.
     {{- end}}
     case {{.Name | toLowerCamel}}
     {{- end}}
@@ -387,15 +377,11 @@ extension {{.Name | toCamel}}: CustomDebugStringConvertible {
 	structTpl = `
 {{- if .Comment}}
 // {{.Comment}}
-{{- else}}
-// TODO: Add documentation to {{.Name}} in firemodel schema.
 {{- end}}
 @objcMembers class {{.Name | toCamel }}: Pring.Object {
     {{- range .Fields}}
     {{- if .Comment}}
     // {{.Comment}}
-    {{- else}}
-    // TODO: Add documentation to {{.Name}} in firemodel schema.
     {{- end}}
     var {{.Name | toLowerCamel -}}: {{.Type | toSwiftType true}}
     {{- end}}

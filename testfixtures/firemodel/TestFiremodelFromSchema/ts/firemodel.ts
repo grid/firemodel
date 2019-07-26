@@ -10,32 +10,20 @@ export namespace example {
     mimeType: string;
     name: string;
   }
-
-  /** TODO: Add documentation to TestEnum in firemodel schema. */
   export enum TestEnum {
-    /** TODO: Add documentation to left in firemodel schema. */
     left = 'LEFT',
-    /** TODO: Add documentation to right in firemodel schema. */
     right = 'RIGHT',
-    /** TODO: Add documentation to up in firemodel schema. */
     up = 'UP',
-    /** TODO: Add documentation to down in firemodel schema. */
     down = 'DOWN',
   }
-
-  /** TODO: Add documentation to TestStruct in firemodel schema. */
   export interface ITestStruct {
-    /** TODO: Add documentation to where in firemodel schema. */
     where?: string;
-    /** TODO: Add documentation to how_much in firemodel schema. */
     howMuch?: number;
-    /** TODO: Add documentation to some_enum in firemodel schema. */
     someEnum?: TestEnum;
   }
 
   /** A Test is a test model. */
   export interface ITestModel {
-    /** TODO: Add documentation to nested_collection in firemodel schema. */
     nestedCollection: firestore.CollectionReference<ITestModel>;
     /** The name. */
     name?: string;
@@ -47,41 +35,23 @@ export namespace example {
     birthdate?: firestore.Timestamp;
     /** True if it is good. */
     isGood?: boolean;
-    /** TODO: Add documentation to data in firemodel schema. */
     data?: firestore.Blob;
-    /** TODO: Add documentation to friend in firemodel schema. */
     friend?: firestore.DocumentReference<ITestModel>;
-    /** TODO: Add documentation to location in firemodel schema. */
     location?: firestore.GeoPoint;
-    /** TODO: Add documentation to colors in firemodel schema. */
     colors?: string[];
-    /** TODO: Add documentation to numbers in firemodel schema. */
     numbers?: number[];
-    /** TODO: Add documentation to bools in firemodel schema. */
     bools?: boolean[];
-    /** TODO: Add documentation to doubles in firemodel schema. */
     doubles?: number[];
-    /** TODO: Add documentation to directions in firemodel schema. */
     directions?: TestEnum[];
-    /** TODO: Add documentation to models in firemodel schema. */
     models?: ITestStruct[];
-    /** TODO: Add documentation to models_2 in firemodel schema. */
     models2?: ITestStruct[];
-    /** TODO: Add documentation to refs in firemodel schema. */
     refs?: firestore.DocumentReference[];
-    /** TODO: Add documentation to model_refs in firemodel schema. */
     modelRefs?: firestore.DocumentReference<ITestTimestamps>[];
-    /** TODO: Add documentation to meta in firemodel schema. */
     meta?: { [key: string]: any; };
-    /** TODO: Add documentation to meta_strs in firemodel schema. */
     metaStrs?: { [key: string]: string; };
-    /** TODO: Add documentation to direction in firemodel schema. */
     direction?: TestEnum;
-    /** TODO: Add documentation to test_file in firemodel schema. */
     testFile?: IFile;
-    /** TODO: Add documentation to url in firemodel schema. */
     url?: URL;
-    /** TODO: Add documentation to nested in firemodel schema. */
     nested?: ITestStruct;
 
     /** Record creation timestamp. */
@@ -89,8 +59,6 @@ export namespace example {
     /** Record update timestamp. */
     updatedAt?: firestore.Timestamp;
   }
-
-  /** TODO: Add documentation to TestTimestamps in firemodel schema. */
   export interface ITestTimestamps {
 
     /** Record creation timestamp. */
@@ -98,10 +66,7 @@ export namespace example {
     /** Record update timestamp. */
     updatedAt?: firestore.Timestamp;
   }
-
-  /** TODO: Add documentation to Test in firemodel schema. */
   export interface ITest {
-    /** TODO: Add documentation to direction in firemodel schema. */
     direction?: TestEnum;
   }
 }
