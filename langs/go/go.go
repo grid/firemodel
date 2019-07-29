@@ -112,7 +112,7 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 		f.Comment("")
 		f.Commentf("Firestore document location: /%s", fmt.Sprintf(format, commentargs...))
 	}
-	clientName := fmt.Sprint("client", model.Name)
+	//clientName := fmt.Sprint("client", model.Name)
 	f.
 		Type().
 		Id(model.Name).
@@ -156,20 +156,20 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			g.Lit(fmt.Sprint(start, strings.Replace(regex, "%s", "([a-zA-Z0-9]+)", -1), "$"))
 		})
 
-		f.Commentf("%s is a named regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexNamedPath"), model.Name)
-		f.Var().Id(fmt.Sprint(model.Name, "RegexNamedPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
-			regex := regexp.QuoteMeta(format)
-			start := "^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
-			for _, arg := range args {
-				repl := fmt.Sprint("(?P<", arg, ">[a-zA-Z0-9]+)")
-				regex = strings.Replace(regex, "%s", repl, 1)
-			}
-			g.Lit(fmt.Sprint(start, regex, "$"))
-		})
-
+	//	f.Commentf("%s is a named regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexNamedPath"), model.Name)
+	//	f.Var().Id(fmt.Sprint(model.Name, "RegexNamedPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
+	//		regex := regexp.QuoteMeta(format)
+	//		start := "^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
+	//		for _, arg := range args {
+	//			repl := fmt.Sprint("(?P<", arg, ">[a-zA-Z0-9]+)")
+	//			regex = strings.Replace(regex, "%s", repl, 1)
+	//		}
+	//		g.Lit(fmt.Sprint(start, regex, "$"))
+	//	})
+	//
 		pathStructName := fmt.Sprint(model.Name, "PathStruct")
 		pathStructFunctionName := fmt.Sprint(model.Name, "PathToStruct")
-		pathStructReverseFunctionName := fmt.Sprint(model.Name, "StructToPath")
+		//pathStructReverseFunctionName := fmt.Sprint(model.Name, "StructToPath")
 		f.Commentf("%s is a struct that contains parts of a path of %s", pathStructName, model.Name)
 		f.Type().Id(pathStructName).StructFunc(func(g *jen.Group) {
 			for _, arg := range args {
@@ -189,144 +189,144 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 			})
 			g.Return(jen.Id("result"))
 		})
-
-		f.Commentf("%s is a function that turns a PathStruct of %s into a firestore path", pathStructReverseFunctionName, model.Name)
-		f.Func().Id(pathStructReverseFunctionName).Params(jen.Id("path").Id("*" + pathStructName)).String().BlockFunc(func(g *jen.Group) {
-			g.Id("built").Op(":=").Qual("fmt", "Sprintf").CallFunc(func(g *jen.Group) {
-				g.Lit(format)
-				for _, arg := range args {
-					g.Id("path").Dot(strcase.ToCamel(arg))
-				}
-			})
-			g.Return(jen.Id("built"))
-		})
-
-		wrapperName := fmt.Sprint(model.Name, "Wrapper")
-		f.Commentf("%s is a struct wrapper that contains a reference to the firemodel instance and the path", wrapperName)
-		f.Type().Id(wrapperName).StructFunc(func(g *jen.Group) {
-			g.Id("Data").Id("*" + model.Name)
-			g.Id("Path").Id("*" + pathStructName)
-			g.Id("PathStr").String()
-			g.Comment("---- Internal Stuffs ----")
-			g.Id("client").Op("*").Id(clientName)
-			g.Id("pathStr").String()
-			g.Id("ref").Op("*").Qual("cloud.google.com/go/firestore", "DocumentRef")
-		})
-
-		fromSnapshotName := fmt.Sprint(model.Name, "FromSnapshot")
-		f.Commentf("%s is a function that will create an instance of the model from a document snapshot", fromSnapshotName)
-		f.Func().
-			Id(fromSnapshotName).
-			Params(
-				jen.Id("snapshot").
-					Op("*").Qual("cloud.google.com/go/firestore", "DocumentSnapshot")).
-			Params(
-				jen.Id("*"+wrapperName),
-				jen.Error()).
-			BlockFunc(func(g *jen.Group) {
-				g.Id("temp").Op(":=").Op("&").Id(model.Name).Values()
-				g.Err().Op(":=").Id("snapshot").Dot("DataTo").Call(jen.Id("temp"))
-				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
-				g.Id("path").Op(":=").Id(pathStructFunctionName).Call(jen.Id("snapshot.Ref.Path"))
-				g.Id("pathStr").Op(":=").Id(pathStructReverseFunctionName).Call(jen.Id("path"))
-				g.Id("wrapper").Op(":=").Id("&" + wrapperName).ValuesFunc(func(g *jen.Group) {
-					g.Id("Path").Op(":").Id("path")
-					g.Id("PathStr").Op(":").Id("pathStr")
-					g.Id("pathStr").Op(":").Id("pathStr")
-					g.Id("ref").Op(":").Id("snapshot.Ref")
-					g.Id("Data").Op(":").Id("temp")
-				})
-				g.Return(jen.Id("wrapper"), jen.Nil())
-			})
-
-		m.clientNames = append(m.clientNames, &ClientName{ClientName: clientName, ModelName: model.Name})
-		f.Type().Id(clientName).StructFunc(func(g *jen.Group) {
-			g.Id("client").Op("*").Id("Client")
-		})
-
-		// Disable create for now, only set
-		// f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Create").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
-		// 	g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
-		// 	g.Id("wrapper").Op(":=").Op("&").Id(wrapperName).ValuesFunc(func(g *jen.Group) {
-		// 		g.Id("ref").Op(":").Id("ref")
-		// 		g.Id("pathStr").Op(":").Id("path")
-		// 		g.Id("PathStr").Op(":").Id("path")
-		// 		g.Id("Path").Op(":").Id(pathStructFunctionName).Call(jen.Id("path"))
-		// 		g.Id("client").Op(":").Id("c")
-		// 		g.Id("Data").Op(":").Id("model")
-		// 	})
-		// 	g.Id("wrapper").Dot("Data").Dot("UpdatedAt").Op("=").Qual("time", "Now").Call()
-		// 	g.Id("wrapper").Dot("Data").Dot("CreatedAt").Op("=").Qual("time", "Now").Call()
-		// 	g.Err().Op(":=").Id("wrapper").Dot("Create").Call(jen.Id("ctx"))
-		// 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
-		// 	g.Return(jen.Id("wrapper"), jen.Nil())
-		// })
-
-		f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Set").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
-			g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
-			g.Id("snapshot").Op(",").Err().Op(":=").Id("ref").Dot("Get").Call(jen.Id("ctx"))
-			g.If(jen.Id("snapshot").Dot("Exists").Call()).BlockFunc(func(g *jen.Group) {
-				g.Id("temp").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
-				g.If(jen.Err().Op("!=").Nil()).Block(jen.Comment("Don't do anything, just override")).Else().BlockFunc(func(g *jen.Group) {
-					g.Id("model").Dot("CreatedAt").Op("=").Id("temp").Dot("Data").Dot("CreatedAt")
-				})
-			})
-			g.Id("wrapper").Op(":=").Op("&").Id(wrapperName).ValuesFunc(func(g *jen.Group) {
-				g.Id("ref").Op(":").Id("ref")
-				g.Id("pathStr").Op(":").Id("path")
-				g.Id("PathStr").Op(":").Id("path")
-				g.Id("Path").Op(":").Id(pathStructFunctionName).Call(jen.Id("path"))
-				g.Id("client").Op(":").Id("c")
-				g.Id("Data").Op(":").Id("model")
-			})
-			g.Id("wrapper").Dot("Data").Dot("UpdatedAt").Op("=").Qual("time", "Now").Call()
-			g.Err().Op("=").Id("wrapper").Dot("Set").Call(jen.Id("ctx"))
-			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
-			g.Return(jen.Id("wrapper"), jen.Nil())
-		})
-
-		getCommandByPathName := fmt.Sprint("Get", "ByPath")
-
-		f.Func().Params(jen.Id("c").Id("*"+clientName)).Id(getCommandByPathName).Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String()).Params(
-			jen.Id("*"+wrapperName),
-			jen.Error()).
-			BlockFunc(func(g *jen.Group) {
-				g.Id("reference").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
-				g.Id("snapshot").Op(",").Err().Op(":=").Id("reference").Dot("Get").Call(jen.Id("ctx"))
-				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
-				g.Id("wrapper").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
-				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
-				g.Return(jen.Id("wrapper"), jen.Nil())
-			})
-
-		f.Func().Params(jen.Id("c").Id("*"+clientName)).Id(getCommandByPathName+"Tx").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("tx").Op("*").Qual("cloud.google.com/go/firestore", "Transaction"), jen.Id("path").String()).Params(
-			jen.Id("*"+wrapperName),
-			jen.Error()).
-			BlockFunc(func(g *jen.Group) {
-				g.Id("reference").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
-				g.Id("snapshot").Op(",").Err().Op(":=").Id("tx").Dot("Get").Call(jen.Id("reference"))
-				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
-				g.Id("wrapper").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
-				g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
-				g.Return(jen.Id("wrapper"), jen.Nil())
-			})
-
-		f.Func().Params(jen.Id("m").Id("*" + wrapperName)).Id("Set").Params(jen.Id("ctx").Qual("context", "Context")).Params(jen.Id("error")).BlockFunc(func(g *jen.Group) {
-			g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
-				g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
-			})
-			g.Id("_").Op(",").Err().Op(":=").Id("m").Dot("ref").Dot("Set").Call(jen.Id("ctx"), jen.Id("m").Dot("Data"))
-			g.Return(jen.Err())
-		})
-
-		f.Func().Params(jen.Id("m").Id("*"+wrapperName)).Id("SetTx").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("tx").Op("*").Qual("cloud.google.com/go/firestore", "Transaction")).Params(jen.Id("error")).BlockFunc(func(g *jen.Group) {
-			g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
-				g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
-			})
-			g.Err().Op(":=").Id("tx").Dot("Set").Call(jen.Id("m").Dot("ref"), jen.Id("m").Dot("Data"))
-			g.Return(jen.Err())
-		})
-
+	//
+	//	f.Commentf("%s is a function that turns a PathStruct of %s into a firestore path", pathStructReverseFunctionName, model.Name)
+	//	f.Func().Id(pathStructReverseFunctionName).Params(jen.Id("path").Id("*" + pathStructName)).String().BlockFunc(func(g *jen.Group) {
+	//		g.Id("built").Op(":=").Qual("fmt", "Sprintf").CallFunc(func(g *jen.Group) {
+	//			g.Lit(format)
+	//			for _, arg := range args {
+	//				g.Id("path").Dot(strcase.ToCamel(arg))
+	//			}
+	//		})
+	//		g.Return(jen.Id("built"))
+	//	})
+	//
+	//	wrapperName := fmt.Sprint(model.Name, "Wrapper")
+	//	f.Commentf("%s is a struct wrapper that contains a reference to the firemodel instance and the path", wrapperName)
+	//	f.Type().Id(wrapperName).StructFunc(func(g *jen.Group) {
+	//		g.Id("Data").Id("*" + model.Name)
+	//		g.Id("Path").Id("*" + pathStructName)
+	//		g.Id("PathStr").String()
+	//		g.Comment("---- Internal Stuffs ----")
+	//		g.Id("client").Op("*").Id(clientName)
+	//		g.Id("pathStr").String()
+	//		g.Id("ref").Op("*").Qual("cloud.google.com/go/firestore", "DocumentRef")
+	//	})
+	//
+	//	fromSnapshotName := fmt.Sprint(model.Name, "FromSnapshot")
+	//	f.Commentf("%s is a function that will create an instance of the model from a document snapshot", fromSnapshotName)
+	//	f.Func().
+	//		Id(fromSnapshotName).
+	//		Params(
+	//			jen.Id("snapshot").
+	//				Op("*").Qual("cloud.google.com/go/firestore", "DocumentSnapshot")).
+	//		Params(
+	//			jen.Id("*"+wrapperName),
+	//			jen.Error()).
+	//		BlockFunc(func(g *jen.Group) {
+	//			g.Id("temp").Op(":=").Op("&").Id(model.Name).Values()
+	//			g.Err().Op(":=").Id("snapshot").Dot("DataTo").Call(jen.Id("temp"))
+	//			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+	//			g.Id("path").Op(":=").Id(pathStructFunctionName).Call(jen.Id("snapshot.Ref.Path"))
+	//			g.Id("pathStr").Op(":=").Id(pathStructReverseFunctionName).Call(jen.Id("path"))
+	//			g.Id("wrapper").Op(":=").Id("&" + wrapperName).ValuesFunc(func(g *jen.Group) {
+	//				g.Id("Path").Op(":").Id("path")
+	//				g.Id("PathStr").Op(":").Id("pathStr")
+	//				g.Id("pathStr").Op(":").Id("pathStr")
+	//				g.Id("ref").Op(":").Id("snapshot.Ref")
+	//				g.Id("Data").Op(":").Id("temp")
+	//			})
+	//			g.Return(jen.Id("wrapper"), jen.Nil())
+	//		})
+	//
+	//	m.clientNames = append(m.clientNames, &ClientName{ClientName: clientName, ModelName: model.Name})
+	//	f.Type().Id(clientName).StructFunc(func(g *jen.Group) {
+	//		g.Id("client").Op("*").Id("Client")
+	//	})
+	//
+	//	// Disable create for now, only set
+	//	// f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Create").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
+	//	// 	g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
+	//	// 	g.Id("wrapper").Op(":=").Op("&").Id(wrapperName).ValuesFunc(func(g *jen.Group) {
+	//	// 		g.Id("ref").Op(":").Id("ref")
+	//	// 		g.Id("pathStr").Op(":").Id("path")
+	//	// 		g.Id("PathStr").Op(":").Id("path")
+	//	// 		g.Id("Path").Op(":").Id(pathStructFunctionName).Call(jen.Id("path"))
+	//	// 		g.Id("client").Op(":").Id("c")
+	//	// 		g.Id("Data").Op(":").Id("model")
+	//	// 	})
+	//	// 	g.Id("wrapper").Dot("Data").Dot("UpdatedAt").Op("=").Qual("time", "Now").Call()
+	//	// 	g.Id("wrapper").Dot("Data").Dot("CreatedAt").Op("=").Qual("time", "Now").Call()
+	//	// 	g.Err().Op(":=").Id("wrapper").Dot("Create").Call(jen.Id("ctx"))
+	//	// 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+	//	// 	g.Return(jen.Id("wrapper"), jen.Nil())
+	//	// })
+	//
+	//	f.Func().Params(jen.Id("c").Op("*").Id(clientName)).Id("Set").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String(), jen.Id("model").Op("*").Id(model.Name)).Params(jen.Op("*").Id(wrapperName), jen.Error()).BlockFunc(func(g *jen.Group) {
+	//		g.Id("ref").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
+	//		g.Id("snapshot").Op(",").Err().Op(":=").Id("ref").Dot("Get").Call(jen.Id("ctx"))
+	//		g.If(jen.Id("snapshot").Dot("Exists").Call()).BlockFunc(func(g *jen.Group) {
+	//			g.Id("temp").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
+	//			g.If(jen.Err().Op("!=").Nil()).Block(jen.Comment("Don't do anything, just override")).Else().BlockFunc(func(g *jen.Group) {
+	//				g.Id("model").Dot("CreatedAt").Op("=").Id("temp").Dot("Data").Dot("CreatedAt")
+	//			})
+	//		})
+	//		g.Id("wrapper").Op(":=").Op("&").Id(wrapperName).ValuesFunc(func(g *jen.Group) {
+	//			g.Id("ref").Op(":").Id("ref")
+	//			g.Id("pathStr").Op(":").Id("path")
+	//			g.Id("PathStr").Op(":").Id("path")
+	//			g.Id("Path").Op(":").Id(pathStructFunctionName).Call(jen.Id("path"))
+	//			g.Id("client").Op(":").Id("c")
+	//			g.Id("Data").Op(":").Id("model")
+	//		})
+	//		g.Id("wrapper").Dot("Data").Dot("UpdatedAt").Op("=").Qual("time", "Now").Call()
+	//		g.Err().Op("=").Id("wrapper").Dot("Set").Call(jen.Id("ctx"))
+	//		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+	//		g.Return(jen.Id("wrapper"), jen.Nil())
+	//	})
+	//
+	//	getCommandByPathName := fmt.Sprint("Get", "ByPath")
+	//
+	//	f.Func().Params(jen.Id("c").Id("*"+clientName)).Id(getCommandByPathName).Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("path").String()).Params(
+	//		jen.Id("*"+wrapperName),
+	//		jen.Error()).
+	//		BlockFunc(func(g *jen.Group) {
+	//			g.Id("reference").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
+	//			g.Id("snapshot").Op(",").Err().Op(":=").Id("reference").Dot("Get").Call(jen.Id("ctx"))
+	//			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+	//			g.Id("wrapper").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
+	//			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+	//			g.Return(jen.Id("wrapper"), jen.Nil())
+	//		})
+	//
+	//	f.Func().Params(jen.Id("c").Id("*"+clientName)).Id(getCommandByPathName+"Tx").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("tx").Op("*").Qual("cloud.google.com/go/firestore", "Transaction"), jen.Id("path").String()).Params(
+	//		jen.Id("*"+wrapperName),
+	//		jen.Error()).
+	//		BlockFunc(func(g *jen.Group) {
+	//			g.Id("reference").Op(":=").Id("c").Dot("client").Dot("Client").Dot("Doc").Call(jen.Id("path"))
+	//			g.Id("snapshot").Op(",").Err().Op(":=").Id("tx").Dot("Get").Call(jen.Id("reference"))
+	//			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+	//			g.Id("wrapper").Op(",").Err().Op(":=").Id(fromSnapshotName).Call(jen.Id("snapshot"))
+	//			g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err()))
+	//			g.Return(jen.Id("wrapper"), jen.Nil())
+	//		})
+	//
+	//	f.Func().Params(jen.Id("m").Id("*" + wrapperName)).Id("Set").Params(jen.Id("ctx").Qual("context", "Context")).Params(jen.Id("error")).BlockFunc(func(g *jen.Group) {
+	//		g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
+	//			g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
+	//		})
+	//		g.Id("_").Op(",").Err().Op(":=").Id("m").Dot("ref").Dot("Set").Call(jen.Id("ctx"), jen.Id("m").Dot("Data"))
+	//		g.Return(jen.Err())
+	//	})
+	//
+	//	f.Func().Params(jen.Id("m").Id("*"+wrapperName)).Id("SetTx").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("tx").Op("*").Qual("cloud.google.com/go/firestore", "Transaction")).Params(jen.Id("error")).BlockFunc(func(g *jen.Group) {
+	//		g.If(jen.Id("m.ref").Op("==").Nil()).BlockFunc(func(g *jen.Group) {
+	//			g.Return(jen.Qual("errors", "New").Call(jen.Lit("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")))
+	//		})
+	//		g.Err().Op(":=").Id("tx").Dot("Set").Call(jen.Id("m").Dot("ref"), jen.Id("m").Dot("Data"))
+	//		g.Return(jen.Err())
+	//	})
+	//
 	}
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))
