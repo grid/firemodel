@@ -7,28 +7,34 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		16D7A19322EB75DB00D686C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A19222EB75DB00D686C0 /* AppDelegate.swift */; };
-		16D7A19522EB75DB00D686C0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A19422EB75DB00D686C0 /* ViewController.swift */; };
-		16D7A19822EB75DB00D686C0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A19622EB75DB00D686C0 /* Main.storyboard */; };
-		16D7A19A22EB75DE00D686C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A19922EB75DE00D686C0 /* Assets.xcassets */; };
-		16D7A19D22EB75DE00D686C0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A19B22EB75DE00D686C0 /* LaunchScreen.storyboard */; };
+		16D7A1AB22EB767B00D686C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */; };
+		16D7A1AD22EB767C00D686C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A1AC22EB767C00D686C0 /* Assets.xcassets */; };
+		16D7A1B022EB767C00D686C0 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A1AE22EB767C00D686C0 /* MainMenu.xib */; };
+		16D7A1B722EB790D00D686C0 /* Firemodel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1B622EB790D00D686C0 /* Firemodel.swift */; };
+		16D7A1B922EC316D00D686C0 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1B822EC316D00D686C0 /* Models.swift */; };
+		86E983AB66F8F062269DC029 /* Pods_Firemodel_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4604533B5E962C05460476DC /* Pods_Firemodel_Demo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		16D7A18F22EB75DB00D686C0 /* FiremodelDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FiremodelDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		16D7A19222EB75DB00D686C0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		16D7A19422EB75DB00D686C0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		16D7A19722EB75DB00D686C0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		16D7A19922EB75DE00D686C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		16D7A19C22EB75DE00D686C0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		16D7A19E22EB75DE00D686C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16D7A1A822EB767B00D686C0 /* Firemodel Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Firemodel Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		16D7A1AC22EB767C00D686C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		16D7A1AF22EB767C00D686C0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		16D7A1B122EB767C00D686C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16D7A1B222EB767C00D686C0 /* Firemodel_Demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Firemodel_Demo.entitlements; sourceTree = "<group>"; };
+		16D7A1B622EB790D00D686C0 /* Firemodel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Firemodel.swift; sourceTree = "<group>"; };
+		16D7A1B822EC316D00D686C0 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		4604533B5E962C05460476DC /* Pods_Firemodel_Demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Firemodel_Demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		67F2C801385E66AF99988806 /* Pods-Firemodel Demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Firemodel Demo.debug.xcconfig"; path = "Target Support Files/Pods-Firemodel Demo/Pods-Firemodel Demo.debug.xcconfig"; sourceTree = "<group>"; };
+		7EDFF51AC472347D5FBFB317 /* Pods-Firemodel Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Firemodel Demo.release.xcconfig"; path = "Target Support Files/Pods-Firemodel Demo/Pods-Firemodel Demo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		16D7A18C22EB75DB00D686C0 /* Frameworks */ = {
+		16D7A1A522EB767B00D686C0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86E983AB66F8F062269DC029 /* Pods_Firemodel_Demo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,50 +44,72 @@
 		16D7A18622EB75DB00D686C0 = {
 			isa = PBXGroup;
 			children = (
-				16D7A19122EB75DB00D686C0 /* FiremodelDemo */,
+				16D7A1A922EB767B00D686C0 /* Firemodel Demo */,
 				16D7A19022EB75DB00D686C0 /* Products */,
+				5C93C9ACD298F650FE3920E0 /* Pods */,
+				86C133C68AD0544B24520D42 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
 		16D7A19022EB75DB00D686C0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				16D7A18F22EB75DB00D686C0 /* FiremodelDemo.app */,
+				16D7A1A822EB767B00D686C0 /* Firemodel Demo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		16D7A19122EB75DB00D686C0 /* FiremodelDemo */ = {
+		16D7A1A922EB767B00D686C0 /* Firemodel Demo */ = {
 			isa = PBXGroup;
 			children = (
-				16D7A19222EB75DB00D686C0 /* AppDelegate.swift */,
-				16D7A19422EB75DB00D686C0 /* ViewController.swift */,
-				16D7A19622EB75DB00D686C0 /* Main.storyboard */,
-				16D7A19922EB75DE00D686C0 /* Assets.xcassets */,
-				16D7A19B22EB75DE00D686C0 /* LaunchScreen.storyboard */,
-				16D7A19E22EB75DE00D686C0 /* Info.plist */,
+				16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */,
+				16D7A1B622EB790D00D686C0 /* Firemodel.swift */,
+				16D7A1B822EC316D00D686C0 /* Models.swift */,
+				16D7A1AC22EB767C00D686C0 /* Assets.xcassets */,
+				16D7A1AE22EB767C00D686C0 /* MainMenu.xib */,
+				16D7A1B122EB767C00D686C0 /* Info.plist */,
+				16D7A1B222EB767C00D686C0 /* Firemodel_Demo.entitlements */,
 			);
-			path = FiremodelDemo;
+			path = "Firemodel Demo";
+			sourceTree = "<group>";
+		};
+		5C93C9ACD298F650FE3920E0 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				67F2C801385E66AF99988806 /* Pods-Firemodel Demo.debug.xcconfig */,
+				7EDFF51AC472347D5FBFB317 /* Pods-Firemodel Demo.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		86C133C68AD0544B24520D42 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4604533B5E962C05460476DC /* Pods_Firemodel_Demo.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		16D7A18E22EB75DB00D686C0 /* FiremodelDemo */ = {
+		16D7A1A722EB767B00D686C0 /* Firemodel Demo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 16D7A1A122EB75DE00D686C0 /* Build configuration list for PBXNativeTarget "FiremodelDemo" */;
+			buildConfigurationList = 16D7A1B522EB767C00D686C0 /* Build configuration list for PBXNativeTarget "Firemodel Demo" */;
 			buildPhases = (
-				16D7A18B22EB75DB00D686C0 /* Sources */,
-				16D7A18C22EB75DB00D686C0 /* Frameworks */,
-				16D7A18D22EB75DB00D686C0 /* Resources */,
+				A641018B638665E462ABB4D5 /* [CP] Check Pods Manifest.lock */,
+				16D7A1A422EB767B00D686C0 /* Sources */,
+				16D7A1A522EB767B00D686C0 /* Frameworks */,
+				16D7A1A622EB767B00D686C0 /* Resources */,
+				7DE721E5FAE6A46CEE531871 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = FiremodelDemo;
-			productName = FiremodelDemo;
-			productReference = 16D7A18F22EB75DB00D686C0 /* FiremodelDemo.app */;
+			name = "Firemodel Demo";
+			productName = "Firemodel Demo";
+			productReference = 16D7A1A822EB767B00D686C0 /* Firemodel Demo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -94,7 +122,7 @@
 				LastUpgradeCheck = 1030;
 				ORGANIZATIONNAME = "Mickey Reiss";
 				TargetAttributes = {
-					16D7A18E22EB75DB00D686C0 = {
+					16D7A1A722EB767B00D686C0 = {
 						CreatedOnToolsVersion = 10.3;
 					};
 				};
@@ -112,51 +140,102 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				16D7A18E22EB75DB00D686C0 /* FiremodelDemo */,
+				16D7A1A722EB767B00D686C0 /* Firemodel Demo */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		16D7A18D22EB75DB00D686C0 /* Resources */ = {
+		16D7A1A622EB767B00D686C0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				16D7A19D22EB75DE00D686C0 /* LaunchScreen.storyboard in Resources */,
-				16D7A19A22EB75DE00D686C0 /* Assets.xcassets in Resources */,
-				16D7A19822EB75DB00D686C0 /* Main.storyboard in Resources */,
+				16D7A1AD22EB767C00D686C0 /* Assets.xcassets in Resources */,
+				16D7A1B022EB767C00D686C0 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		7DE721E5FAE6A46CEE531871 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Firemodel Demo/Pods-Firemodel Demo-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/BoringSSL-GRPC/openssl_grpc.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
+				"${BUILT_PRODUCTS_DIR}/gRPC-C++/grpcpp.framework",
+				"${BUILT_PRODUCTS_DIR}/gRPC-Core/grpc.framework",
+				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/openssl_grpc.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/grpcpp.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/grpc.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Firemodel Demo/Pods-Firemodel Demo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A641018B638665E462ABB4D5 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Firemodel Demo-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-		16D7A18B22EB75DB00D686C0 /* Sources */ = {
+		16D7A1A422EB767B00D686C0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				16D7A19522EB75DB00D686C0 /* ViewController.swift in Sources */,
-				16D7A19322EB75DB00D686C0 /* AppDelegate.swift in Sources */,
+				16D7A1B922EC316D00D686C0 /* Models.swift in Sources */,
+				16D7A1AB22EB767B00D686C0 /* AppDelegate.swift in Sources */,
+				16D7A1B722EB790D00D686C0 /* Firemodel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		16D7A19622EB75DB00D686C0 /* Main.storyboard */ = {
+		16D7A1AE22EB767C00D686C0 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				16D7A19722EB75DB00D686C0 /* Base */,
+				16D7A1AF22EB767C00D686C0 /* Base */,
 			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		16D7A19B22EB75DE00D686C0 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				16D7A19C22EB75DE00D686C0 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
+			name = MainMenu.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -213,7 +292,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -268,7 +347,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -278,39 +357,49 @@
 			};
 			name = Release;
 		};
-		16D7A1A222EB75DE00D686C0 /* Debug */ = {
+		16D7A1B322EB767C00D686C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 67F2C801385E66AF99988806 /* Pods-Firemodel Demo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Firemodel Demo/Firemodel_Demo.entitlements";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = P79Z2X46N8;
-				INFOPLIST_FILE = FiremodelDemo/Info.plist;
+				INFOPLIST_FILE = "Firemodel Demo/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.visor.FiremodelDemo;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.visor.Firemodel-Demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		16D7A1A322EB75DE00D686C0 /* Release */ = {
+		16D7A1B422EB767C00D686C0 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7EDFF51AC472347D5FBFB317 /* Pods-Firemodel Demo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Firemodel Demo/Firemodel_Demo.entitlements";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = P79Z2X46N8;
-				INFOPLIST_FILE = FiremodelDemo/Info.plist;
+				INFOPLIST_FILE = "Firemodel Demo/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.visor.FiremodelDemo;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.visor.Firemodel-Demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -326,11 +415,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		16D7A1A122EB75DE00D686C0 /* Build configuration list for PBXNativeTarget "FiremodelDemo" */ = {
+		16D7A1B522EB767C00D686C0 /* Build configuration list for PBXNativeTarget "Firemodel Demo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				16D7A1A222EB75DE00D686C0 /* Debug */,
-				16D7A1A322EB75DE00D686C0 /* Release */,
+				16D7A1B322EB767C00D686C0 /* Debug */,
+				16D7A1B422EB767C00D686C0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
