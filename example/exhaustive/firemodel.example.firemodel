@@ -1,0 +1,51 @@
+option ts.namespace = "example";
+
+enum TestEnum {
+    left,
+    right,
+    up,
+    down,
+}
+
+struct TestStruct {
+  string where;
+  integer how_much;
+  TestEnum some_enum;
+}
+
+// A Test is a test model.
+model TestModel {
+  option firestore.model_name = "test_models";
+  option firestore.path = "users/{user_id}/test_models/{test_model_id}";
+  option firestore.autotimestamp = true;
+
+  // The name.
+  string name;
+  // The age.
+  integer age;
+  // The number pi.
+  double pi;
+  // The birth date.
+  timestamp birthdate;
+  // True if it is good.
+  boolean is_good;
+  bytes data;
+  reference<TestModel> friend;
+  geopoint location;
+  array<string> colors;
+  array<integer> numbers;
+  array<boolean> bools;
+  array<double> doubles;
+  array<TestEnum> directions;
+  array<TestStruct> models;
+  array<TestStruct> models2;
+  array<reference> refs;
+  array<reference<TestTimestamps>> model_refs;
+  map meta;
+  map<string> meta_strs;
+  TestEnum direction;
+  File test_file;
+  URL url;
+  TestStruct nested;
+  collection<TestModel> nested_collection;
+}

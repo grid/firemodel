@@ -1,0 +1,49 @@
+struct Avatar {
+  URL url;
+  string color;
+}
+
+root model User implements Userlike {
+  string username;
+  string display_name;
+  Avatar avatar;
+}
+
+enum Audience {
+  global,
+  friends,
+}
+
+model Gram under User {
+  Audience shared_with;
+  URL photo_url;
+  string description;
+}
+
+model Messages under User {
+  MessageContent content;
+  reference<Friend> from;
+}
+
+enum MessageContent {
+  text(string),
+  photo(PhotoMessageContent),
+}
+
+struct PhotoMessageContent {
+  string caption;
+  URL url;
+}
+
+model Friend under User implements Userlike {
+  string username;
+  string display_name;
+  Avatar avatar;
+  timestamp friends_sinice;
+}
+
+interface Userlike {
+  string username;
+  string display_name;
+  Avatar avatar;
+}
