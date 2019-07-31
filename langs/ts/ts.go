@@ -175,16 +175,11 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   {{- if .Comment}}
 
   /** {{.Comment}} */
-  {{- else}}
-
-  /** TODO: Add documentation to {{.Name}} in firemodel schema. */
   {{- end}}
   export interface {{.Name | interfaceName | ToCamel}} {
     {{- range .Collections}}
     {{- if .Comment}}
     /** {{.Comment}} */
-    {{- else }}
-    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
     {{.Name | ToLowerCamel}}: firestore.CollectionReference<{{.Type.Name | interfaceName | ToCamel}}>;
     {{- end}}
@@ -192,8 +187,6 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
     {{- range .Fields}}
     {{- if .Comment}}
     /** {{.Comment}} */
-    {{- else }}
-    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
     {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type}};
     {{- end}}
@@ -210,16 +203,11 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   {{- if .Comment}}
 
   /** {{.Comment}} */
-  {{- else}}
-
-  /** TODO: Add documentation to {{.Name}} in firemodel schema. */
   {{- end}}
   export interface {{.Name | interfaceName | ToCamel}} {
     {{- range .Fields}}
     {{- if .Comment}}
     /** {{.Comment}} */
-    {{- else }}
-    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
     {{.Name | ToLowerCamel -}}?: {{toTypescriptType .Type}};
     {{- end}}
@@ -229,16 +217,11 @@ export namespace {{.Options | getSchemaOption "ts" "namespace" "firemodel"}} {
   {{- if .Comment}}
 
   /** {{.Comment}} */
-  {{- else}}
-
-  /** TODO: Add documentation to {{.Name}} in firemodel schema. */
   {{- end}}
   export enum {{.Name | ToCamel}} {
     {{- range .Values}}
     {{- if .Comment}}
     /** {{.Comment}} */
-    {{- else}}
-    /** TODO: Add documentation to {{.Name}} in firemodel schema. */
     {{- end}}
     {{.Name}} = '{{.Name | ToScreamingSnake}}',
     {{- end}}

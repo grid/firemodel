@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-// TODO: Add comment to TestTimestamps in firemodel schema.
 //
 // Firestore document location: /timestamps/{test_timestamps_id}
 type TestTimestamps struct {
