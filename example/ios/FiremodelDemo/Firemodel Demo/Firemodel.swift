@@ -26,42 +26,27 @@ enum DocumentSnapshot<T> {
     case error(Error)
 }
 
-enum CollectionSnapshot<T> {
-    struct Change<T> {
-        let type: DocumentChangeType
-        let document: T
-        let oldIndex: Int
-        let newIndex: Int
-    }
 
-    case initial([T])
-    case changes([Change<T>])
+struct DocumentChange<T> {
+    let document: T
+    let oldIndex: UInt
+    let newIndex: UInt
+}
+
+enum CollectionSnapshot<T> {
+    case documents(_: [T], diff: (additions: [Change<T>], modifications: [Change<T>], removals: [Change<T>]), metadata: SnapshotMetadata)
     case error(Error)
 }
 
-protocol Gettable {
+protocol Subscribable {
     associatedtype T
-    func get(withQuery applyQuery: (Query) -> Query, _ receiver: @escaping (T) -> Void, source: Source)
-}
-
-protocol Listable {
-    associatedtype T
-    func list(withQuery applyQuery: (Query) -> Query, _ receiver: @escaping ([User]) -> Void)
-}
-
-protocol Watchable {
-    associatedtype T
-
-    func watch(withQuery applyQuery: (Query) -> Query = { q in q }, _ receiver: @escaping (Snapshot<T>, Diff<T>) -> Void) -> Stopable
-}
-
-protocol Stopable {
-    func stop()
+    func subscribe(withQuery applyQuery: ((Query) -> Query)?,
+                   receiver publish: @escaping (CollectionSnapshot<T>) -> Void) -> Unsubscriber
 }
 
 // MARK: - Client
 
-class Firestore {
+class Firemodel {
     private let firestore: FirebaseFirestore.Firestore
 
     init() {
@@ -92,62 +77,42 @@ struct UserCollectionRef {
     }
 }
 
-extension UserCollectionRef: Listable {
-    typealias T = [User]
+extension UserCollectionRef: Subscribable {
 
-    func list(withQuery applyQuery: (Query) -> Query = { q in q }, _ receiver: @escaping (Snapshot<[User]>) -> Void) {
-        applyQuery(ref)
-            .getDocuments { (snap, error) in
+    func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
+                   receiver publish: @escaping (CollectionSnapshot<User>) -> Void) -> Unsubscriber {
+
+        let registration = (applyQuery?(ref) ?? ref)
+            .addSnapshotListener { (snap: QuerySnapshot?, error: Error?) in
                 if let error = error {
-                    receiver(.error(error))
+                    publish(.error(error))
                     return
                 }
                 guard let snap = snap else {
-                    // TODO
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
                     return
                 }
 
-                var users = [User]()
-                for snap in snap.documents {
+
+                var changes = [DocumentChange<User>]()
+                for change in snap.documentChanges {
+
+                    let user: User
                     do {
-                        let user = try User(snapshot: snap)
-                        users.append(user)
+                        user = try User(snapshot: change.document)
                     } catch {
-                        receiver(.error(error))
+                        publish(.error(error))
                         return
                     }
-                }
-                receiver(.element(users))
-        }
-    }
-}
 
-extension UserCollectionRef: Watchable {
-    func watch(withQuery applyQuery: (Query) -> Query = { q in q }, _ receiver: @escaping (Snapshot<User>) -> Void) -> Stopable {
-        let listenerRegistration = applyQuery(ref).addSnapshotListener { (snap, error) in
-            if let error = error {
-                receiver(.error(error))
-                return
-            }
-            guard let snap = snap else {
-                // TODO
-                return
-            }
-
-            var users = [User]()
-            for snap in snap.documents {
-                do {
-                    let user = try User(snapshot: snap)
-                    users.append(user)
-                } catch {
-                    receiver(.error(error))
-                    return
+                    changes.append(DocumentChange(document: user,
+                                                   oldIndex: change.oldIndex,
+                                                   newIndex: change.newIndex))
                 }
-            }
-            receiver(.element(users))
+                publish(.changes(changes, snap.metadata as SnapshotMetadata))
         }
 
-        return ListenerRegistrationStopper(listenerRegistration: listenerRegistration)
+        return Unsubscriber(listenerRegistration: registration)
     }
 }
 
