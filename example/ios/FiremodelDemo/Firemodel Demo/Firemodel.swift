@@ -14,18 +14,10 @@ typealias Source = FirebaseFirestore.FirestoreSource
 // MARK: - Protocols
 
 struct Change<T> {
-    let type: DocumentChangeType
     let document: T
     let oldIndex: Int
     let newIndex: Int
 }
-
-enum DocumentSnapshot<T> {
-    case initial(Snapshot<T>)
-    case change(Change<T>)
-    case error(Error)
-}
-
 
 struct DocumentChange<T> {
     let document: T
@@ -33,15 +25,19 @@ struct DocumentChange<T> {
     let newIndex: UInt
 }
 
-enum CollectionSnapshot<T> {
-    case documents(_: [T], diff: (additions: [Change<T>], modifications: [Change<T>], removals: [Change<T>]), metadata: SnapshotMetadata)
+enum CollectionEvent<T> {
+    case snapshot(_: [T], diff: (additions: [Change<T>], modifications: [Change<T>], removals: [Change<T>]), metadata: SnapshotMetadata)
     case error(Error)
 }
 
 protocol Subscribable {
     associatedtype T
     func subscribe(withQuery applyQuery: ((Query) -> Query)?,
-                   receiver publish: @escaping (CollectionSnapshot<T>) -> Void) -> Unsubscriber
+                   receiver publish: @escaping (CollectionEvent<T>) -> Void) -> Unsubscriber
+}
+
+protocol Unsubscriber {
+    func unsubscribe()
 }
 
 // MARK: - Client
@@ -78,9 +74,10 @@ struct UserCollectionRef {
 }
 
 extension UserCollectionRef: Subscribable {
+    typealias T = User
 
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
-                   receiver publish: @escaping (CollectionSnapshot<User>) -> Void) -> Unsubscriber {
+                   receiver publish: @escaping (CollectionEvent<User>) -> Void) -> Unsubscriber {
 
         let registration = (applyQuery?(ref) ?? ref)
             .addSnapshotListener { (snap: QuerySnapshot?, error: Error?) in
@@ -112,7 +109,7 @@ extension UserCollectionRef: Subscribable {
                 publish(.changes(changes, snap.metadata as SnapshotMetadata))
         }
 
-        return Unsubscriber(listenerRegistration: registration)
+        return ListenerRegistrationUnsubscriber(listenerRegistration: registration)
     }
 }
 
@@ -213,38 +210,32 @@ extension UserRef: Watchable {
     }
 }
 
-private struct ListenerRegistrationStopper: Stopable {
-    fileprivate let listenerRegistration: ListenerRegistration
+private struct ListenerRegistrationUnsubscriber: Unsubscriber {
+    private let listenerRegistration: ListenerRegistration
 
-    func stop() {
+    func unsubscribe() {
         listenerRegistration.remove()
     }
 }
 
-fileprivate extension ListenerRegistration {
-    func stopper() -> ListenerRegistrationStopper {
-        return ListenerRegistrationStopper(listenerRegistration: self)
-    }
-}
-
 enum FiremodelError: Error {
-    case typeError(model: Any.Type, key: AnyKeyPath, expectedType: Any.Type, actualValue: Any?)
+    case typeError
 }
 
 // User + Snapshot
 fileprivate extension User {
     init(snapshot: DocumentSnapshot) throws {
         guard let username: String? = snapshot.get("username") as? String? else {
-            throw FiremodelError.typeError(model: User.self, key: \User.username, expectedType: String.self, actualValue: snapshot.get("username"))
+            throw FiremodelError.typeError
         }
         guard let displayName: String? = snapshot.get("displayName") as? String? else {
-            throw FiremodelError.typeError(model: User.self, key: \User.displayName, expectedType: String.self, actualValue: snapshot.get("displayName"))
+            throw FiremodelError.typeError
         }
         guard let avatarUrl = try URL(snapshot: snapshot.get("avatar.url") as? String) else {
-            throw FiremodelError.typeError(model: Avatar.self, key: \Avatar.url, expectedType: String.self, actualValue: snapshot.get("avatar.url"))
+            throw FiremodelError.typeError
         }
         guard let avatarColor = snapshot.get("avatar.color") as? String? else {
-            throw FiremodelError.typeError(model: Avatar.self, key: \Avatar.color, expectedType: String.self, actualValue: snapshot.get("avatar.color"))
+            throw FiremodelError.typeError
         }
 
         self.init(username: username,
@@ -289,7 +280,7 @@ fileprivate extension Gram {
 fileprivate extension Message {
     init(snapshot: DocumentSnapshot) throws {
         guard let from = snapshot.get("from") as? DocumentReference? else {
-            throw FiremodelError.typeError(model: <#T##Any.Type#>, key: <#T##AnyKeyPath#>, expectedType: <#T##Any.Type#>, actualValue: <#T##Any?#>)
+            throw FiremodelError.typeError
         }
 
         self.init(content: try MessageContent(snapshot: snapshot,

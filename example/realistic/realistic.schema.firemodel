@@ -1,28 +1,82 @@
+// A ~realistic schema that demonstrates firemodel v0.2 syntax using metaphors from instagram.
+
+// ---------------------
+// [new] ASCII ART FTW!
+// ---------------------
+
+// [new] Interfaces allow you to declare structural abstractions. If a model or struct declares that it
+// implements an interface, it must include all the interface's fields with correct types.
+//
+// Interfaces are intended for compostability and abstraction, similar to graphql interfaces.
+interface HasToken {
+  string token;
+}
+
+// [unchanged] Structs are used for sharing structures of nested content, which
+// are stored as Maps in firestore and also accessible via FieldPaths in most
+// firestore client libraries.
 struct Avatar {
   URL url;
   string color;
 }
 
-root model User implements Userlike {
+// Models define structures for firestore documents models. Models cannot be used as field types.
+// [new] Models can implement zero or more interfaces.
+// [new] Models can have nested models, which designate nested collections.
+// [new] Models use an inflector to determine their pluralized collection name in firestore.
+// [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
+model User implements HasToken, Author {
   string username;
   string display_name;
   Avatar avatar;
+
+  model Gram {
+    Audience shared_with;
+    URL photo_url;
+    string description;
+  }
+
+  model Messages {
+    MessageContent content;
+    reference<Friend> from;
+
+    model Attachment {
+      string title;
+      AttachmentContent content;
+    }
+  }
+
+  model Friend implements Author {
+    string username;
+    string display_name;
+    Avatar avatar;
+    timestamp friends_sinice;
+  }
+
 }
 
+// [unchanged] Enums provide type safety around string enumerations. Enums are stored in firestore as capitalized strings.
 enum Audience {
   global,
   friends,
 }
 
-model Gram under User {
-  Audience shared_with;
-  URL photo_url;
-  string description;
+// [new] Enums values may now optionally include associated values. Associated
+// values may have any field type, including all primitive types and structs.
+// Associated values are stored in firestore under a period-delimited key,
+// prefixed with the enum field name; primitive types are stored under the
+// subkey key `_`. The enum case is always written, even when there is also an
+// associated value. Keys for enum values other than the active one are not written to firestore.
+enum AttachmentContent {
+  placeholder, // e.g. for an Attachment, written as `content = "PLACEHOLDER"`
+  imoji(bytes), // e.g. for an Attachment, written as `content = "IMOJI", content.imoji = #BYTES#`
+  gram(reference<Gram>),
+  upload(Upload), // e.g. for an Attachment, written as `content = "UPLOAD", content.upload.token = "oijasdf", content.upload.etc = the_rest`
 }
 
-model Messages under User {
-  MessageContent content;
-  reference<Friend> from;
+struct Upload {
+  URL url;
+  string mime_type;
 }
 
 enum MessageContent {
@@ -35,14 +89,7 @@ struct PhotoMessageContent {
   URL url;
 }
 
-model Friend under User implements Userlike {
-  string username;
-  string display_name;
-  Avatar avatar;
-  timestamp friends_sinice;
-}
-
-interface Userlike {
+interface Author {
   string username;
   string display_name;
   Avatar avatar;
