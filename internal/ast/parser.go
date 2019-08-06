@@ -44,11 +44,12 @@ func (d *lexerDefinition) Lex(r io.Reader) (lexer.Lexer, error) {
 
 func (d *lexerDefinition) Symbols() map[string]rune {
 	return map[string]rune{
-		"EOF":     scanner.EOF,
-		"Ident":   scanner.Ident,
-		"String":  scanner.String,
-		"Int":     scanner.Int,
-		"Comment": scanner.Comment,
+		"EOF":       scanner.EOF,
+		"Ident":     scanner.Ident,
+		"String":    scanner.String,
+		"RawString": scanner.RawString,
+		"Int":       scanner.Int,
+		"Comment":   scanner.Comment,
 	}
 }
 
@@ -60,16 +61,35 @@ type AST struct {
 }
 
 type ASTElement struct {
-	Comment string     `parser:"{ @Comment }"`
-	Model   *ASTModel  `parser:"(  'model' @@"`
-	Enum    *ASTEnum   `parser:"| 'enum' @@"`
-	Option  *ASTOption `parser:"| 'option' @@"`
-	Struct  *ASTStruct `parser:"| 'struct' @@ )"`
+	Comment   string        `parser:"{ @Comment }"`
+	Model     *ASTModel     `parser:"( 'model' @@"`
+	Interface *ASTInterface `parser:"| 'interface' @@"`
+	Service   *ASTService   `parser:"| 'service' @@"`
+	Enum      *ASTEnum      `parser:"| 'enum' @@"`
+	Option    *ASTOption    `parser:"| 'option' @@"`
+	Struct    *ASTStruct    `parser:"| 'struct' @@ )"`
 }
 
 type ASTModel struct {
+	Identifier   ASTIdentifier      `parser:"@Ident"`
+	PathTemplate string             `parser:"'at' @String"`
+	Implements   string             `parser:"( 'implements' ( @Ident ',' )* ( @Ident ) )?"`
+	Elements     []*ASTModelElement `parser:"'{' { @@ } '}'"`
+}
+
+type ASTInterface struct {
 	Identifier ASTIdentifier      `parser:"@Ident"`
 	Elements   []*ASTModelElement `parser:"'{' { @@ } '}'"`
+}
+
+type ASTService struct {
+	Elements []*ASTServiceElement `parser:"'{' { @@ } '}'"`
+}
+
+type ASTServiceElement struct {
+	Comment    string        `parser:"{ @Comment }"`
+	Identifier string        `parser:"'rpc' @Ident"`
+	Type       *ASTFieldType `parser:"'(' @@ ')' ';'"`
 }
 
 type ASTStruct struct {
@@ -86,7 +106,7 @@ var (
 		"bytes", "reference", "geopoint", "array", "map", "url",
 		"file", "collection",
 		// Keywords.
-		"model", "option", "enum",
+		"model", "option", "enum", "implements", "struct", "at",
 	}
 )
 
@@ -117,7 +137,7 @@ type ASTModelElement struct {
 
 type ASTEnum struct {
 	Identifier ASTIdentifier   `parser:"@Ident '{'"`
-	Values     []*ASTEnumValue `parser:"{ @@ } '}'"`
+	Values     []*ASTEnumValue `parser:"( @@ ',' )* '}'"`
 }
 
 type ASTOption struct {
@@ -127,8 +147,9 @@ type ASTOption struct {
 }
 
 type ASTEnumValue struct {
-	Comment string `parser:"{ @Comment }"`
-	Name    string `parser:"@Ident ','"`
+	Comment         string        `parser:"{ @Comment }"`
+	Name            string        `parser:"@Ident"`
+	AssociatedValue *ASTFieldType `parser:"( '(' @@ ')')?"`
 }
 
 type ASTField struct {

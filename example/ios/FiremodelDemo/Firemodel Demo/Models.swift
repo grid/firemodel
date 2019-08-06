@@ -52,8 +52,12 @@ struct Message {
 
 enum MessageContent {
     case invalid(String)
-    case text(String?)
+    case text(TextMessageContent)
     case photo(PhotoMessageContent)
+}
+
+struct TextMessageContent {
+    let message: String?
 }
 
 struct PhotoMessageContent {

@@ -39,6 +39,20 @@ func TestFiremodelFromSchema(t *testing.T) {
 	runTest(t, schema)
 }
 
+func TestFiremodelFromRealisticSchema(t *testing.T) {
+	file, err := os.Open("example/realistic/realistic.schema.firemodel")
+	if err != nil {
+		t.Fatalf("open realistic schema: %s", err)
+	}
+
+	schema, err := firemodel.ParseSchema(file)
+	if err != nil {
+		panic(err)
+	}
+
+	runTest(t, schema)
+}
+
 func (ctx *testCtx) firemodelConfig(testName string) *firemodel.Config {
 	return &firemodel.Config{
 		Languages: []firemodel.Language{

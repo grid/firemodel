@@ -20,39 +20,49 @@ struct Avatar {
   string color;
 }
 
+// This is the service. There can only be one.
+service {
+  rpc SendMessage(SendMessageRequest);
+}
+
+struct SendMessageRequest {
+  reference<Friend> to;
+  MessageContent content;
+}
+
 // Models define structures for firestore documents models. Models cannot be used as field types.
 // [new] Models can implement zero or more interfaces.
 // [new] Models can have nested models, which designate nested collections.
 // [new] Models use an inflector to determine their pluralized collection name in firestore.
 // [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
-model User implements HasToken, Author {
+model User at "/users/{user_id}" implements HasToken, Author {
   string username;
   string display_name;
   Avatar avatar;
+}
 
-  model Gram {
-    Audience shared_with;
-    URL photo_url;
-    string description;
-  }
+model Gram at "/grams/{gram_id}" {
+  Audience shared_with;
+  URL photo_url;
+  string description;
+}
 
-  model Messages {
-    MessageContent content;
-    reference<Friend> from;
+model Message at "/messages/{message_id}" {
+  MessageContent content;
+  reference<Friend> from;
 
-    model Attachment {
-      string title;
-      AttachmentContent content;
-    }
-  }
+}
 
-  model Friend implements Author {
-    string username;
-    string display_name;
-    Avatar avatar;
-    timestamp friends_sinice;
-  }
+model Attachment at "/attachments/{attachment_id}" {
+  string title;
+  AttachmentContent content;
+}
 
+model Friend at "/users/{user_id}/friends/{friend_id}" implements Author {
+  string username;
+  string display_name;
+  Avatar avatar;
+  timestamp friends_sinice;
 }
 
 // [unchanged] Enums provide type safety around string enumerations. Enums are stored in firestore as capitalized strings.
@@ -62,16 +72,19 @@ enum Audience {
 }
 
 // [new] Enums values may now optionally include associated values. Associated
-// values may have any field type, including all primitive types and structs.
-// Associated values are stored in firestore under a period-delimited key,
-// prefixed with the enum field name; primitive types are stored under the
-// subkey key `_`. The enum case is always written, even when there is also an
-// associated value. Keys for enum values other than the active one are not written to firestore.
+// values must have a struct type. Associated values are stored in firestore
+// under a period-delimited key, prefixed with the enum field name. The enum
+// case is always written, even when there is also an associated value. Keys
+// for enum values other than the active one are not written to firestore.
 enum AttachmentContent {
-  placeholder, // e.g. for an Attachment, written as `content = "PLACEHOLDER"`
-  imoji(bytes), // e.g. for an Attachment, written as `content = "IMOJI", content.imoji = #BYTES#`
-  gram(reference<Gram>),
-  upload(Upload), // e.g. for an Attachment, written as `content = "UPLOAD", content.upload.token = "oijasdf", content.upload.etc = the_rest`
+  // e.g. for an Attachment, written as `content = "PLACEHOLDER"`
+  placeholder,
+   // e.g. for an Attachment, written as `content = "IMOJI", content.imoji = #BYTES#`
+  imoji(ImojiAttachment),
+   // e.g. for an Attachment, written as `content = "IMOJI", content.imoji = #BYTES#`
+  gram(GramAttachment),
+   // e.g. for an Attachment, written as `content = "UPLOAD", content.upload.token = "oijasdf", content.upload.etc = the_rest`
+  upload(UploadAttachment),
 }
 
 struct Upload {
@@ -80,8 +93,12 @@ struct Upload {
 }
 
 enum MessageContent {
-  text(string),
+  text(TextMessageContent),
   photo(PhotoMessageContent),
+}
+
+struct TextMessageContent {
+  string message;
 }
 
 struct PhotoMessageContent {

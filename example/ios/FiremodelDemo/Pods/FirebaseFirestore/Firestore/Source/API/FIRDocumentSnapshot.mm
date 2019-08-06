@@ -167,7 +167,6 @@ ServerTimestampBehavior InternalServerTimestampBehavior(FIRServerTimestampBehavi
     ThrowInvalidArgument("Subscript key must be an NSString or FIRFieldPath.");
   }
 
-    _snapshot.
   FSTFieldValue *fieldValue = _snapshot.GetValue(fieldPath.internalValue);
   FSTFieldValueOptions *options = [self optionsForServerTimestampBehavior:serverTimestampBehavior];
   return fieldValue == nil ? nil : [self convertedValue:fieldValue options:options];

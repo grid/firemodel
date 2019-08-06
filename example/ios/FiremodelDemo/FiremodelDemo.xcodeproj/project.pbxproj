@@ -7,15 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		16690F6A22F3938F0090639D /* Firemodel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1B622EB790D00D686C0 /* Firemodel.swift */; };
+		16690F6C22F9FC620090639D /* Decoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16690F6B22F9FC620090639D /* Decoding.swift */; };
 		16D7A1AB22EB767B00D686C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */; };
 		16D7A1AD22EB767C00D686C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A1AC22EB767C00D686C0 /* Assets.xcassets */; };
 		16D7A1B022EB767C00D686C0 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A1AE22EB767C00D686C0 /* MainMenu.xib */; };
-		16D7A1B722EB790D00D686C0 /* Firemodel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1B622EB790D00D686C0 /* Firemodel.swift */; };
 		16D7A1B922EC316D00D686C0 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1B822EC316D00D686C0 /* Models.swift */; };
 		86E983AB66F8F062269DC029 /* Pods_Firemodel_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4604533B5E962C05460476DC /* Pods_Firemodel_Demo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		161B1C6C22F38E6100B72C0A /* Firemodel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Firemodel.h; sourceTree = "<group>"; };
+		161B1C6D22F38E6100B72C0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16690F6B22F9FC620090639D /* Decoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Decoding.swift; sourceTree = "<group>"; };
 		16D7A1A822EB767B00D686C0 /* Firemodel Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Firemodel Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		16D7A1AC22EB767C00D686C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -41,10 +45,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		161B1C6B22F38E6100B72C0A /* Firemodel */ = {
+			isa = PBXGroup;
+			children = (
+				161B1C6C22F38E6100B72C0A /* Firemodel.h */,
+				161B1C6D22F38E6100B72C0A /* Info.plist */,
+			);
+			path = Firemodel;
+			sourceTree = "<group>";
+		};
 		16D7A18622EB75DB00D686C0 = {
 			isa = PBXGroup;
 			children = (
 				16D7A1A922EB767B00D686C0 /* Firemodel Demo */,
+				161B1C6B22F38E6100B72C0A /* Firemodel */,
 				16D7A19022EB75DB00D686C0 /* Products */,
 				5C93C9ACD298F650FE3920E0 /* Pods */,
 				86C133C68AD0544B24520D42 /* Frameworks */,
@@ -64,6 +78,7 @@
 			children = (
 				16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */,
 				16D7A1B622EB790D00D686C0 /* Firemodel.swift */,
+				16690F6B22F9FC620090639D /* Decoding.swift */,
 				16D7A1B822EC316D00D686C0 /* Models.swift */,
 				16D7A1AC22EB767C00D686C0 /* Assets.xcassets */,
 				16D7A1AE22EB767C00D686C0 /* MainMenu.xib */,
@@ -222,8 +237,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				16D7A1B922EC316D00D686C0 /* Models.swift in Sources */,
+				16690F6A22F3938F0090639D /* Firemodel.swift in Sources */,
+				16690F6C22F9FC620090639D /* Decoding.swift in Sources */,
 				16D7A1AB22EB767B00D686C0 /* AppDelegate.swift in Sources */,
-				16D7A1B722EB790D00D686C0 /* Firemodel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
