@@ -1,4 +1,4 @@
 // Regression test.
-model User {
+model User: "/users/{user}" {
 	string name;
 }

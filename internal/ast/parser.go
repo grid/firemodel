@@ -2,25 +2,39 @@ package ast
 
 import (
 	"fmt"
+	"github.com/alecthomas/participle"
+	"github.com/alecthomas/participle/lexer"
+	"github.com/pkg/errors"
+	"github.com/visor-tax/firemodel/version"
 	"io"
+	"log"
 	"regexp"
 	"sort"
 	"strings"
 	"text/scanner"
-
-	"github.com/alecthomas/participle"
-	"github.com/alecthomas/participle/lexer"
-	"github.com/pkg/errors"
 )
+
+var commentPattern = regexp.MustCompile(`//\s*(?P<Comment>.*)$|/\*(?P<BlockComment>(?s:.*))\*/`)
 
 func ParseSchema(r io.Reader) (*AST, error) {
 	parser := participle.MustBuild(
 		&AST{},
 		participle.Lexer(&lexerDefinition{}),
 		participle.Map(func(token lexer.Token) (lexer.Token, error) {
+			if version.Version == "(dev)" {
+				log.Print(scanner.TokenString(rune(token.Type)), " -> ", token.Value)
+			}
 			if token.Type == scanner.Comment {
-				p := regexp.MustCompile(`//\s*(?P<Comment>.*)`)
-				token.Value = p.FindStringSubmatch(token.Value)[1]
+				submatch := commentPattern.FindStringSubmatch(token.Value)
+				if lineComment := submatch[1]; lineComment != "" {
+					token.Value = lineComment
+				} else if blockComment := submatch[2]; blockComment != "" {
+					lines := strings.Split(blockComment, "\n")
+					for lineIdx, line := range lines {
+						lines[lineIdx] = strings.TrimLeft(strings.TrimSpace(line), "*")
+					}
+					token.Value = strings.Join(lines, "\n")
+				}
 			}
 			return token, nil
 		}),
@@ -28,7 +42,7 @@ func ParseSchema(r io.Reader) (*AST, error) {
 
 	s := &AST{}
 	if err := parser.Parse(r, s); err != nil {
-		return nil, errors.Wrap(err, "firemodel:")
+		return nil, errors.Wrap(err, "firemodel syntax error")
 	}
 	return s, nil
 }
@@ -38,7 +52,7 @@ type lexerDefinition struct{}
 func (d *lexerDefinition) Lex(r io.Reader) (lexer.Lexer, error) {
 	s := &scanner.Scanner{}
 	l := lexer.LexWithScanner(r, s)
-	s.Mode = s.Mode &^ scanner.SkipComments
+	s.Mode = scanner.GoTokens ^ scanner.SkipComments
 	return l, nil
 }
 
@@ -57,11 +71,11 @@ func (d *lexerDefinition) Symbols() map[string]rune {
 //
 // Read about the magical annotations here: https://github.com/alecthomas/participle/.
 type AST struct {
-	Types []*ASTElement `parser:"{ @@ }"`
+	Types []*ASTElement `parser:"( @@ | Comment )*"`
 }
 
 type ASTElement struct {
-	Comment   string        `parser:"{ @Comment }"`
+	Comment   string        `parser:"( @Comment )?"`
 	Model     *ASTModel     `parser:"( 'model' @@"`
 	Interface *ASTInterface `parser:"| 'interface' @@"`
 	Service   *ASTService   `parser:"| 'service' @@"`
@@ -71,30 +85,73 @@ type ASTElement struct {
 }
 
 type ASTModel struct {
-	Identifier   ASTIdentifier      `parser:"@Ident"`
-	PathTemplate string             `parser:"'at' @String"`
-	Implements   string             `parser:"( 'implements' ( @Ident ',' )* ( @Ident ) )?"`
-	Elements     []*ASTModelElement `parser:"'{' { @@ } '}'"`
+	Identifier   ASTIdentifier      `parser:"@Ident ':'"`
+	PathTemplate *ASTPathTemplate   `parser:"@@"`
+	Implements   []ASTIdentifier    `parser:"( 'implements' ( @Ident ',' )* @Ident )?"`
+	Elements     []*ASTModelElement `parser:"'{' ( @@ )* '}'"`
 }
+
+type ASTPathTemplate struct {
+	pattern string
+}
+
+func (pt *ASTPathTemplate) Parse(lex lexer.PeekingLexer) error {
+	tok, err := lex.Next()
+	if err != nil {
+		return err
+	}
+	if tok.Type != scanner.String {
+		return participle.NextMatch
+	}
+	if len(tok.Value) == 0 {
+		return errors.New("missing path pattern")
+	}
+	parts := strings.Split(tok.Value, "/")
+	if parts[0] != "" {
+		return errors.Errorf("path pattern should start with /: %s", tok)
+	}
+	if len(parts)%2 != 1 {
+		return errors.Errorf("bad path pattern: %s", tok)
+	}
+	for k, v := range parts[1:] { // start after blank for leading /
+		switch k % 2 {
+		case 1: //collections
+			if !collectionPattern.MatchString(v) {
+				return errors.Errorf("bad collection %s in pattern %s", v, tok.Value)
+			}
+		case 2: // documents
+			if !documentTemplatePattern.MatchString(v) {
+				return errors.Errorf("bad document template %s in pattern %s", v, tok.Value)
+			}
+		}
+	}
+	pt.pattern = tok.Value
+	return nil
+}
+
+var (
+	collectionPattern       = regexp.MustCompile(`[a-zA-Z0-9]+`)
+	documentTemplatePattern = regexp.MustCompile(`\{[a-zA-Z0-9]+\}`)
+)
 
 type ASTInterface struct {
 	Identifier ASTIdentifier      `parser:"@Ident"`
-	Elements   []*ASTModelElement `parser:"'{' { @@ } '}'"`
+	Elements   []*ASTModelElement `parser:"'{' ( @@ )* '}'"`
 }
 
 type ASTService struct {
-	Elements []*ASTServiceElement `parser:"'{' { @@ } '}'"`
+	Elements []*ASTServiceElement `parser:"'{' ( @@  | Comment )* '}'"`
 }
 
 type ASTServiceElement struct {
 	Comment    string        `parser:"{ @Comment }"`
 	Identifier string        `parser:"'rpc' @Ident"`
-	Type       *ASTFieldType `parser:"'(' @@ ')' ';'"`
+	Type       *ASTFieldType `parser:"'(' @@ ')' ';' "`
 }
 
 type ASTStruct struct {
 	Identifier ASTIdentifier       `parser:"@Ident"`
-	Elements   []*ASTStructElement `parser:"'{' { @@ } '}'"`
+	Elements   []*ASTStructElement `parser:"'{' ( @@  | Comment  )* '}'"`
 }
 
 type ASTIdentifier string
@@ -153,14 +210,14 @@ type ASTEnumValue struct {
 }
 
 type ASTField struct {
-	Comment string        `parser:"{ @Comment }"`
+	Comment string        `parser:"( @Comment )?"`
 	Type    *ASTFieldType `parser:"@@"`
 	Name    string        `parser:"@Ident ';'"`
 }
 
 type ASTFieldType struct {
 	Base    ASTType       `parser:"@Ident"`
-	Generic *ASTFieldType `parser:"[ '<' @@ '>' ]"`
+	Generic *ASTFieldType `parser:"( '<' @@ '>' )?"`
 }
 
 func (ft *ASTFieldType) String() string {

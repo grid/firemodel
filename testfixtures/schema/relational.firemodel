@@ -1,10 +1,10 @@
-model Operator {
+model Operator: "/operators/{operator_id}" {
 	string operator_name;
 }
-model Component {
+model Component: "/components/{component_id}" {
 	string component_name;
 }
-model Machine {
+model Machine: "/machines/{machine_id}" {
 	reference<Operator> owner;
 	collection<Component> components;
 }

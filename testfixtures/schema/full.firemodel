@@ -1,5 +1,5 @@
 // A Test is a test model.
-model TestModel {
+model TestModel: "/tests/{test_id}" {
 	// The name.
 	string name;
     // The age.

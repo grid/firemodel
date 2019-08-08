@@ -1,6 +1,7 @@
 package firemodel
 
 import (
+	"runtime/debug"
 	"testing"
 
 	"gotest.tools/assert"
@@ -432,12 +433,42 @@ func TestParseSchema(t *testing.T) {
 				Options: SchemaOptions{},
 			},
 		},
+		{
+			name: "comments",
+			want: &Schema{
+				Structs: []*SchemaStruct{
+					{
+						Name:    "Foo",
+						Comment: "Struct Comment.",
+						Fields: []*SchemaField{
+							{
+								Name:    "cool_field",
+								Comment: "Field comment",
+								Type:    &String{},
+							},
+						},
+					},
+					{
+						Name:    "Bar",
+						Comment: "Multi-line\n\n Struct comment.",
+						Fields: []*SchemaField{
+							{
+								Name:    "field_two",
+								Comment: "Multi-line\nField comment",
+								Type:    &String{},
+							},
+						},
+					},
+				},
+				Options: SchemaOptions{},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
 				if p := recover(); p != nil && !tt.wantErr {
-					t.Fatal("panic", p)
+					t.Fatalf("panic: %s\n\n%s", p, debug.Stack())
 				}
 			}()
 			r, err := os.Open(path.Join("testfixtures", "schema", tt.name+".firemodel"))
@@ -446,7 +477,7 @@ func TestParseSchema(t *testing.T) {
 			}
 			got, err := ParseSchema(r)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseSchema() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseSchema error: %v", err)
 				return
 			}
 

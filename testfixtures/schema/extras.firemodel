@@ -2,7 +2,7 @@ enum TestEnum {}
 
 struct TestStruct {}
 
-model TestModel {
+model TestModel: "/tests/{test_id}" {
     reference<TestModel> other;
     reference unspecified_other;
     array<string> primative_ary;

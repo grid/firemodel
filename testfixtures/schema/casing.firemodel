@@ -1,12 +1,12 @@
-model NormalCase {
+model NormalCase: "/normals/{normal}" {
   string foo_bar;
 }
-model camelCase {
+model camelCase: "/camels/{camel}" {
   string fooBar;
 }
-model TitleCase {
+model TitleCase: "/titles/{title}"{
   string FooBar;
 }
-model snake_case {
+model snake_case: "/snakes/{snake}" {
   string foo_bar;
 }

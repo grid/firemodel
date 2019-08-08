@@ -1,0 +1,38 @@
+// File Comment1
+// File Comment2
+
+// File Comment3
+
+// Struct Comment.
+struct Foo {
+    // Ambiguous, ignored comment.
+    // Field comment
+    string cool_field; // After field comment.
+    // End of struct comment.
+}
+
+// --------------------
+// Middle separator
+// --------------------
+
+/* Multi-line
+ *
+ * Struct comment. */
+struct Bar {
+    /* Multi-line
+       Field comment */
+    string field_two;
+}
+
+/* --------------------
+   ASCII ART
+   -------------------- */
+
+// struct CommentedOut {
+//   bool do_not_use;
+// }
+
+// EOF Comment
+// EOF Comment2
+
+// EOF Comment3

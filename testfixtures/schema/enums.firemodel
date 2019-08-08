@@ -7,7 +7,7 @@ enum Direction {
 	down,
 }
 
-model TestModel {
+model TestModel: "/tests/{test_id}" {
 	// The direction.
     Direction dir;
 }
