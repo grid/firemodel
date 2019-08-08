@@ -20,12 +20,12 @@ import (
 const fixturesRoot = "testfixtures/firemodel"
 
 func TestFiremodelFromSchema(t *testing.T) {
-	file1, err := os.Open("example/firemodel.example.firemodel")
+	file1, err := os.Open("example/exhaustive/firemodel.example.firemodel")
 	if err != nil {
 		panic(err)
 	}
 	defer file1.Close()
-	file2, err := os.Open("example/firemodel.common.firemodel")
+	file2, err := os.Open("example/exhaustive/firemodel.common.firemodel")
 	if err != nil {
 		panic(err)
 	}
