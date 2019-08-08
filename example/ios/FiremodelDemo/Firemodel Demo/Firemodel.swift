@@ -13,24 +13,13 @@ typealias Source = FirebaseFirestore.FirestoreSource
 
 // MARK: - Protocols
 
-enum FiremodelDocumentEvent<T> {
-    case snapshot(_: T, metadata: SnapshotMetadata)
-    case error(Error)
-}
-
 protocol FiremodelDocumentSubscriber {
     associatedtype DocumentType
     func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<DocumentType>) -> Void) -> Unsubscriber
 }
 
-struct FiremodelChange<T> {
-    let document: T
-    let oldIndex: UInt
-    let newIndex: UInt
-}
-
-enum FiremodelCollectionEvent<T> {
-    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
+enum FiremodelDocumentEvent<T> {
+    case snapshot(_: T, metadata: SnapshotMetadata)
     case error(Error)
 }
 
@@ -40,6 +29,17 @@ protocol FiremodelCollectionSubscriber {
                    receiver publish: @escaping (FiremodelCollectionEvent<DocumentType>) -> Void) -> Unsubscriber
 }
 
+enum FiremodelCollectionEvent<T> {
+    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
+    case error(Error)
+}
+
+struct FiremodelChange<T> {
+    let document: T
+    let oldIndex: UInt
+    let newIndex: UInt
+}
+
 // MARK: - Client
 
 class FiremodelClient {
@@ -47,14 +47,11 @@ class FiremodelClient {
 
     static func dev() -> FiremodelClient {
         let firestore = FirebaseFirestore.Firestore.firestore()
-        let transport = FiremodelRPCHTTPTransport(firestore: firestore, rpcBaseURL: URL(string: "http://localhost:8020/")!)
-        return FiremodelClient(firestore: firestore,
-                               transport: transport)
+        return FiremodelClient(firestore: firestore)
     }
 
-    init(firestore: FirebaseFirestore.Firestore, transport: FiremodelRPCTransport) {
+    init(firestore: FirebaseFirestore.Firestore) {
         self.firestore = firestore
-        self.transport = transport
     }
 
     // MARK: - Root Collections
@@ -83,157 +80,157 @@ class FiremodelClient {
 
     // MARK: - RPCs
 
-    private let transport: FiremodelRPCTransport
-
-    func dispatch(rpc: FiremodelRPCRequest,
-                  waitForUpdates: Bool,
-                  success: @escaping (FiremodelRPCSuccess) -> Void,
-                  failure: @escaping (FiremodelRPCError) -> Void) {
-
-        let meta = FiremodelRPCRequestMeta(bundleID: Bundle.main.bundleIdentifier,
-                                           appVersion: "1.0.0",
-                                           appBuild: "1",
-                                           osVersion: "13.0",
-                                           device: "iPhone4,3",
-                                           traceID: "TODO-trace",
-                                           spanID: "TODO-span")
-
-        let credentials = FiremodelRPCCredentials.firebaseAuthToken("myjwt")
-
-        try! self.transport.performRequest(
-            rpc,
-            meta: meta,
-            credentials: credentials,
-            success: { response in
-                var anyError: FiremodelRPCError?
-
-                let dispatchGroup = DispatchGroup()
-
-                if waitForUpdates {
-                    response.updatedDocuments.forEach({ updatedDoc in
-                        dispatchGroup.enter()
-                        updatedDoc.reference.getDocument(source: .server) { (snap, error) in
-                            if let error = error {
-                                debugPrint("Get document returned error")
-                                anyError = FiremodelRPCError.fromError(error)
-                            }
-                            debugPrint("Get document returned okk")
-                            dispatchGroup.leave()
-                        }
-                    })
-                }
-
-                dispatchGroup.notify(queue: DispatchQueue.main) {
-                    if let error = anyError {
-                        failure(error)
-                    } else {
-                        success(FiremodelRPCSuccess())
-                    }
-                }
-        },
-            failure: failure)
-    }
+//    private let transport: FiremodelRPCTransport
+//
+//    func dispatch(rpc: FiremodelRPCRequest,
+//                  waitForUpdates: Bool,
+//                  success: @escaping (FiremodelRPCSuccess) -> Void,
+//                  failure: @escaping (FiremodelRPCError) -> Void) {
+//
+//        let meta = FiremodelRPCRequestMeta(bundleID: Bundle.main.bundleIdentifier,
+//                                           appVersion: "1.0.0",
+//                                           appBuild: "1",
+//                                           osVersion: "13.0",
+//                                           device: "iPhone4,3",
+//                                           traceID: "TODO-trace",
+//                                           spanID: "TODO-span")
+//
+//        let credentials = FiremodelRPCCredentials.firebaseAuthToken("myjwt")
+//
+//        try! self.transport.performRequest(
+//            rpc,
+//            meta: meta,
+//            credentials: credentials,
+//            success: { response in
+//                var anyError: FiremodelRPCError?
+//
+//                let dispatchGroup = DispatchGroup()
+//
+//                if waitForUpdates {
+//                    response.updatedDocuments.forEach({ updatedDoc in
+//                        dispatchGroup.enter()
+//                        updatedDoc.reference.getDocument(source: .server) { (snap, error) in
+//                            if let error = error {
+//                                debugPrint("Get document returned error")
+//                                anyError = FiremodelRPCError.fromError(error)
+//                            }
+//                            debugPrint("Get document returned okk")
+//                            dispatchGroup.leave()
+//                        }
+//                    })
+//                }
+//
+//                dispatchGroup.notify(queue: DispatchQueue.main) {
+//                    if let error = anyError {
+//                        failure(error)
+//                    } else {
+//                        success(FiremodelRPCSuccess())
+//                    }
+//                }
+//        },
+//            failure: failure)
+//    }
 }
 
-enum FiremodelRPCCredentials {
-    case firebaseAuthToken(String)
-}
+//enum FiremodelRPCCredentials {
+//    case firebaseAuthToken(String)
+//}
+//
+//protocol FiremodelRPCTransport {
+//    func performRequest(_ rpc: FiremodelRPCRequest,
+//                        meta: FiremodelRPCRequestMeta,
+//                        credentials: FiremodelRPCCredentials,
+//                        success: @escaping (FiremodelRPCResponse) -> Void,
+//                        failure: @escaping (FiremodelRPCError) -> Void) throws
+//}
 
-protocol FiremodelRPCTransport {
-    func performRequest(_ rpc: FiremodelRPCRequest,
-                        meta: FiremodelRPCRequestMeta,
-                        credentials: FiremodelRPCCredentials,
-                        success: @escaping (FiremodelRPCResponse) -> Void,
-                        failure: @escaping (FiremodelRPCError) -> Void) throws
-}
-
-class FiremodelRPCHTTPTransport: FiremodelRPCTransport {
-    private let firestore: Firestore
-
-    private let session: URLSession
-
-    private let baseURL: URL
-
-    private let operationQueue: OperationQueue
-
-    init(firestore: FirebaseFirestore.Firestore, rpcBaseURL: URL) {
-        self.firestore = firestore
-        self.baseURL = rpcBaseURL
-        self.operationQueue = OperationQueue()
-        operationQueue.name = "FiremodelRPCHTTPTranspoprtQueue"
-        operationQueue.qualityOfService = .userInitiated
-
-        let config = URLSessionConfiguration()
-        config.allowsCellularAccess = true
-        config.httpShouldUsePipelining = true
-        config.waitsForConnectivity = true
-
-        session = URLSession(configuration: config,
-                             delegate: nil,
-                             delegateQueue: operationQueue)
-    }
-
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
-
-    func performRequest(_ rpc: FiremodelRPCRequest,
-                        meta: FiremodelRPCRequestMeta,
-                        credentials: FiremodelRPCCredentials,
-                        success: @escaping (FiremodelRPCResponse) -> Void,
-                        failure: @escaping (FiremodelRPCError) -> Void) throws {
-
-        guard let requestURL = URL(string: "/rpc", relativeTo: baseURL) else {
-            failure(FiremodelRPCError.unexpected("Invalid request url"))
-            return
-        }
-
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "content-type")
-        request.addValue("application/json", forHTTPHeaderField: "accept")
-        request.httpBody = try! encoder.encode(rpc)
-
-        session.dataTask(with: request) { [weak self] (data, response, error) in
-            if let error = error {
-                DispatchQueue.main.async {
-                    failure(.fromError(error))
-                }
-                return
-            }
-            guard let response = response as? HTTPURLResponse else {
-                DispatchQueue.main.async {
-                    failure(.unexpected("Missing HTTP response"))
-                }
-                return
-            }
-            guard response.mimeType == "application/json" else {
-                DispatchQueue.main.async {
-                    failure(.unexpected("Missing HTTP response"))
-                }
-                return
-            }
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    failure(.unexpected("Missing HTTP response body"))
-                }
-                return
-            }
-            guard (200...300).contains(response.statusCode) else {
-                DispatchQueue.main.async {
-                    failure(.fromErrorResponse(response))
-                }
-                return
-            }
-
-            guard let decoder = self?.decoder, let firestore = self?.firestore else { return }
-            decoder.userInfo[firestoreClientDecodingKey] = firestore
-            let rpcResponse = try! decoder.decode(FiremodelRPCResponse.self, from: data)
-            DispatchQueue.main.async {
-                success(rpcResponse)
-            }
-        }.resume()
-    }
-}
+//class FiremodelRPCHTTPTransport: FiremodelRPCTransport {
+//    private let firestore: Firestore
+//
+//    private let session: URLSession
+//
+//    private let baseURL: URL
+//
+//    private let operationQueue: OperationQueue
+//
+//    init(firestore: FirebaseFirestore.Firestore, rpcBaseURL: URL) {
+//        self.firestore = firestore
+//        self.baseURL = rpcBaseURL
+//        self.operationQueue = OperationQueue()
+//        operationQueue.name = "FiremodelRPCHTTPTranspoprtQueue"
+//        operationQueue.qualityOfService = .userInitiated
+//
+//        let config = URLSessionConfiguration()
+//        config.allowsCellularAccess = true
+//        config.httpShouldUsePipelining = true
+//        config.waitsForConnectivity = true
+//
+//        session = URLSession(configuration: config,
+//                             delegate: nil,
+//                             delegateQueue: operationQueue)
+//    }
+//
+//    private let encoder = JSONEncoder()
+//    private let decoder = JSONDecoder()
+//
+//    func performRequest(_ rpc: FiremodelRPCRequest,
+//                        meta: FiremodelRPCRequestMeta,
+//                        credentials: FiremodelRPCCredentials,
+//                        success: @escaping (FiremodelRPCResponse) -> Void,
+//                        failure: @escaping (FiremodelRPCError) -> Void) throws {
+//
+//        guard let requestURL = URL(string: "/rpc", relativeTo: baseURL) else {
+//            failure(FiremodelRPCError.unexpected("Invalid request url"))
+//            return
+//        }
+//
+//        var request = URLRequest(url: requestURL)
+//        request.httpMethod = "POST"
+//        request.addValue("application/json", forHTTPHeaderField: "content-type")
+//        request.addValue("application/json", forHTTPHeaderField: "accept")
+//        request.httpBody = try! encoder.encode(rpc)
+//
+//        session.dataTask(with: request) { [weak self] (data, response, error) in
+//            if let error = error {
+//                DispatchQueue.main.async {
+//                    failure(.fromError(error))
+//                }
+//                return
+//            }
+//            guard let response = response as? HTTPURLResponse else {
+//                DispatchQueue.main.async {
+//                    failure(.unexpected("Missing HTTP response"))
+//                }
+//                return
+//            }
+//            guard response.mimeType == "application/json" else {
+//                DispatchQueue.main.async {
+//                    failure(.unexpected("Missing HTTP response"))
+//                }
+//                return
+//            }
+//            guard let data = data else {
+//                DispatchQueue.main.async {
+//                    failure(.unexpected("Missing HTTP response body"))
+//                }
+//                return
+//            }
+//            guard (200...300).contains(response.statusCode) else {
+//                DispatchQueue.main.async {
+//                    failure(.fromErrorResponse(response))
+//                }
+//                return
+//            }
+//
+//            guard let decoder = self?.decoder, let firestore = self?.firestore else { return }
+//            decoder.userInfo[firestoreClientDecodingKey] = firestore
+//            let rpcResponse = try! decoder.decode(FiremodelRPCResponse.self, from: data)
+//            DispatchQueue.main.async {
+//                success(rpcResponse)
+//            }
+//        }.resume()
+//    }
+//}
 
 let firestoreClientDecodingKey = CodingUserInfoKey(rawValue: "firestore")!
 
@@ -254,28 +251,28 @@ struct FiremodelRPCRequestMeta: Codable {
 }
 
 
-extension FiremodelRPCRequest: Encodable {
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        switch self {
-        case let .sendMessage(to: friendRef, content: messageContent):
-            try container.encode("SEND_MESSAGE", forKey: .type)
-            var nested = container.nestedContainer(keyedBy: SendMessageKeys.self, forKey: .sendMessage)
-            try nested.encode(friendRef, forKey: .to)
-            try nested.encode(messageContent, forKey: .content)
-        }
-    }
-
-    enum CodingKeys: CodingKey {
-        case type
-        case sendMessage
-    }
-
-    enum SendMessageKeys: CodingKey {
-        case to
-        case content
-    }
-}
+//extension FiremodelRPCRequest: Encodable {
+//    func encode(to encoder: Encoder) throws {
+//        var container = encoder.container(keyedBy: CodingKeys.self)
+//        switch self {
+//        case let .sendMessage(to: friendRef, content: messageContent):
+//            try container.encode("SEND_MESSAGE", forKey: .type)
+//            var nested = container.nestedContainer(keyedBy: SendMessageKeys.self, forKey: .sendMessage)
+//            try nested.encode(friendRef, forKey: .to)
+//            try nested.encode(messageContent, forKey: .content)
+//        }
+//    }
+//
+//    enum CodingKeys: CodingKey {
+//        case type
+//        case sendMessage
+//    }
+//
+//    enum SendMessageKeys: CodingKey {
+//        case to
+//        case content
+//    }
+//}
 
 extension FriendRef: Encodable {
     func encode(to encoder: Encoder) throws {
@@ -284,67 +281,67 @@ extension FriendRef: Encodable {
     }
 }
 
-struct FiremodelRPCResponse: Decodable {
-    let updatedDocuments: [AnyDocumentReference]
-}
-
-// Wrapper around FirebaseFirestore.DocumentReference to facilitate extending the Firebase SDK class with Decodable.
-struct AnyDocumentReference {
-    fileprivate let reference: FirebaseFirestore.DocumentReference
-}
-
-extension AnyDocumentReference: Decodable {
-    init(from decoder: Decoder) throws {
-        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
-            throw NSError(domain: "firemodel", code: 1, userInfo: nil)
-        }
-
-        let container = try decoder.singleValueContainer()
-        let rawReference = try container.decode(String.self)
-        self.reference = client.rawDocumentReference(rawReference)
-    }
-}
-
-struct FiremodelRPCError: Error {
-    let code: FiremodelRPCErrorCode
-    let message: String
-    let reason: String
-    let fieldErrors: [String: String]? = nil
-
-    static func fromError(_ error: Error) -> FiremodelRPCError {
-        return FiremodelRPCError(
-            code: .unknown,
-            message: error.localizedDescription,
-            reason: String(describing: error)
-        )
-    }
-
-    // Returns an error template for incorrect beahvior that should never happen.
-    static func unexpected(_ reason: String) -> FiremodelRPCError {
-        assertionFailure(reason)
-        return FiremodelRPCError(code: .unknown, message: "Something went wrong", reason: reason)
-    }
-
-    static func fromErrorResponse(_ response: HTTPURLResponse) -> FiremodelRPCError {
-        // TODO: Interpret status codes.
-        return FiremodelRPCError(code: .unknown,
-                                 message: "Something went wrong",
-                                 reason: "RPC server responded with \(response.statusCode) \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
-    }
-}
-
-enum FiremodelRPCErrorCode {
-    case unknown
-    case internalError
-    case badRequest
-    case preconditionFailed
-    case unimplemented
-    case unauthenticated
-}
-
-struct FiremodelRPCSuccess {
-}
-
+//struct FiremodelRPCResponse: Decodable {
+//    let updatedDocuments: [AnyDocumentReference]
+//}
+//
+//// Wrapper around FirebaseFirestore.DocumentReference to facilitate extending the Firebase SDK class with Decodable.
+//struct AnyDocumentReference {
+//    fileprivate let reference: FirebaseFirestore.DocumentReference
+//}
+//
+//extension AnyDocumentReference: Decodable {
+//    init(from decoder: Decoder) throws {
+//        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+//            throw NSError(domain: "firemodel", code: 1, userInfo: nil)
+//        }
+//
+//        let container = try decoder.singleValueContainer()
+//        let rawReference = try container.decode(String.self)
+//        self.reference = client.rawDocumentReference(rawReference)
+//    }
+//}
+//
+//struct FiremodelRPCError: Error {
+//    let code: FiremodelRPCErrorCode
+//    let message: String
+//    let reason: String
+//    let fieldErrors: [String: String]? = nil
+//
+//    static func fromError(_ error: Error) -> FiremodelRPCError {
+//        return FiremodelRPCError(
+//            code: .unknown,
+//            message: error.localizedDescription,
+//            reason: String(describing: error)
+//        )
+//    }
+//
+//    // Returns an error template for incorrect beahvior that should never happen.
+//    static func unexpected(_ reason: String) -> FiremodelRPCError {
+//        assertionFailure(reason)
+//        return FiremodelRPCError(code: .unknown, message: "Something went wrong", reason: reason)
+//    }
+//
+//    static func fromErrorResponse(_ response: HTTPURLResponse) -> FiremodelRPCError {
+//        // TODO: Interpret status codes.
+//        return FiremodelRPCError(code: .unknown,
+//                                 message: "Something went wrong",
+//                                 reason: "RPC server responded with \(response.statusCode) \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
+//    }
+//}
+//
+//enum FiremodelRPCErrorCode {
+//    case unknown
+//    case internalError
+//    case badRequest
+//    case preconditionFailed
+//    case unimplemented
+//    case unauthenticated
+//}
+//
+//struct FiremodelRPCSuccess {
+//}
+//
 // Models
 
 struct UserCollectionRef {
