@@ -252,6 +252,60 @@ func TestParseSchema(t *testing.T) {
 			},
 		},
 		{
+			name: "enums_with_associated_values",
+			want: &Schema{
+				Enums: []*SchemaEnum{
+					{
+						Name: "Frobnicator",
+						Values: []*SchemaEnumValue{
+							{
+								Name: "up",
+							},
+							{
+								Name: "down",
+							},
+						},
+					},
+					{
+						Name: "Computer",
+						Values: []*SchemaEnumValue{
+							{
+								Name: "off",
+							},
+							{
+								Name: "on",
+								AssociatedValue: Struct{
+									T: &SchemaStruct{
+										Name: "ComputerOnState",
+									},
+								},
+							},
+						},
+					},
+				},
+				Structs: []*SchemaStruct{
+					{
+						Name: "ComputerOnState",
+						Fields: []*SchemaField{
+							{
+								Name: "processes",
+								Type: &Integer{},
+							},
+							{
+								Name: "frob",
+								Type: &Enum{
+									T: &SchemaEnum{
+										Name: "Frobnicator",
+									},
+								},
+							},
+						},
+					},
+				},
+				Options: SchemaOptions{},
+			},
+		},
+		{
 			name:    "error_nonsense",
 			wantErr: true,
 		},

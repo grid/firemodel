@@ -182,10 +182,19 @@ func (c *configSchemaCompiler) compileLanguageOptions() (out SchemaOptions) {
 
 func (c *configSchemaCompiler) enumValuesToConfig(values []*ast.ASTEnumValue) (out []*SchemaEnumValue) {
 	for _, enumValue := range values {
-		out = append(out, &SchemaEnumValue{
+		value := &SchemaEnumValue{
 			Name:    strcase.ToSnake(enumValue.Name),
 			Comment: enumValue.Comment,
-		})
+		}
+		if enumValue.AssociatedValue != nil {
+			if schemaStruct, ok := c.assertStructType(enumValue.AssociatedValue); !ok {
+				err := errors.Errorf("Invalid enum associated value type: %s is not a struct type", enumValue.AssociatedValue)
+				panic(err)
+			} else {
+				value.AssociatedValue = Struct{schemaStruct}
+			}
+		}
+		out = append(out, value)
 	}
 	return
 }

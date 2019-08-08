@@ -1,0 +1,14 @@
+enum Frobnicator {
+	up,
+	down,
+}
+
+struct ComputerOnState {
+    integer processes;
+    Frobnicator frob;
+}
+
+enum Computer {
+    off,
+	on(ComputerOnState),
+}
