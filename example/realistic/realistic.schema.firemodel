@@ -35,30 +35,30 @@ struct SendMessageRequest {
 // [new] Models can have nested models, which designate nested collections.
 // [new] Models use an inflector to determine their pluralized collection name in firestore.
 // [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
-model User at "/users/{user_id}" implements HasToken, Author {
+model User: "/users/{user_id}" implements HasToken, Author {
   string username;
   string display_name;
   Avatar avatar;
 }
 
-model Gram at "/grams/{gram_id}" {
+model Gram: "/grams/{gram_id}" {
   Audience shared_with;
   URL photo_url;
   string description;
 }
 
-model Message at "/messages/{message_id}" {
+model Message: "/messages/{message_id}" {
   MessageContent content;
   reference<Friend> from;
 
 }
 
-model Attachment at "/attachments/{attachment_id}" {
+model Attachment: "/attachments/{attachment_id}" {
   string title;
   AttachmentContent content;
 }
 
-model Friend at "/users/{user_id}/friends/{friend_id}" implements Author {
+model Friend: "/users/{user_id}/friends/{friend_id}" implements Author {
   string username;
   string display_name;
   Avatar avatar;
@@ -85,6 +85,19 @@ enum AttachmentContent {
   gram(GramAttachment),
    // e.g. for an Attachment, written as `content = "UPLOAD", content.upload.token = "oijasdf", content.upload.etc = the_rest`
   upload(UploadAttachment),
+}
+
+struct ImojiAttachment {
+    bytes cool_pic;
+}
+
+struct GramAttachment {
+    string ref;
+}
+
+struct UploadAttachment {
+    string title;
+    URL src;
 }
 
 struct Upload {

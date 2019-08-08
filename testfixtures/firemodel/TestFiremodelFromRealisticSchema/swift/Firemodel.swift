@@ -35,7 +35,7 @@ extension Audience: CustomDebugStringConvertible {
 
     var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
-// [new] Enums values may now optionally include associated values. Associatedvalues must have a struct type. Associated values are stored in firestoreunder a period-delimited key, prefixed with the enum field name. The enumcase is always written, even when there is also an associated value. Keysfor enum values other than the active one are not written to firestore.
+// for enum values other than the active one are not written to firestore.
 @objc enum AttachmentContent: Int {
     // e.g. for an Attachment, written as `content = "PLACEHOLDER"`
     case placeholder
@@ -113,7 +113,7 @@ extension MessageContent: CustomDebugStringConvertible {
     var debugDescription: String { return firestoreValue ?? "<INVALID>" }
 }
 
-// [unchanged] Structs are used for sharing structures of nested content, whichare stored as Maps in firestore and also accessible via FieldPaths in mostfirestore client libraries.
+// firestore client libraries.
 @objcMembers class Avatar: Pring.Object {
     var url: URL?
     var color: String?
@@ -144,6 +144,19 @@ extension MessageContent: CustomDebugStringConvertible {
     }
 }
 
+@objcMembers class ImojiAttachment: Pring.Object {
+    var coolPic: Data?
+}
+
+@objcMembers class GramAttachment: Pring.Object {
+    var ref: String?
+}
+
+@objcMembers class UploadAttachment: Pring.Object {
+    var title: String?
+    var src: URL?
+}
+
 @objcMembers class Upload: Pring.Object {
     var url: URL?
     var mimeType: String?
@@ -158,7 +171,7 @@ extension MessageContent: CustomDebugStringConvertible {
     var url: URL?
 }
 
-// Models define structures for firestore documents models. Models cannot be used as field types.[new] Models can implement zero or more interfaces.[new] Models can have nested models, which designate nested collections.[new] Models use an inflector to determine their pluralized collection name in firestore.[new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
+// [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
 @objcMembers class User: Pring.Object {
     dynamic var username: String?
     dynamic var displayName: String?

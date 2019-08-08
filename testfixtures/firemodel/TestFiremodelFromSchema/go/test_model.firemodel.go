@@ -4,8 +4,6 @@ package firemodel
 
 import (
 	firestore "cloud.google.com/go/firestore"
-	"context"
-	"errors"
 	"fmt"
 	runtime "github.com/visor-tax/firemodel/runtime"
 	latlng "google.golang.org/genproto/googleapis/type/latlng"
@@ -60,9 +58,6 @@ func TestModelPath(userId string, testModelId string) string {
 // TestModelRegexPath is a regex that can be use to filter out firestore events of TestModel
 var TestModelRegexPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?users/([a-zA-Z0-9]+)/test_models/([a-zA-Z0-9]+)$")
 
-// TestModelRegexNamedPath is a named regex that can be use to filter out firestore events of TestModel
-var TestModelRegexNamedPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?users/(?P<user_id>[a-zA-Z0-9]+)/test_models/(?P<test_model_id>[a-zA-Z0-9]+)$")
-
 // TestModelPathStruct is a struct that contains parts of a path of TestModel
 type TestModelPathStruct struct {
 	UserId      string
@@ -74,96 +69,4 @@ func TestModelPathToStruct(path string) *TestModelPathStruct {
 	parsed := TestModelRegexPath.FindStringSubmatch(path)
 	result := &TestModelPathStruct{UserId: parsed[1], TestModelId: parsed[2]}
 	return result
-}
-
-// TestModelStructToPath is a function that turns a PathStruct of TestModel into a firestore path
-func TestModelStructToPath(path *TestModelPathStruct) string {
-	built := fmt.Sprintf("users/%s/test_models/%s", path.UserId, path.TestModelId)
-	return built
-}
-
-// TestModelWrapper is a struct wrapper that contains a reference to the firemodel instance and the path
-type TestModelWrapper struct {
-	Data    *TestModel
-	Path    *TestModelPathStruct
-	PathStr string
-	// ---- Internal Stuffs ----
-	client  *clientTestModel
-	pathStr string
-	ref     *firestore.DocumentRef
-}
-
-// TestModelFromSnapshot is a function that will create an instance of the model from a document snapshot
-func TestModelFromSnapshot(snapshot *firestore.DocumentSnapshot) (*TestModelWrapper, error) {
-	temp := &TestModel{}
-	err := snapshot.DataTo(temp)
-	if err != nil {
-		return nil, err
-	}
-	path := TestModelPathToStruct(snapshot.Ref.Path)
-	pathStr := TestModelStructToPath(path)
-	wrapper := &TestModelWrapper{Path: path, PathStr: pathStr, pathStr: pathStr, ref: snapshot.Ref, Data: temp}
-	return wrapper, nil
-}
-
-type clientTestModel struct {
-	client *Client
-}
-
-func (c *clientTestModel) Set(ctx context.Context, path string, model *TestModel) (*TestModelWrapper, error) {
-	ref := c.client.Client.Doc(path)
-	snapshot, err := ref.Get(ctx)
-	if snapshot.Exists() {
-		temp, err := TestModelFromSnapshot(snapshot)
-		if err != nil {
-			// Don't do anything, just override
-		} else {
-			model.CreatedAt = temp.Data.CreatedAt
-		}
-	}
-	wrapper := &TestModelWrapper{ref: ref, pathStr: path, PathStr: path, Path: TestModelPathToStruct(path), client: c, Data: model}
-	wrapper.Data.UpdatedAt = time.Now()
-	err = wrapper.Set(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return wrapper, nil
-}
-func (c *clientTestModel) GetByPath(ctx context.Context, path string) (*TestModelWrapper, error) {
-	reference := c.client.Client.Doc(path)
-	snapshot, err := reference.Get(ctx)
-	if err != nil {
-		return nil, err
-	}
-	wrapper, err := TestModelFromSnapshot(snapshot)
-	if err != nil {
-		return nil, err
-	}
-	return wrapper, nil
-}
-func (c *clientTestModel) GetByPathTx(ctx context.Context, tx *firestore.Transaction, path string) (*TestModelWrapper, error) {
-	reference := c.client.Client.Doc(path)
-	snapshot, err := tx.Get(reference)
-	if err != nil {
-		return nil, err
-	}
-	wrapper, err := TestModelFromSnapshot(snapshot)
-	if err != nil {
-		return nil, err
-	}
-	return wrapper, nil
-}
-func (m *TestModelWrapper) Set(ctx context.Context) error {
-	if m.ref == nil {
-		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
-	}
-	_, err := m.ref.Set(ctx, m.Data)
-	return err
-}
-func (m *TestModelWrapper) SetTx(ctx context.Context, tx *firestore.Transaction) error {
-	if m.ref == nil {
-		return errors.New("Cannot call set on a firemodel object that has no reference. Call `create` on the orm with this object instead")
-	}
-	err := tx.Set(m.ref, m.Data)
-	return err
 }

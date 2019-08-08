@@ -2,7 +2,7 @@
 
 package firemodel
 
-// [new] Enums values may now optionally include associated values. Associatedvalues must have a struct type. Associated values are stored in firestoreunder a period-delimited key, prefixed with the enum field name. The enumcase is always written, even when there is also an associated value. Keysfor enum values other than the active one are not written to firestore.
+// for enum values other than the active one are not written to firestore.
 type AttachmentContent string
 
 const (

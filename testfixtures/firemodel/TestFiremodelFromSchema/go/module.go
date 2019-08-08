@@ -5,14 +5,10 @@ package firemodel
 import firestore "cloud.google.com/go/firestore"
 
 type Client struct {
-	Client         *firestore.Client
-	TestModel      *clientTestModel
-	TestTimestamps *clientTestTimestamps
+	Client *firestore.Client
 }
 
 func NewClient(client *firestore.Client) *Client {
 	temp := &Client{Client: client}
-	temp.TestModel = &clientTestModel{client: temp}
-	temp.TestTimestamps = &clientTestTimestamps{client: temp}
 	return temp
 }

@@ -17,7 +17,7 @@ export namespace firemodel {
     friends = 'FRIENDS',
   }
 
-  /** [new] Enums values may now optionally include associated values. Associatedvalues must have a struct type. Associated values are stored in firestoreunder a period-delimited key, prefixed with the enum field name. The enumcase is always written, even when there is also an associated value. Keysfor enum values other than the active one are not written to firestore. */
+  /** for enum values other than the active one are not written to firestore. */
   export enum AttachmentContent {
     /** e.g. for an Attachment, written as `content = "PLACEHOLDER"` */
     placeholder = 'PLACEHOLDER',
@@ -33,7 +33,7 @@ export namespace firemodel {
     photo = 'PHOTO',
   }
 
-  /** [unchanged] Structs are used for sharing structures of nested content, whichare stored as Maps in firestore and also accessible via FieldPaths in mostfirestore client libraries. */
+  /** firestore client libraries. */
   export interface IAvatar {
     url?: URL;
     color?: string;
@@ -41,6 +41,16 @@ export namespace firemodel {
   export interface ISendMessageRequest {
     to?: firestore.DocumentReference<IFriend>;
     content?: MessageContent;
+  }
+  export interface IImojiAttachment {
+    coolPic?: firestore.Blob;
+  }
+  export interface IGramAttachment {
+    ref?: string;
+  }
+  export interface IUploadAttachment {
+    title?: string;
+    src?: URL;
   }
   export interface IUpload {
     url?: URL;
@@ -54,7 +64,7 @@ export namespace firemodel {
     url?: URL;
   }
 
-  /** Models define structures for firestore documents models. Models cannot be used as field types.[new] Models can implement zero or more interfaces.[new] Models can have nested models, which designate nested collections.[new] Models use an inflector to determine their pluralized collection name in firestore.[new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values. */
+  /** [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values. */
   export interface IUser {
     username?: string;
     displayName?: string;

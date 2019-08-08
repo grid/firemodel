@@ -2,7 +2,7 @@
 
 package firemodel
 
-// Models define structures for firestore documents models. Models cannot be used as field types.[new] Models can implement zero or more interfaces.[new] Models can have nested models, which designate nested collections.[new] Models use an inflector to determine their pluralized collection name in firestore.[new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
+// [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
 type User struct {
 	Username    string  `firestore:"username,omitempty"`
 	DisplayName string  `firestore:"displayName,omitempty"`

@@ -4,7 +4,7 @@ package firemodel
 
 import runtime "github.com/visor-tax/firemodel/runtime"
 
-// [unchanged] Structs are used for sharing structures of nested content, whichare stored as Maps in firestore and also accessible via FieldPaths in mostfirestore client libraries.
+// firestore client libraries.
 type Avatar struct {
 	Url   runtime.URL `firestore:"url,omitempty"`
 	Color string      `firestore:"color,omitempty"`
