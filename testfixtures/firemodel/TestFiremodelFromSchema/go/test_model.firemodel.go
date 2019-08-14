@@ -35,10 +35,8 @@ type TestModel struct {
 	Directions []TestEnum               `firestore:"directions,omitempty"`
 	Models     []*TestStruct            `firestore:"models,omitempty"`
 	Models2    []*TestStruct            `firestore:"models2,omitempty"`
-	Refs       []*firestore.DocumentRef `firestore:"refs,omitempty"`
 	ModelRefs  []*firestore.DocumentRef `firestore:"modelRefs,omitempty"`
-	Meta       map[string]interface{}   `firestore:"meta,omitempty"`
-	MetaStrs   map[string]string        `firestore:"metaStrs,omitempty"`
+	Meta       map[string]string        `firestore:"meta,omitempty"`
 	Direction  TestEnum                 `firestore:"direction,omitempty"`
 	TestFile   *runtime.File            `firestore:"testFile,omitempty"`
 	Url        runtime.URL              `firestore:"url,omitempty"`

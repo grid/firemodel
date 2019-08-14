@@ -8,4 +8,5 @@ type Gram struct {
 	SharedWith  Audience    `firestore:"sharedWith,omitempty"`
 	PhotoUrl    runtime.URL `firestore:"photoUrl,omitempty"`
 	Description string      `firestore:"description,omitempty"`
+	Tags        []string    `firestore:"tags,omitempty"`
 }

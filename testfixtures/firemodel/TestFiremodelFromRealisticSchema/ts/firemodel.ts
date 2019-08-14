@@ -74,6 +74,7 @@ export namespace firemodel {
     sharedWith?: Audience;
     photoUrl?: URL;
     description?: string;
+    tags?: string[];
   }
   export interface IMessage {
     content?: MessageContent;

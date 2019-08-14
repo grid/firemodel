@@ -5,6 +5,7 @@ enum TestEnum {
     right,
     up,
     down,
+    other(TestStruct),
 }
 
 struct TestStruct {
@@ -39,10 +40,8 @@ model TestModel: "/test_models/{test_model_id}" {
   array<TestEnum> directions;
   array<TestStruct> models;
   array<TestStruct> models2;
-  array<reference> refs;
   array<reference<TestTimestamps>> model_refs;
-  map meta;
-  map<string> meta_strs;
+  map<string> meta;
   TestEnum direction;
   File test_file;
   URL url;

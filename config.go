@@ -134,7 +134,7 @@ type SchemaFieldType interface {
 type SchemaEnumValue struct {
 	Name            string
 	Comment         string
-	AssociatedValue Struct
+	AssociatedValue *Struct
 }
 
 type Boolean struct{}

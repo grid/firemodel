@@ -241,7 +241,25 @@ func TestParseSchema(t *testing.T) {
 								Comment: "The direction.",
 								Name:    "dir",
 								Type: &Enum{
-									T: &SchemaEnum{Name: "Direction"},
+									T: &SchemaEnum{
+										Name:    "Direction",
+										Comment: "A cardinal direction.",
+										Values: []*SchemaEnumValue{
+											{
+												Comment: "Leftwards.",
+												Name:    "left",
+											},
+											{
+												Name: "right",
+											},
+											{
+												Name: "up",
+											},
+											{
+												Name: "down",
+											},
+										},
+									},
 								},
 							},
 						},
@@ -274,7 +292,7 @@ func TestParseSchema(t *testing.T) {
 							},
 							{
 								Name: "on",
-								AssociatedValue: Struct{
+								AssociatedValue: &Struct{
 									T: &SchemaStruct{
 										Name: "ComputerOnState",
 									},
@@ -296,6 +314,14 @@ func TestParseSchema(t *testing.T) {
 								Type: &Enum{
 									T: &SchemaEnum{
 										Name: "Frobnicator",
+										Values: []*SchemaEnumValue{
+											{
+												Name: "up",
+											},
+											{
+												Name: "down",
+											},
+										},
 									},
 								},
 							},

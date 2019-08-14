@@ -15,6 +15,7 @@ export namespace example {
     right = 'RIGHT',
     up = 'UP',
     down = 'DOWN',
+    other = 'OTHER',
   }
   export interface ITestStruct {
     where?: string;
@@ -45,10 +46,8 @@ export namespace example {
     directions?: TestEnum[];
     models?: ITestStruct[];
     models2?: ITestStruct[];
-    refs?: firestore.DocumentReference[];
     modelRefs?: firestore.DocumentReference<ITestTimestamps>[];
-    meta?: { [key: string]: any; };
-    metaStrs?: { [key: string]: string; };
+    meta?: { [key: string]: string; };
     direction?: TestEnum;
     testFile?: IFile;
     url?: URL;
@@ -60,6 +59,7 @@ export namespace example {
     updatedAt?: firestore.Timestamp;
   }
   export interface ITestTimestamps {
+    t?: number;
 
     /** Record creation timestamp. */
     createdAt?: firestore.Timestamp;

@@ -11,6 +11,7 @@ import (
 //
 // Firestore document location: /timestamps/{test_timestamps_id}
 type TestTimestamps struct {
+	T int64 `firestore:"t"`
 
 	// Creation timestamp.
 	CreatedAt time.Time `firestore:"createdAt"`

@@ -30,20 +30,20 @@ type configSchemaCompiler struct {
 }
 
 func (c *configSchemaCompiler) compileConfig() (*Schema, error) {
-	if err := c.precompileEnumTypes(); err != nil {
-		return nil, err
-	}
 	if err := c.precompileModelTypes(); err != nil {
 		return nil, err
 	}
 	if err := c.precompileStructTypes(); err != nil {
 		return nil, err
 	}
+	if err := c.precompileEnumTypes(); err != nil {
+		return nil, err
+	}
 
 	return &Schema{
-		Models:  c.compileModels(),
 		Enums:   c.compileEnums(),
 		Structs: c.compileStructs(),
+		Models:  c.compileModels(),
 		Options: c.compileLanguageOptions(),
 	}, nil
 }
@@ -61,7 +61,9 @@ func (c *configSchemaCompiler) precompileEnumTypes() error {
 		}
 
 		c.enums = append(c.enums, &SchemaEnum{
-			Name: strcase.ToCamel(string(v.Enum.Identifier)),
+			Name:    strcase.ToCamel(string(v.Enum.Identifier)),
+			Comment: v.Comment,
+			Values:  c.enumValuesToConfig(v.Enum.Values),
 		})
 	}
 	return nil
@@ -191,7 +193,7 @@ func (c *configSchemaCompiler) enumValuesToConfig(values []*ast.ASTEnumValue) (o
 				err := errors.Errorf("Invalid enum associated value type: %s is not a struct type", enumValue.AssociatedValue)
 				panic(err)
 			} else {
-				value.AssociatedValue = Struct{schemaStruct}
+				value.AssociatedValue = &Struct{schemaStruct}
 			}
 		}
 		out = append(out, value)

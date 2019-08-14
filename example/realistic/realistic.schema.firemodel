@@ -45,6 +45,7 @@ model Gram: "/grams/{gram_id}" {
   Audience shared_with;
   URL photo_url;
   string description;
+  array<string> tags;
 }
 
 model Message: "/messages/{message_id}" {

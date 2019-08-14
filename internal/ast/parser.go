@@ -5,9 +5,9 @@ import (
 	"github.com/alecthomas/participle"
 	"github.com/alecthomas/participle/lexer"
 	"github.com/pkg/errors"
-	"github.com/visor-tax/firemodel/version"
 	"io"
 	"log"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -21,7 +21,7 @@ func ParseSchema(r io.Reader) (*AST, error) {
 		&AST{},
 		participle.Lexer(&lexerDefinition{}),
 		participle.Map(func(token lexer.Token) (lexer.Token, error) {
-			if version.Version == "(dev)" {
+			if os.Getenv("DEBUG") != "" {
 				log.Print(scanner.TokenString(rune(token.Type)), " -> ", token.Value)
 			}
 			if token.Type == scanner.Comment {

@@ -106,20 +106,9 @@ enum MessageContent {
 
 // MARK: - References
 
-struct UserRef: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subcollection refs
-	// TODO: Parent refs
-}
-
-struct UserCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
+struct UserRef: FiremodelCollectionSubscriber {
+    fileprivate let ref: DocumentReference
+    fileprivate let client: FiremodelClient
 
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<User>) -> Void) -> FiremodelUnsubscriber {
@@ -172,20 +161,9 @@ struct UserCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct GramRef: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subcollection refs
-	// TODO: Parent refs
-}
-
-struct GramCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
+struct GramRef: FiremodelCollectionSubscriber {
+    fileprivate let ref: DocumentReference
+    fileprivate let client: FiremodelClient
 
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Gram>) -> Void) -> FiremodelUnsubscriber {
@@ -238,20 +216,9 @@ struct GramCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct MessageRef: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subcollection refs
-	// TODO: Parent refs
-}
-
-struct MessageCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
+struct MessageRef: FiremodelCollectionSubscriber {
+    fileprivate let ref: DocumentReference
+    fileprivate let client: FiremodelClient
 
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Message>) -> Void) -> FiremodelUnsubscriber {
@@ -304,20 +271,9 @@ struct MessageCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct AttachmentRef: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subcollection refs
-	// TODO: Parent refs
-}
-
-struct AttachmentCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
+struct AttachmentRef: FiremodelCollectionSubscriber {
+    fileprivate let ref: DocumentReference
+    fileprivate let client: FiremodelClient
 
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Attachment>) -> Void) -> FiremodelUnsubscriber {
@@ -370,20 +326,9 @@ struct AttachmentCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct FriendRef: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subcollection refs
-	// TODO: Parent refs
-}
-
-struct FriendCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
+struct FriendRef: FiremodelCollectionSubscriber {
+    fileprivate let ref: DocumentReference
+    fileprivate let client: FiremodelClient
 
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Friend>) -> Void) -> FiremodelUnsubscriber {
@@ -437,7 +382,7 @@ struct FriendCollectionRef: FiremodelCollectionSubscriber {
 }
 
 
-// MARK: - Coding 
+// MARK: - Coding
 
 extension User: Decodable {
     init(from decoder: Decoder) throws {
@@ -447,11 +392,11 @@ extension User: Decodable {
         self.avatar = try container.decodeIfPresent(Avatar.self, forKey: .avatar)
     }
 
-	// Coding keys for User.
+    // Coding keys for User.
     enum CodingKeys: String, CodingKey {
-		case username = "username"
-		case displayName = "display_name"
-		case avatar = "avatar"
+        case username = "username"
+        case displayName = "display_name"
+        case avatar = "avatar"
     }
 }
 
@@ -463,21 +408,21 @@ extension Gram: Decodable {
         self.photoUrl = try container.decodeIfPresent(URL.self, forKey: .photoUrl)
         self.description = try container.decodeIfPresent(String.self, forKey: .description)
         self.tags =  try container.decodeIfPresent([String])
-		
+
     }
 
-	// Coding keys for Gram.
+    // Coding keys for Gram.
     enum CodingKeys: String, CodingKey {
-		case sharedWith = "shared_with"
-		case photoUrl = "photo_url"
-		case description = "description"
-		case tags = "tags"
+        case sharedWith = "shared_with"
+        case photoUrl = "photo_url"
+        case description = "description"
+        case tags = "tags"
     }
     // Coding keys for the Audience enum’s associated value.
-	enum AudienceType: String, CodingKey {
-		case global = "global"
-		case friends = "friends"
-	}
+    enum AudienceType: String, CodingKey {
+        case global = "global"
+        case friends = "friends"
+    }
 }
 
 extension Message: Decodable {
@@ -485,27 +430,27 @@ extension Message: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let contentType = try container.decodeIfPresent(String.self, forKey: .content)
         let content = try container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
-		switch contentType {
-		case MessageContent.text.rawValue:
-		self.text = try container.decodeIfPresent(TextMessageContent.self, forKey: .text)
-		case MessageContent.photo.rawValue:
-		self.photo = try container.decodeIfPresent(PhotoMessageContent.self, forKey: .photo)
-		default:
-			break
-		}
+        switch contentType {
+        case MessageContent.text.rawValue:
+            self.text = try container.decodeIfPresent(TextMessageContent.self, forKey: .text)
+        case MessageContent.photo.rawValue:
+            self.photo = try container.decodeIfPresent(PhotoMessageContent.self, forKey: .photo)
+        default:
+            break
+        }
         self.from = try container.decodeIfPresent(FriendRef.self, forKey: .from)
     }
 
-	// Coding keys for Message.
+    // Coding keys for Message.
     enum CodingKeys: String, CodingKey {
-		case content = "content"
-		case from = "from"
+        case content = "content"
+        case from = "from"
     }
     // Coding keys for the MessageContent enum’s associated value.
-	enum MessageContentType: String, CodingKey {
-		case text = "text"
-		case photo = "photo"
-	}
+    enum MessageContentType: String, CodingKey {
+        case text = "text"
+        case photo = "photo"
+    }
 }
 
 extension Attachment: Decodable {
@@ -514,30 +459,30 @@ extension Attachment: Decodable {
         self.title = try container.decodeIfPresent(String.self, forKey: .title)
         let contentType = try container.decodeIfPresent(String.self, forKey: .content)
         let content = try container.nestedContainer(keyedBy: AttachmentContentType.self, forKey: .content)
-		switch contentType {
-		case AttachmentContent.imoji.rawValue:
-		self.imoji = try container.decodeIfPresent(ImojiAttachment.self, forKey: .imoji)
-		case AttachmentContent.gram.rawValue:
-		self.gram = try container.decodeIfPresent(GramAttachment.self, forKey: .gram)
-		case AttachmentContent.upload.rawValue:
-		self.upload = try container.decodeIfPresent(UploadAttachment.self, forKey: .upload)
-		default:
-			break
-		}
+        switch contentType {
+        case AttachmentContent.imoji.rawValue:
+            self.imoji = try container.decodeIfPresent(ImojiAttachment.self, forKey: .imoji)
+        case AttachmentContent.gram.rawValue:
+            self.gram = try container.decodeIfPresent(GramAttachment.self, forKey: .gram)
+        case AttachmentContent.upload.rawValue:
+            self.upload = try container.decodeIfPresent(UploadAttachment.self, forKey: .upload)
+        default:
+            break
+        }
     }
 
-	// Coding keys for Attachment.
+    // Coding keys for Attachment.
     enum CodingKeys: String, CodingKey {
-		case title = "title"
-		case content = "content"
+        case title = "title"
+        case content = "content"
     }
     // Coding keys for the AttachmentContent enum’s associated value.
-	enum AttachmentContentType: String, CodingKey {
-		case placeholder = "placeholder"
-		case imoji = "imoji"
-		case gram = "gram"
-		case upload = "upload"
-	}
+    enum AttachmentContentType: String, CodingKey {
+        case placeholder = "placeholder"
+        case imoji = "imoji"
+        case gram = "gram"
+        case upload = "upload"
+    }
 }
 
 extension Friend: Decodable {
@@ -549,12 +494,12 @@ extension Friend: Decodable {
         self.friendsSinice = try container.decodeIfPresent(Date.self, forKey: .friendsSinice)
     }
 
-	// Coding keys for Friend.
+    // Coding keys for Friend.
     enum CodingKeys: String, CodingKey {
-		case username = "username"
-		case displayName = "display_name"
-		case avatar = "avatar"
-		case friendsSinice = "friends_sinice"
+        case username = "username"
+        case displayName = "display_name"
+        case avatar = "avatar"
+        case friendsSinice = "friends_sinice"
     }
 }
 
@@ -566,10 +511,10 @@ extension Avatar: Decodable {
         self.color = try container.decodeIfPresent(String.self, forKey: .color)
     }
 
-	// Coding keys for Avatar.
+    // Coding keys for Avatar.
     enum CodingKeys: String, CodingKey {
-		case url = "url"
-		case color = "color"
+        case url = "url"
+        case color = "color"
     }
 }
 
@@ -579,26 +524,26 @@ extension SendMessageRequest: Decodable {
         self.to = try container.decodeIfPresent(FriendRef.self, forKey: .to)
         let contentType = try container.decodeIfPresent(String.self, forKey: .content)
         let content = try container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
-		switch contentType {
-		case MessageContent.text.rawValue:
-		self.text = try container.decodeIfPresent(TextMessageContent.self, forKey: .text)
-		case MessageContent.photo.rawValue:
-		self.photo = try container.decodeIfPresent(PhotoMessageContent.self, forKey: .photo)
-		default:
-			break
-		}
+        switch contentType {
+        case MessageContent.text.rawValue:
+            self.text = try container.decodeIfPresent(TextMessageContent.self, forKey: .text)
+        case MessageContent.photo.rawValue:
+            self.photo = try container.decodeIfPresent(PhotoMessageContent.self, forKey: .photo)
+        default:
+            break
+        }
     }
 
-	// Coding keys for SendMessageRequest.
+    // Coding keys for SendMessageRequest.
     enum CodingKeys: String, CodingKey {
-		case to = "to"
-		case content = "content"
+        case to = "to"
+        case content = "content"
     }
     // Coding keys for the MessageContent enum’s associated value.
-	enum MessageContentType: String, CodingKey {
-		case text = "text"
-		case photo = "photo"
-	}
+    enum MessageContentType: String, CodingKey {
+        case text = "text"
+        case photo = "photo"
+    }
 }
 
 extension ImojiAttachment: Decodable {
@@ -607,9 +552,9 @@ extension ImojiAttachment: Decodable {
         self.coolPic = try container.decodeIfPresent(Data.self, forKey: .coolPic)
     }
 
-	// Coding keys for ImojiAttachment.
+    // Coding keys for ImojiAttachment.
     enum CodingKeys: String, CodingKey {
-		case coolPic = "cool_pic"
+        case coolPic = "cool_pic"
     }
 }
 
@@ -619,9 +564,9 @@ extension GramAttachment: Decodable {
         self.ref = try container.decodeIfPresent(String.self, forKey: .ref)
     }
 
-	// Coding keys for GramAttachment.
+    // Coding keys for GramAttachment.
     enum CodingKeys: String, CodingKey {
-		case ref = "ref"
+        case ref = "ref"
     }
 }
 
@@ -632,10 +577,10 @@ extension UploadAttachment: Decodable {
         self.src = try container.decodeIfPresent(URL.self, forKey: .src)
     }
 
-	// Coding keys for UploadAttachment.
+    // Coding keys for UploadAttachment.
     enum CodingKeys: String, CodingKey {
-		case title = "title"
-		case src = "src"
+        case title = "title"
+        case src = "src"
     }
 }
 
@@ -646,10 +591,10 @@ extension Upload: Decodable {
         self.mimeType = try container.decodeIfPresent(String.self, forKey: .mimeType)
     }
 
-	// Coding keys for Upload.
+    // Coding keys for Upload.
     enum CodingKeys: String, CodingKey {
-		case url = "url"
-		case mimeType = "mime_type"
+        case url = "url"
+        case mimeType = "mime_type"
     }
 }
 
@@ -659,9 +604,9 @@ extension TextMessageContent: Decodable {
         self.message = try container.decodeIfPresent(String.self, forKey: .message)
     }
 
-	// Coding keys for TextMessageContent.
+    // Coding keys for TextMessageContent.
     enum CodingKeys: String, CodingKey {
-		case message = "message"
+        case message = "message"
     }
 }
 
@@ -672,10 +617,10 @@ extension PhotoMessageContent: Decodable {
         self.url = try container.decodeIfPresent(URL.self, forKey: .url)
     }
 
-	// Coding keys for PhotoMessageContent.
+    // Coding keys for PhotoMessageContent.
     enum CodingKeys: String, CodingKey {
-		case caption = "caption"
-		case url = "url"
+        case caption = "caption"
+        case url = "url"
     }
 }
 
@@ -1125,12 +1070,12 @@ struct DocumentSnapshotKeyedDecodingContainerProtocol<Key>: KeyedDecodingContain
 }
 
 
-// MARK: - Protocols 
+// MARK: - Protocols
 
 // MARK: - Standard Types
 
 struct GeoPoint {
-  let latitude: Float
-  let longitude: Float
+    let latitude: Float
+    let longitude: Float
 }
 

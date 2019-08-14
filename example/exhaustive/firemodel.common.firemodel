@@ -3,6 +3,8 @@ model TestTimestamps: "/test_timestamps/{test_timestamp_id}" {
   option firestore.model_name = "timestamps";
   option firestore.path = "timestamps/{test_timestamps_id}";
   option firestore.autotimestamp = true;
+
+  integer t;
 }
 
 model Test: "/test_timestamps/{test_timestamp_id}" {

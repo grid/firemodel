@@ -23,7 +23,7 @@ enum Audience {
     case friends
 }
 
-// MARKR: - Interfaces
+// MARK: - Interfaces
 
 protocol Userlike {
     var username: String? { get }
@@ -43,6 +43,7 @@ struct Gram {
     let sharedWith: Audience?
     let photoUrl: URL?
     let description: String?
+    let tags: [String]?
 }
 
 struct Message {

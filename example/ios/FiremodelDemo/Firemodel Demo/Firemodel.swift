@@ -236,19 +236,19 @@ let firestoreClientDecodingKey = CodingUserInfoKey(rawValue: "firestore")!
 
 // RPCs
 
-enum FiremodelRPCRequest {
-    case sendMessage(to: FriendRef, content: Message)
-}
-
-struct FiremodelRPCRequestMeta: Codable {
-    let bundleID: String?
-    let appVersion: String?
-    let appBuild: String?
-    let osVersion: String?
-    let device: String?
-    let traceID: String?
-    let spanID: String?
-}
+//enum FiremodelRPCRequest {
+//    case sendMessage(to: FriendRef, content: Message)
+//}
+//
+//struct FiremodelRPCRequestMeta: Codable {
+//    let bundleID: String?
+//    let appVersion: String?
+//    let appBuild: String?
+//    let osVersion: String?
+//    let device: String?
+//    let traceID: String?
+//    let spanID: String?
+//}
 
 
 //extension FiremodelRPCRequest: Encodable {
@@ -519,7 +519,7 @@ extension Avatar: Decodable {
     }
 }
 
-extension Message: Encodable, Decodable {
+extension Message: Decodable {
     init(from decoder: Decoder) throws {
         let message = try decoder.container(keyedBy: CodingKeys.self)
         self.from = try message.decodeIfPresent(FriendRef.self, forKey: .from)
@@ -539,29 +539,29 @@ extension Message: Encodable, Decodable {
         }
     }
 
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        if let from = from {
-            try container.encode(from, forKey: .from)
-        } else {
-            try container.encodeNil(forKey: .from)
-        }
-        var contentContainer = container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
-        if let content = content {
-            switch content {
-            case let .text(textMessageContent):
-                try container.encode("TEXT", forKey: .content)
-                try contentContainer.encode(textMessageContent, forKey: .text)
-            case let .photo(photoMessageContent):
-                try container.encode("PHOTO", forKey: .content)
-                try contentContainer.encode(photoMessageContent, forKey: .photo)
-            case let .invalid(invalid):
-                try container.encode(invalid, forKey: .content)
-            default:
-                try container.encodeNil(forKey: .content)
-            }
-        }
-    }
+//    func encode(to encoder: Encoder) throws {
+//        var container = encoder.container(keyedBy: CodingKeys.self)
+//        if let from = from {
+//            try container.encode(from, forKey: .from)
+//        } else {
+//            try container.encodeNil(forKey: .from)
+//        }
+//        var contentContainer = container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
+//        if let content = content {
+//            switch content {
+//            case let .text(textMessageContent):
+//                try container.encode("TEXT", forKey: .content)
+//                try contentContainer.encode(textMessageContent, forKey: .text)
+//            case let .photo(photoMessageContent):
+//                try container.encode("PHOTO", forKey: .content)
+//                try contentContainer.encode(photoMessageContent, forKey: .photo)
+//            case let .invalid(invalid):
+//                try container.encode(invalid, forKey: .content)
+//            default:
+//                try container.encodeNil(forKey: .content)
+//            }
+//        }
+//    }
 
     private enum MessageContentType: String, CodingKey {
         case text
@@ -639,23 +639,74 @@ fileprivate extension Audience {
     }
 }
 
-fileprivate extension Gram {
-//    init(snapshot: DocumentSnapshot) throws {
-//        guard let rawSharedWith = snapshot.get("sharedWith") as? String? else {
-//            throw FiremodelError.typeError(model: Gram.self, key: \Gram.sharedWith, expectedType: Audience.self, actualValue: snapshot.get("sharedWith"))
-//        }
-//        guard let photoUrl = try URL(snapshot: snapshot.get("photoUrl")) else {
-//            throw FiremodelError.typeError(model: Gram.self, key: \Gram.photoUrl, expectedType: URL.self, actualValue: snapshot.get("photoUrl"))
-//        }
-//        guard let description = snapshot.get("description") as? String? else {
-//            throw FiremodelError.typeError(model: Gram.self, key: \Gram.description, expectedType: String.self, actualValue: snapshot.get("description"))
+//extension Gram: Decodable {
+//    struct T {}
+//    init(from decoder: Decoder) throws {
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//
+//        // Decode Audience’s associated value.
+//        let sharedWithType = try container.decodeIfPresent(String.self, forKey: .sharedWith)
+//        let sharedWith = try container.nestedContainer(keyedBy: AudienceType.self, forKey: .sharedWith)
+//        switch sharedWithType {
 //        }
 //
-//        self.init(sharedWith: Audience(snapshot: rawSharedWith),
-//                  photoUrl: photoUrl,
-//                  description: description)
+//        self.photoUrl = try container.decodeIfPresent(URL.self, forKey: .photoUrl)
+//
+//        self.description = try container.decodeIfPresent(String.self, forKey: .description)
+//
+//        self.tags = try container.decodeIfPresent([String].self, forKey: .tags)
 //    }
-}
+//
+//    // Coding keys for Gram.
+//    enum CodingKeys: String, CodingKey {
+//        case sharedWith = "shared_with"
+//        case photoUrl = "photo_url"
+//        case description = "description"
+//        case tags = "tags"
+//    }
+//
+//    // Coding keys for the Audience enum’s associated value.
+//    enum AudienceType: String, CodingKey {
+//        case global = "global"
+//        case friends = "friends"
+//    }
+//}
+
+
+
+
+//extension Gram: Decodable {
+//
+//    init(from decoder: Decoder) throws {
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        self.description
+//        self.photoUrl
+//        self.sharedWith
+//        self.tags = try container.decodeIfPresent([String], forKey: .tags)
+//
+//    }
+//
+//    enum CodingKeys: CodingKey {
+//        case tags
+//        case d
+//    }
+//
+////    init(snapshot: DocumentSnapshot) throws {
+////        guard let rawSharedWith = snapshot.get("sharedWith") as? String? else {
+////            throw FiremodelError.typeError(model: Gram.self, key: \Gram.sharedWith, expectedType: Audience.self, actualValue: snapshot.get("sharedWith"))
+////        }
+////        guard let photoUrl = try URL(snapshot: snapshot.get("photoUrl")) else {
+////            throw FiremodelError.typeError(model: Gram.self, key: \Gram.photoUrl, expectedType: URL.self, actualValue: snapshot.get("photoUrl"))
+////        }
+////        guard let description = snapshot.get("description") as? String? else {
+////            throw FiremodelError.typeError(model: Gram.self, key: \Gram.description, expectedType: String.self, actualValue: snapshot.get("description"))
+////        }
+////
+////        self.init(sharedWith: Audience(snapshot: rawSharedWith),
+////                  photoUrl: photoUrl,
+////                  description: description)
+////    }
+//}
 
 fileprivate extension Message {
 //    init(snapshot: DocumentSnapshot) throws {
