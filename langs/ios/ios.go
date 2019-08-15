@@ -65,6 +65,7 @@ func newTpl(schema *firemodel.Schema) *template.Template {
 	_ = template.Must(tpl.New("coding").Parse(coding))
 	_ = template.Must(tpl.New("refcoding").Parse(refcoding))
 	_ = template.Must(tpl.New("enum").Parse(enum))
+	_ = template.Must(tpl.New("protocol").Parse(protocol))
 	return tpl
 }
 
@@ -326,6 +327,11 @@ import FirebaseFirestore
 {{template "enum" .}}
 {{- end}}
 
+// MARK: - Interfaces
+{{range .Interfaces -}}
+{{template "protocol" .}}
+{{- end}}
+
 // MARK: - References
 {{range .Models -}}
 {{template "refs" .}}
@@ -368,6 +374,12 @@ struct {{.Name | toCamel}} {
     let {{.Name | toSwiftFieldName -}}: {{.Type | toSwiftType true}}
     {{- end}}
 }
+
+{{- $type := . -}}
+{{- range .Implements }}
+extension {{ $type.Name | toCamel }}: {{.Name | toCamel }} {
+}
+{{- end }}
 `
 
 	coding = `
@@ -1097,6 +1109,20 @@ enum {{.Name | toCamel }} {
     {{- if .AssociatedValue -}}
     ( {{- .AssociatedValue.T.Name -}} )
     {{- end -}}
+    {{- end}}
+}
+`
+
+	protocol = `
+{{- if .Comment}}
+// {{.Comment}}
+{{- end}}
+protocol {{.Name | toCamel }} {
+    {{- range .Fields}}
+    {{- if .Comment}}
+    // {{.Comment}}
+    {{- end}}
+    var {{.Name | toSwiftFieldName}}: {{ .Type | toSwiftType true }} { get }
     {{- end}}
 }
 `

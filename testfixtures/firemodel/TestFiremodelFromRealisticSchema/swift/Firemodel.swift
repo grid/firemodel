@@ -7,9 +7,14 @@ import FirebaseFirestore
 
 // [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
 struct User {
+    let token: String?
     let username: String?
     let displayName: String?
     let avatar: Avatar?
+}
+extension User: HasToken {
+}
+extension User: Author {
 }
 
 struct LocalizedString {
@@ -38,6 +43,8 @@ struct Friend {
     let displayName: String?
     let avatar: Avatar?
     let friendsSinice: Date?
+}
+extension Friend: Author {
 }
 
 
@@ -106,6 +113,20 @@ enum MessageContent {
 	case invalid(String?)
     case text(TextMessageContent)
     case photo(PhotoMessageContent)
+}
+
+
+// MARK: - Interfaces
+
+// Interfaces are intended for composability and abstraction, similar to graphql interfaces.
+protocol HasToken {
+    var token: String? { get }
+}
+
+protocol Author {
+    var username: String? { get }
+    var displayName: String? { get }
+    var avatar: Avatar? { get }
 }
 
 
@@ -783,6 +804,7 @@ extension FriendRef: FiremodelDocumentSubscriber {
 extension User: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.token = try container.decodeIfPresent(String.self, forKey: .token)
         self.username = try container.decodeIfPresent(String.self, forKey: .username)
         self.displayName = try container.decodeIfPresent(String.self, forKey: .displayName)
         self.avatar = try container.decodeIfPresent(Avatar.self, forKey: .avatar)
@@ -790,6 +812,7 @@ extension User: Decodable {
 
 	// Coding keys for User.
     enum CodingKeys: String, CodingKey {
+		case token = "token"
 		case username = "username"
 		case displayName = "display_name"
 		case avatar = "avatar"

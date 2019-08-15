@@ -86,7 +86,7 @@ type ASTElement struct {
 type ASTModel struct {
 	Identifier   ASTIdentifier      `parser:"@Ident ':'"`
 	PathTemplate *ASTPathTemplate   `parser:"@@"`
-	Implements   []ASTIdentifier    `parser:"( 'implements' ( @Ident ',' )* @Ident )?"`
+	Implements   []ASTType          `parser:"( 'implements' ( @Ident ',' )* @Ident )?"`
 	Elements     []*ASTModelElement `parser:"'{' ( @@  | Comment  )* '}'"`
 }
 
@@ -144,12 +144,13 @@ var (
 )
 
 type ASTInterface struct {
-	Identifier ASTIdentifier      `parser:"@Ident"`
-	Elements   []*ASTModelElement `parser:"'{' ( @@ )* '}'"`
+	Identifier ASTIdentifier       `parser:"@Ident"`
+	Elements   []*ASTStructElement `parser:"'{' ( @@ )* '}'"`
 }
 
 type ASTStruct struct {
 	Identifier ASTIdentifier       `parser:"@Ident"`
+	Implements []ASTType           `parser:"( 'implements' ( @Ident ',' )* @Ident )?"`
 	Elements   []*ASTStructElement `parser:"'{' ( @@  | Comment  )* '}'"`
 }
 

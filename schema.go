@@ -22,9 +22,10 @@ func ParseSchema(r io.Reader) (*Schema, error) {
 }
 
 type configSchemaCompiler struct {
-	models  []*SchemaModel
-	structs []*SchemaStruct
-	enums   []*SchemaEnum
+	models     []*SchemaModel
+	structs    []*SchemaStruct
+	enums      []*SchemaEnum
+	interfaces []*SchemaInterface
 
 	ast *ast.AST
 }
@@ -39,11 +40,15 @@ func (c *configSchemaCompiler) compileConfig() (*Schema, error) {
 	if err := c.precompileEnumTypes(); err != nil {
 		return nil, err
 	}
+	if err := c.precompileInterfaces(); err != nil {
+		return nil, err
+	}
 
 	return &Schema{
-		Enums:   c.compileEnums(),
-		Structs: c.compileStructs(),
-		Models:  c.compileModels(),
+		Enums:      c.compileEnums(),
+		Structs:    c.compileStructs(),
+		Models:     c.compileModels(),
+		Interfaces: c.interfaces,
 	}, nil
 }
 
@@ -63,6 +68,26 @@ func (c *configSchemaCompiler) precompileEnumTypes() error {
 			Name:    strcase.ToCamel(string(v.Enum.Identifier)),
 			Comment: v.Comment,
 			Values:  c.enumValuesToConfig(v.Enum.Values),
+		})
+	}
+	return nil
+}
+
+func (c *configSchemaCompiler) precompileInterfaces() error {
+	for _, v := range c.ast.Types {
+		if v.Interface == nil {
+			continue
+		}
+
+		if v.Interface.Identifier.IsReserved() {
+			err := errors.Errorf("firemodel/schema: can't name enum %s, %s is a reserved word.", v.Interface.Identifier, v.Interface.Identifier)
+			return err
+		}
+
+		c.interfaces = append(c.interfaces, &SchemaInterface{
+			Name:    strcase.ToCamel(string(v.Interface.Identifier)),
+			Comment: v.Comment,
+			Fields:  c.compileStructFields(v.Interface.Elements),
 		})
 	}
 	return nil
@@ -116,6 +141,7 @@ func (c *configSchemaCompiler) compileModels() (out []*SchemaModel) {
 			panic(err)
 		}
 
+		// Parse model path
 		modelPathTemplate := SchemaModelPathTemplate{
 			Pattern: v.Model.PathTemplate.Pattern,
 		}
@@ -126,10 +152,25 @@ func (c *configSchemaCompiler) compileModels() (out []*SchemaModel) {
 					DocumentPlaceholder: part.DocumentPlaceholder,
 				})
 		}
+
+		fields := c.compileModelFields(v.Model.Elements)
+
+		// Parse interfaces
+		var modelInterfaces []*SchemaInterface
+		for _, implementedInterface := range v.Model.Implements {
+			if schemaInterface, ok := c.assertInterfaceType(implementedInterface); ok {
+				if err := c.assertInterfaceConformance(string(v.Model.Identifier), schemaInterface, fields); err != nil {
+					panic(err)
+				}
+				modelInterfaces = append(modelInterfaces, schemaInterface)
+			}
+		}
+
 		out = append(out, &SchemaModel{
 			Name:          strcase.ToCamel(string(v.Model.Identifier)),
 			Comment:       v.Comment,
-			Fields:        c.compileModelFields(v.Model.Elements),
+			Implements:    modelInterfaces,
+			Fields:        fields,
 			FirestorePath: modelPathTemplate,
 		})
 	}
@@ -147,10 +188,24 @@ func (c *configSchemaCompiler) compileStructs() (out []*SchemaStruct) {
 			panic(err)
 		}
 
+		fields := c.compileStructFields(v.Struct.Elements)
+
+		// Parse interfaces
+		var modelInterfaces []*SchemaInterface
+		for _, implementedInterface := range v.Struct.Implements {
+			if schemaInterface, ok := c.assertInterfaceType(implementedInterface); ok {
+				if err := c.assertInterfaceConformance(string(v.Struct.Identifier), schemaInterface, fields); err != nil {
+					panic(err)
+				}
+				modelInterfaces = append(modelInterfaces, schemaInterface)
+			}
+		}
+
 		out = append(out, &SchemaStruct{
-			Name:    strcase.ToCamel(string(v.Struct.Identifier)),
-			Comment: v.Comment,
-			Fields:  c.compileStructFields(v.Struct.Elements),
+			Name:       strcase.ToCamel(string(v.Struct.Identifier)),
+			Comment:    v.Comment,
+			Implements: modelInterfaces,
+			Fields:     fields,
 		})
 	}
 	return
@@ -301,6 +356,18 @@ func (c *configSchemaCompiler) assertModelType(astFieldType *ast.ASTFieldType) (
 	return nil, false
 }
 
+func (c *configSchemaCompiler) assertInterfaceType(astType ast.ASTType) (*SchemaInterface, bool) {
+	if c.interfaces == nil {
+		panic("bug: interface types not yet registered")
+	}
+	for _, schemaInterface := range c.interfaces {
+		if schemaInterface.Name == strcase.ToCamel(string(astType)) {
+			return schemaInterface, true
+		}
+	}
+	return nil, false
+}
+
 func (c *configSchemaCompiler) assertStructType(astFieldType *ast.ASTFieldType) (*SchemaStruct, bool) {
 	if c.structs == nil {
 		panic("bug: model types not yet registered")
@@ -331,4 +398,22 @@ func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (*Schem
 
 	}
 	return nil, false
+}
+
+func (c *configSchemaCompiler) assertInterfaceConformance(modelOrStructName string, schemaInterface *SchemaInterface, fields []*SchemaField) error {
+	for _, requiredField := range schemaInterface.Fields {
+		var found bool
+		for _, actualField := range fields {
+			if requiredField.Name == actualField.Name {
+				found = true
+				if !equalSchemaFieldTypes(requiredField.Type, actualField.Type) {
+					return errors.Errorf("Field %s has incompatible type %s according to interface %s (expected %s)", actualField.Name, actualField.Type, schemaInterface.Name, requiredField.Type)
+				}
+			}
+		}
+		if !found {
+			return errors.Errorf("Type %s is missing field %s %s required by interface %s", modelOrStructName, requiredField.Type, requiredField.Name, schemaInterface.Name)
+		}
+	}
+	return nil
 }

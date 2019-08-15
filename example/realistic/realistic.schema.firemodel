@@ -7,7 +7,7 @@
 // [new] Interfaces allow you to declare structural abstractions. If a model or struct declares that it
 // implements an interface, it must include all the interface's fields with correct types.
 //
-// Interfaces are intended for compostability and abstraction, similar to graphql interfaces.
+// Interfaces are intended for composability and abstraction, similar to graphql interfaces.
 interface HasToken {
   string token;
 }
@@ -26,6 +26,7 @@ struct Avatar {
 // [new] Models use an inflector to determine their pluralized collection name in firestore.
 // [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
 model User: "/users/{user_id}" implements HasToken, Author {
+  string token;
   string username;
   string display_name;
   Avatar avatar;
