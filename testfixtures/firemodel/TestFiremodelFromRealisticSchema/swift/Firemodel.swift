@@ -12,7 +12,11 @@ struct User {
     let avatar: Avatar?
 }
 
-struct Gram {
+struct LocalizedString {
+    let strings: [String: String]
+}
+
+struct InstantGram {
     let sharedWith: Audience?
     let photoUrl: URL?
     let description: String?
@@ -43,11 +47,6 @@ struct Friend {
 struct Avatar {
     let url: URL?
     let color: String?
-}
-
-struct SendMessageRequest {
-    let to: FriendRef?
-    let content: MessageContent?
 }
 
 struct ImojiAttachment {
@@ -106,21 +105,19 @@ enum MessageContent {
 
 // MARK: - References
 
-struct UserRef: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
+struct UserCollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
-	// TODO: Parent refs
+
+	// MARK: - Child Ref
+
+    func user(id: String) -> UserRef {
+        return UserRef(ref: ref.document(id), client: client)
+    }
 }
 
-struct UserCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
-
+extension UserCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<User>) -> Void) -> FiremodelUnsubscriber {
 
@@ -172,23 +169,79 @@ struct UserCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct GramRef: FiremodelDocumentSubscriber {
+struct UserRef {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
-	// TODO: Parent refs
+	// MARK: - Parent Ref
+
+    func parent() -> UserCollectionRef {
+        return UserCollectionRef(ref: ref.parent, client: client)
+    }
+
+	// MARK: -  Subcollection Refs
+
+    func instantGrams() -> InstantGramCollectionRef {
+        return InstantGramCollectionRef(ref: ref.collection("instant_grams"), client: client)
+    }
+
+    func messages() -> MessageCollectionRef {
+        return MessageCollectionRef(ref: ref.collection("messages"), client: client)
+    }
+
+    func attachments() -> AttachmentCollectionRef {
+        return AttachmentCollectionRef(ref: ref.collection("attachments"), client: client)
+    }
+
+    func friends() -> FriendCollectionRef {
+        return FriendCollectionRef(ref: ref.collection("friends"), client: client)
+    }
 }
 
-struct GramCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
+extension UserRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<User>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(User.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
+struct LocalizedStringCollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subdoc refs
+
+	// MARK: - Child Ref
+
+    func localizedString(id: String) -> LocalizedStringRef {
+        return LocalizedStringRef(ref: ref.document(id), client: client)
+    }
 }
 
+extension LocalizedStringCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
-                   receiver publish: @escaping (FiremodelCollectionEvent<Gram>) -> Void) -> FiremodelUnsubscriber {
+                   receiver publish: @escaping (FiremodelCollectionEvent<LocalizedString>) -> Void) -> FiremodelUnsubscriber {
 
         let registration = (applyQuery?(ref) ?? ref)
             .addSnapshotListener { (snap: QuerySnapshot?, error: Error?) in
@@ -203,12 +256,12 @@ struct GramCollectionRef: FiremodelCollectionSubscriber {
                 }
 
 
-                var documents = [Gram]()
-                var diff = (additions: [FiremodelChange<Gram>](), modifications: [FiremodelChange<Gram>](), removals: [FiremodelChange<Gram>]())
+                var documents = [LocalizedString]()
+                var diff = (additions: [FiremodelChange<LocalizedString>](), modifications: [FiremodelChange<LocalizedString>](), removals: [FiremodelChange<LocalizedString>]())
                 for change in snap.documentChanges {
-                    let model: Gram
+                    let model: LocalizedString
                     do {
-                        model = try self.client.decode(Gram.self, from: change.document)
+                        model = try self.client.decode(LocalizedString.self, from: change.document)
                     } catch {
                         publish(.error(error))
                         return
@@ -238,21 +291,175 @@ struct GramCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct MessageRef: FiremodelDocumentSubscriber {
+struct LocalizedStringRef {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
-	// TODO: Parent refs
+	// MARK: - Parent Ref
+
+    func parent() -> LocalizedStringCollectionRef {
+        return LocalizedStringCollectionRef(ref: ref.parent, client: client)
+    }
 }
 
-struct MessageCollectionRef: FiremodelCollectionSubscriber {
+extension LocalizedStringRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<LocalizedString>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(LocalizedString.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
+struct InstantGramCollectionRef {
+	fileprivate let ref: CollectionReference
+	fileprivate let client: FiremodelClient
+
+	// MARK: - Parent Ref
+
+    func parent() -> UserRef {
+        return UserRef(ref: ref.parent!, client: client)
+    }
+
+
+	// MARK: - Child Ref
+
+    func instantGram(id: String) -> InstantGramRef {
+        return InstantGramRef(ref: ref.document(id), client: client)
+    }
+}
+
+extension InstantGramCollectionRef: FiremodelCollectionSubscriber {
+    func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
+                   receiver publish: @escaping (FiremodelCollectionEvent<InstantGram>) -> Void) -> FiremodelUnsubscriber {
+
+        let registration = (applyQuery?(ref) ?? ref)
+            .addSnapshotListener { (snap: QuerySnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+
+
+                var documents = [InstantGram]()
+                var diff = (additions: [FiremodelChange<InstantGram>](), modifications: [FiremodelChange<InstantGram>](), removals: [FiremodelChange<InstantGram>]())
+                for change in snap.documentChanges {
+                    let model: InstantGram
+                    do {
+                        model = try self.client.decode(InstantGram.self, from: change.document)
+                    } catch {
+                        publish(.error(error))
+                        return
+                    }
+
+                    documents.append(model)
+
+                    let firemodelChange = FiremodelChange(document: model, oldIndex: change.oldIndex, newIndex: change.newIndex)
+
+                    switch change.type {
+                    case DocumentChangeType.added:
+                        diff.additions.append(firemodelChange)
+                    case DocumentChangeType.modified:
+                        diff.modifications.append(firemodelChange)
+                    case DocumentChangeType.removed:
+                        diff.removals.append(firemodelChange)
+                    default:
+                        assertionFailure("unexpected firestore DocumentChangeType \(change.type)")
+                    }
+
+                }
+
+                publish(.snapshot(documents, diff: diff, metadata: snap.metadata as SnapshotMetadata))
+        }
+
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+struct InstantGramRef {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subdoc refs
+	// MARK: - Parent Ref
+
+    func parent() -> InstantGramCollectionRef {
+        return InstantGramCollectionRef(ref: ref.parent, client: client)
+    }
 }
 
+extension InstantGramRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<InstantGram>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(InstantGram.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
+struct MessageCollectionRef {
+	fileprivate let ref: CollectionReference
+	fileprivate let client: FiremodelClient
+
+	// MARK: - Parent Ref
+
+    func parent() -> UserRef {
+        return UserRef(ref: ref.parent!, client: client)
+    }
+
+
+	// MARK: - Child Ref
+
+    func message(id: String) -> MessageRef {
+        return MessageRef(ref: ref.document(id), client: client)
+    }
+}
+
+extension MessageCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Message>) -> Void) -> FiremodelUnsubscriber {
 
@@ -304,21 +511,65 @@ struct MessageCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct AttachmentRef: FiremodelDocumentSubscriber {
+struct MessageRef {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
-	// TODO: Parent refs
+	// MARK: - Parent Ref
+
+    func parent() -> MessageCollectionRef {
+        return MessageCollectionRef(ref: ref.parent, client: client)
+    }
 }
 
-struct AttachmentCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
+extension MessageRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<Message>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(Message.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
+struct AttachmentCollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subdoc refs
+	// MARK: - Parent Ref
+
+    func parent() -> UserRef {
+        return UserRef(ref: ref.parent!, client: client)
+    }
+
+
+	// MARK: - Child Ref
+
+    func attachment(id: String) -> AttachmentRef {
+        return AttachmentRef(ref: ref.document(id), client: client)
+    }
 }
 
+extension AttachmentCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Attachment>) -> Void) -> FiremodelUnsubscriber {
 
@@ -370,21 +621,65 @@ struct AttachmentCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct FriendRef: FiremodelDocumentSubscriber {
+struct AttachmentRef {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
-	// TODO: Parent refs
+	// MARK: - Parent Ref
+
+    func parent() -> AttachmentCollectionRef {
+        return AttachmentCollectionRef(ref: ref.parent, client: client)
+    }
 }
 
-struct FriendCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
+extension AttachmentRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<Attachment>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(Attachment.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
+struct FriendCollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subdoc refs
+	// MARK: - Parent Ref
+
+    func parent() -> UserRef {
+        return UserRef(ref: ref.parent!, client: client)
+    }
+
+
+	// MARK: - Child Ref
+
+    func friend(id: String) -> FriendRef {
+        return FriendRef(ref: ref.document(id), client: client)
+    }
 }
 
+extension FriendCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Friend>) -> Void) -> FiremodelUnsubscriber {
 
@@ -436,6 +731,46 @@ struct FriendCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
+struct FriendRef {
+	fileprivate let ref: DocumentReference
+	fileprivate let client: FiremodelClient
+
+	// MARK: - Parent Ref
+
+    func parent() -> FriendCollectionRef {
+        return FriendCollectionRef(ref: ref.parent, client: client)
+    }
+}
+
+extension FriendRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<Friend>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(Friend.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
 
 // MARK: - Coding 
 
@@ -455,18 +790,36 @@ extension User: Decodable {
     }
 }
 
-extension Gram: Decodable {
+extension LocalizedString: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let sharedWithType = try container.decodeIfPresent(String.self, forKey: .sharedWith)
-        let sharedWith = try container.nestedContainer(keyedBy: AudienceType.self, forKey: .sharedWith)
-        self.photoUrl = try container.decodeIfPresent(URL.self, forKey: .photoUrl)
-        self.description = try container.decodeIfPresent(String.self, forKey: .description)
-        self.tags =  try container.decodeIfPresent([String])
+        self.strings =  try container.decode([String: String].self, forKey: .strings)
 		
     }
 
-	// Coding keys for Gram.
+	// Coding keys for LocalizedString.
+    enum CodingKeys: String, CodingKey {
+		case strings = "strings"
+    }
+}
+
+extension InstantGram: Decodable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        switch try container.decodeIfPresent(String.self, forKey: .sharedWith) {
+		case "GLOBAL":
+			self.sharedWith = .global
+		case "FRIENDS":
+			self.sharedWith = .friends
+		default:
+			self.sharedWith = nil
+		}
+        self.photoUrl = try container.decodeIfPresent(URL.self, forKey: .photoUrl)
+        self.description = try container.decodeIfPresent(String.self, forKey: .description)
+        self.tags =  try container.decode([String].self, forKey: .tags)
+    }
+
+	// Coding keys for InstantGram.
     enum CodingKeys: String, CodingKey {
 		case sharedWith = "shared_with"
 		case photoUrl = "photo_url"
@@ -483,15 +836,14 @@ extension Gram: Decodable {
 extension Message: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let contentType = try container.decodeIfPresent(String.self, forKey: .content)
-        let content = try container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
-		switch contentType {
-		case MessageContent.text.rawValue:
-		self.text = try container.decodeIfPresent(TextMessageContent.self, forKey: .text)
-		case MessageContent.photo.rawValue:
-		self.photo = try container.decodeIfPresent(PhotoMessageContent.self, forKey: .photo)
+        let contentContainer = try container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
+        switch try container.decodeIfPresent(String.self, forKey: .content) {
+		case "TEXT":
+			self.content = .text(try contentContainer.decode(TextMessageContent.self, forKey: MessageContentType.text))
+		case "PHOTO":
+			self.content = .photo(try contentContainer.decode(PhotoMessageContent.self, forKey: MessageContentType.photo))
 		default:
-			break
+			self.content = nil
 		}
         self.from = try container.decodeIfPresent(FriendRef.self, forKey: .from)
     }
@@ -512,17 +864,18 @@ extension Attachment: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.title = try container.decodeIfPresent(String.self, forKey: .title)
-        let contentType = try container.decodeIfPresent(String.self, forKey: .content)
-        let content = try container.nestedContainer(keyedBy: AttachmentContentType.self, forKey: .content)
-		switch contentType {
-		case AttachmentContent.imoji.rawValue:
-		self.imoji = try container.decodeIfPresent(ImojiAttachment.self, forKey: .imoji)
-		case AttachmentContent.gram.rawValue:
-		self.gram = try container.decodeIfPresent(GramAttachment.self, forKey: .gram)
-		case AttachmentContent.upload.rawValue:
-		self.upload = try container.decodeIfPresent(UploadAttachment.self, forKey: .upload)
+        let contentContainer = try container.nestedContainer(keyedBy: AttachmentContentType.self, forKey: .content)
+        switch try container.decodeIfPresent(String.self, forKey: .content) {
+		case "PLACEHOLDER":
+			self.content = .placeholder
+		case "IMOJI":
+			self.content = .imoji(try contentContainer.decode(ImojiAttachment.self, forKey: AttachmentContentType.imoji))
+		case "GRAM":
+			self.content = .gram(try contentContainer.decode(GramAttachment.self, forKey: AttachmentContentType.gram))
+		case "UPLOAD":
+			self.content = .upload(try contentContainer.decode(UploadAttachment.self, forKey: AttachmentContentType.upload))
 		default:
-			break
+			self.content = nil
 		}
     }
 
@@ -559,6 +912,79 @@ extension Friend: Decodable {
 }
 
 
+extension UserRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+extension LocalizedStringRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+extension InstantGramRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+extension MessageRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+extension AttachmentRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+extension FriendRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+
 extension Avatar: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -571,34 +997,6 @@ extension Avatar: Decodable {
 		case url = "url"
 		case color = "color"
     }
-}
-
-extension SendMessageRequest: Decodable {
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.to = try container.decodeIfPresent(FriendRef.self, forKey: .to)
-        let contentType = try container.decodeIfPresent(String.self, forKey: .content)
-        let content = try container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
-		switch contentType {
-		case MessageContent.text.rawValue:
-		self.text = try container.decodeIfPresent(TextMessageContent.self, forKey: .text)
-		case MessageContent.photo.rawValue:
-		self.photo = try container.decodeIfPresent(PhotoMessageContent.self, forKey: .photo)
-		default:
-			break
-		}
-    }
-
-	// Coding keys for SendMessageRequest.
-    enum CodingKeys: String, CodingKey {
-		case to = "to"
-		case content = "content"
-    }
-    // Coding keys for the MessageContent enum’s associated value.
-	enum MessageContentType: String, CodingKey {
-		case text = "text"
-		case photo = "photo"
-	}
 }
 
 extension ImojiAttachment: Decodable {
@@ -681,10 +1079,41 @@ extension PhotoMessageContent: Decodable {
 
 
 
+// MARK: - Client
 
-typealias Source = FirebaseFirestore.FirestoreSource
+class FiremodelClient {
+    private let firestore: FirebaseFirestore.Firestore
 
-// MARK: - Protocols
+	// Deprecated. Please use DI initializer instead.
+    static func dev() -> FiremodelClient {
+        let firestore = FirebaseFirestore.Firestore.firestore()
+        return FiremodelClient(firestore: firestore)
+    }
+
+    init(firestore: FirebaseFirestore.Firestore) {
+        self.firestore = firestore
+    }
+
+    // MARK: - Root Collections
+
+    func users() -> UserCollectionRef {
+        return UserCollectionRef(ref: firestore.collection("users"), client: self)
+    }
+
+    func user(id: String) -> UserRef {
+        return UserRef(ref: firestore.collection("users").document(id), client: self)
+    }
+
+    func localizedStrings() -> LocalizedStringCollectionRef {
+        return LocalizedStringCollectionRef(ref: firestore.collection("localized_string"), client: self)
+    }
+
+    func localizedString(id: String) -> LocalizedStringRef {
+        return LocalizedStringRef(ref: firestore.collection("localized_string").document(id), client: self)
+    }
+}
+
+// MARK: - Subscription Helpers
 
 protocol FiremodelDocumentSubscriber {
     associatedtype DocumentType
@@ -700,6 +1129,17 @@ protocol FiremodelCollectionSubscriber {
     associatedtype DocumentType
     func subscribe(withQuery applyQuery: ((Query) -> Query)?,
                    receiver publish: @escaping (FiremodelCollectionEvent<DocumentType>) -> Void) -> FiremodelUnsubscriber
+}
+
+enum FiremodelCollectionEvent<T> {
+    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
+    case error(Error)
+}
+
+struct FiremodelChange<T> {
+    let document: T
+    let oldIndex: UInt
+    let newIndex: UInt
 }
 
 class FiremodelUnsubscriber {
@@ -727,44 +1167,13 @@ class FiremodelUnsubscriber {
     }
 }
 
-enum FiremodelCollectionEvent<T> {
-    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
-    case error(Error)
-}
 
-struct FiremodelChange<T> {
-    let document: T
-    let oldIndex: UInt
-    let newIndex: UInt
-}
+// MARK: - Decoding Helpers
 
-// MARK: - Client
+extension FiremodelClient {
 
-class FiremodelClient {
-    private let firestore: FirebaseFirestore.Firestore
 
-    static func dev() -> FiremodelClient {
-        let firestore = FirebaseFirestore.Firestore.firestore()
-        return FiremodelClient(firestore: firestore)
-    }
-
-    init(firestore: FirebaseFirestore.Firestore) {
-        self.firestore = firestore
-    }
-
-    // MARK: - Root Collections
-
-    func users() -> UserCollectionRef {
-        return UserCollectionRef(ref: firestore.collection("users"), client: self)
-    }
-
-    func user(id: String) -> UserRef {
-        return users().user(id: id)
-    }
-
-    // MARK: - Decoding
-
-    func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
+    fileprivate func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
         let decoder = DocumentSnapshotDecoder(documentSnapshot: snapshot,
                                               codingPath: [],
                                               userInfo: [firestoreClientDecodingKey: self])
@@ -772,9 +1181,14 @@ class FiremodelClient {
         return try type.init(from: decoder)
     }
 
-    func rawDocumentReference(_ path: String) -> DocumentReference {
+    fileprivate func rawDocumentReference(_ path: String) -> DocumentReference {
         return self.firestore.document(path)
     }
+}
+
+enum FiremodelError: Error {
+    case typeError
+    case internalError
 }
 
 fileprivate let firestoreClientDecodingKey = CodingUserInfoKey(rawValue: "firestore")!
@@ -1124,8 +1538,6 @@ struct DocumentSnapshotKeyedDecodingContainerProtocol<Key>: KeyedDecodingContain
     }
 }
 
-
-// MARK: - Protocols 
 
 // MARK: - Standard Types
 

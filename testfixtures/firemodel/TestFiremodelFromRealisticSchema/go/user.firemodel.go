@@ -3,6 +3,7 @@
 package firemodel
 
 // [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values.
+// Firestore document location: /users/{user_id}
 type User struct {
 	Username    string  `firestore:"username,omitempty"`
 	DisplayName string  `firestore:"displayName,omitempty"`

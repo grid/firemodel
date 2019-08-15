@@ -439,6 +439,34 @@ struct UserRef {
     }
 }
 
+extension UserRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<User>) -> Void) -> Unsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(User.self, from: change.document)
+                    publish(.snapshot(model))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return Unsubscriber(listenerRegistration: registration)
+    }
+}
+
 class Unsubscriber {
     private var listenerRegistration: ListenerRegistration?
     private var unsubscribeOnDeinit: Bool = true

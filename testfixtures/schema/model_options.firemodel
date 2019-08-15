@@ -1,3 +1,0 @@
-model AnnotatedModel: "/annotated_models/{annotated_model_id}" {
-	option lang.opt = "great";
-}

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		16C55C2B230481B70090E640 /* Firemodel.gen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C55C2A230481B70090E640 /* Firemodel.gen.swift */; };
+		16C55C2D2304E2530090E640 /* Firemodel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C55C2C2304E2520090E640 /* Firemodel.swift */; };
 		16D7A1AB22EB767B00D686C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */; };
 		16D7A1AD22EB767C00D686C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A1AC22EB767C00D686C0 /* Assets.xcassets */; };
 		16D7A1B022EB767C00D686C0 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 16D7A1AE22EB767C00D686C0 /* MainMenu.xib */; };
@@ -18,14 +18,14 @@
 		161B1C6C22F38E6100B72C0A /* Firemodel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Firemodel.h; sourceTree = "<group>"; };
 		161B1C6D22F38E6100B72C0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		16690F6B22F9FC620090639D /* Decoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Decoding.swift; sourceTree = "<group>"; };
-		16C55C2A230481B70090E640 /* Firemodel.gen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Firemodel.gen.swift; sourceTree = "<group>"; };
+		16C55C2C2304E2520090E640 /* Firemodel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Firemodel.swift; path = ../../../../testfixtures/firemodel/TestFiremodelFromRealisticSchema/swift/Firemodel.swift; sourceTree = "<group>"; };
 		16D7A1A822EB767B00D686C0 /* Firemodel Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Firemodel Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		16D7A1AC22EB767C00D686C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		16D7A1AF22EB767C00D686C0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		16D7A1B122EB767C00D686C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		16D7A1B222EB767C00D686C0 /* Firemodel_Demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Firemodel_Demo.entitlements; sourceTree = "<group>"; };
-		16D7A1B622EB790D00D686C0 /* Firemodel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Firemodel.swift; sourceTree = "<group>"; };
+		16D7A1B622EB790D00D686C0 /* Firemodel.handcrafted.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Firemodel.handcrafted.swift; sourceTree = "<group>"; };
 		16D7A1B822EC316D00D686C0 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		4604533B5E962C05460476DC /* Pods_Firemodel_Demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Firemodel_Demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		67F2C801385E66AF99988806 /* Pods-Firemodel Demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Firemodel Demo.debug.xcconfig"; path = "Target Support Files/Pods-Firemodel Demo/Pods-Firemodel Demo.debug.xcconfig"; sourceTree = "<group>"; };
@@ -75,13 +75,13 @@
 		16D7A1A922EB767B00D686C0 /* Firemodel Demo */ = {
 			isa = PBXGroup;
 			children = (
+				16C55C2C2304E2520090E640 /* Firemodel.swift */,
 				16D7A1AA22EB767B00D686C0 /* AppDelegate.swift */,
-				16D7A1B622EB790D00D686C0 /* Firemodel.swift */,
+				16D7A1B622EB790D00D686C0 /* Firemodel.handcrafted.swift */,
 				16690F6B22F9FC620090639D /* Decoding.swift */,
 				16D7A1B822EC316D00D686C0 /* Models.swift */,
 				16D7A1AC22EB767C00D686C0 /* Assets.xcassets */,
 				16D7A1AE22EB767C00D686C0 /* MainMenu.xib */,
-				16C55C2A230481B70090E640 /* Firemodel.gen.swift */,
 				16D7A1B122EB767C00D686C0 /* Info.plist */,
 				16D7A1B222EB767C00D686C0 /* Firemodel_Demo.entitlements */,
 			);
@@ -237,7 +237,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16D7A1AB22EB767B00D686C0 /* AppDelegate.swift in Sources */,
-				16C55C2B230481B70090E640 /* Firemodel.gen.swift in Sources */,
+				16C55C2D2304E2530090E640 /* Firemodel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

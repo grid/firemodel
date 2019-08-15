@@ -18,20 +18,16 @@ func TestParseSchema(t *testing.T) {
 	}{
 		{
 			name: "empty",
-			want: &Schema{
-				Options: SchemaOptions{},
-			},
+			want: &Schema{},
 		},
 		{
 			name: "empty_model",
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
-						Name:    "Empty",
-						Options: SchemaModelOptions{},
+						Name: "Empty",
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -40,16 +36,17 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name: "SimpleModel",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/models/{model_id}",
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "foo",
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -115,10 +112,8 @@ func TestParseSchema(t *testing.T) {
 								Type: &URL{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -180,7 +175,6 @@ func TestParseSchema(t *testing.T) {
 								Type: &Map{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 				},
 				Structs: []*SchemaStruct{
@@ -188,7 +182,6 @@ func TestParseSchema(t *testing.T) {
 						Name: "TestStruct",
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -203,10 +196,8 @@ func TestParseSchema(t *testing.T) {
 								Type: &URL{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -263,10 +254,8 @@ func TestParseSchema(t *testing.T) {
 								},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -328,7 +317,6 @@ func TestParseSchema(t *testing.T) {
 						},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -347,7 +335,6 @@ func TestParseSchema(t *testing.T) {
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "Component",
@@ -357,7 +344,6 @@ func TestParseSchema(t *testing.T) {
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "Machine",
@@ -367,49 +353,8 @@ func TestParseSchema(t *testing.T) {
 								Type: &Reference{T: &SchemaModel{Name: "Operator"}},
 							},
 						},
-						Options: SchemaModelOptions{},
-						Collections: []*SchemaNestedCollection{
-							{
-								Name: "components",
-								Type: &SchemaModel{Name: "Component"},
-							},
-						},
 					},
 				},
-				Options: SchemaOptions{},
-			},
-		},
-		{
-			name: "language_options",
-			want: &Schema{
-				Options: SchemaOptions{
-					"langname": {
-						"optname": "optval",
-					},
-					"otherlang": {
-						"str":       "hey",
-						"number":    "1",
-						"truth":     "true",
-						"falseness": "false",
-						"nullness":  "null",
-					},
-				},
-			},
-		},
-		{
-			name: "model_options",
-			want: &Schema{
-				Models: []*SchemaModel{
-					{
-						Name: "AnnotatedModel",
-						Options: SchemaModelOptions{
-							"lang": {
-								"opt": "great",
-							},
-						},
-					},
-				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -424,7 +369,6 @@ func TestParseSchema(t *testing.T) {
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "CamelCase",
@@ -434,7 +378,6 @@ func TestParseSchema(t *testing.T) {
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "TitleCase",
@@ -444,7 +387,6 @@ func TestParseSchema(t *testing.T) {
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 					{
 						Name: "SnakeCase",
@@ -454,10 +396,8 @@ func TestParseSchema(t *testing.T) {
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -491,7 +431,6 @@ func TestParseSchema(t *testing.T) {
 						},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
@@ -507,15 +446,26 @@ func TestParseSchema(t *testing.T) {
 								Type: &String{},
 							},
 						},
-						Options: SchemaModelOptions{},
 					},
 				},
-				Options: SchemaOptions{},
 			},
 		},
 		{
 			name: "comments",
 			want: &Schema{
+				Models: []*SchemaModel{
+					{
+						Name:    "FooModel",
+						Comment: "Model Comments.",
+						Fields: []*SchemaField{
+							{
+								Name:    "cool_field",
+								Comment: "Field comment",
+								Type:    &String{},
+							},
+						},
+					},
+				},
 				Structs: []*SchemaStruct{
 					{
 						Name:    "Foo",
@@ -540,7 +490,19 @@ func TestParseSchema(t *testing.T) {
 						},
 					},
 				},
-				Options: SchemaOptions{},
+				Enums: []*SchemaEnum{
+					{
+						Name:    "FooEnum",
+						Comment: "Enum Comments.",
+						Values: []*SchemaEnumValue{
+							{
+								Name:            "one",
+								Comment:         "Case comment",
+								AssociatedValue: nil,
+							},
+						},
+					},
+				},
 			},
 		},
 	}

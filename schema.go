@@ -44,7 +44,6 @@ func (c *configSchemaCompiler) compileConfig() (*Schema, error) {
 		Enums:   c.compileEnums(),
 		Structs: c.compileStructs(),
 		Models:  c.compileModels(),
-		Options: c.compileLanguageOptions(),
 	}, nil
 }
 
@@ -80,7 +79,6 @@ func (c *configSchemaCompiler) precompileModelTypes() error {
 			err := errors.Errorf("firemodel/schema: can't name model %s, %s is a reserved word.", v.Model.Identifier, v.Model.Identifier)
 			return err
 		}
-
 		c.models = append(c.models, &SchemaModel{
 			Name: strcase.ToCamel(string(v.Model.Identifier)),
 		})
@@ -118,12 +116,21 @@ func (c *configSchemaCompiler) compileModels() (out []*SchemaModel) {
 			panic(err)
 		}
 
+		modelPathTemplate := SchemaModelPathTemplate{
+			Pattern: v.Model.PathTemplate.Pattern,
+		}
+		for _, part := range v.Model.PathTemplate.CollectionParts {
+			modelPathTemplate.CollectionParts = append(modelPathTemplate.CollectionParts,
+				SchemaModelPathTemplatePart{
+					CollectionName:      part.CollectionName,
+					DocumentPlaceholder: part.DocumentPlaceholder,
+				})
+		}
 		out = append(out, &SchemaModel{
-			Name:        strcase.ToCamel(string(v.Model.Identifier)),
-			Comment:     v.Comment,
-			Fields:      c.compileModelFields(v.Model.Elements),
-			Collections: c.compileCollections(v.Model.Elements),
-			Options:     c.compileModelOptions(v.Model.Elements),
+			Name:          strcase.ToCamel(string(v.Model.Identifier)),
+			Comment:       v.Comment,
+			Fields:        c.compileModelFields(v.Model.Elements),
+			FirestorePath: modelPathTemplate,
 		})
 	}
 	return
@@ -159,25 +166,6 @@ func (c *configSchemaCompiler) compileEnums() (out []*SchemaEnum) {
 			Comment: v.Comment,
 			Values:  c.enumValuesToConfig(v.Enum.Values),
 		})
-	}
-	return
-}
-
-func (c *configSchemaCompiler) compileLanguageOptions() (out SchemaOptions) {
-	out = SchemaOptions{}
-	for _, v := range c.ast.Types {
-		opt := v.Option
-		if opt == nil {
-			continue
-		}
-		if out[opt.Language] == nil {
-			out[opt.Language] = map[string]string{}
-		}
-		if opt.Key.IsReserved() {
-			err := errors.Errorf("firemodel/schema: can't use option key %s, %s is a reserved word.", opt.Key, opt.Key)
-			panic(err)
-		}
-		out[opt.Language][string(opt.Key)] = opt.Value
 	}
 	return
 }
@@ -234,29 +222,6 @@ func (c *configSchemaCompiler) compileStructFields(elements []*ast.ASTStructElem
 			Name:    strcase.ToSnake(field.Name),
 			Comment: field.Comment,
 			Type:    c.compileFieldType(field.Type),
-		})
-	}
-	return
-}
-
-func (c *configSchemaCompiler) compileCollections(elements []*ast.ASTModelElement) (out []*SchemaNestedCollection) {
-	for _, element := range elements {
-		field := element.Field
-		if field == nil {
-			continue // element is not a Field
-		}
-		if !field.Type.Base.IsCollection() {
-			continue // handled in compileFields
-		}
-		modelType, ok := c.assertModelType(field.Type.Generic)
-		if !ok {
-			err := errors.Errorf("invalid collection type: %s", field.Type)
-			panic(err)
-		}
-		out = append(out, &SchemaNestedCollection{
-			Name:    field.Name,
-			Comment: field.Comment,
-			Type:    modelType,
 		})
 	}
 	return
@@ -366,23 +331,4 @@ func (c *configSchemaCompiler) assertEnumType(astType *ast.ASTFieldType) (*Schem
 
 	}
 	return nil, false
-}
-
-func (c *configSchemaCompiler) compileModelOptions(elements []*ast.ASTModelElement) SchemaModelOptions {
-	out := SchemaModelOptions{}
-	for _, element := range elements {
-		option := element.Option
-		if option == nil {
-			continue
-		}
-		if out[option.Language] == nil {
-			out[option.Language] = map[string]string{}
-		}
-		if option.Key.IsReserved() {
-			err := errors.Errorf("firemodel/schema: can't use option key %s, %s is a reserved word.", option.Key, option.Key)
-			panic(err)
-		}
-		out[option.Language][string(option.Key)] = option.Value
-	}
-	return out
 }

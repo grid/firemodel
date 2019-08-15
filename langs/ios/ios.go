@@ -2,6 +2,7 @@ package ios
 
 import (
 	"fmt"
+	"github.com/jinzhu/inflection"
 	"text/template"
 
 	"github.com/iancoleman/strcase"
@@ -16,21 +17,21 @@ func init() {
 
 type Modeler struct{}
 
-func (m *Modeler) Model(schema *firemodel.Schema, sourceCoder firemodel.SourceCoder) error {
+func (m *Modeler) Model(schema *firemodel.Schema, options firemodel.GenOptions, sourceCoder firemodel.SourceCoder) error {
 	f, err := sourceCoder.NewFile("Firemodel.swift")
 	if err != nil {
 		return errors.Wrapf(err, "firemodel/ios: create swift file")
 	}
 	defer f.Close()
 
-	if err := tpl.Execute(f, schema); err != nil {
+	if err := newTpl(schema).Execute(f, schema); err != nil {
 		return errors.Wrapf(err, "firemodel/ios: generating swift")
 	}
 	return nil
 }
 
-var (
-	tpl = template.Must(template.
+func newTpl(schema *firemodel.Schema) *template.Template {
+	tpl := template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
 			"firemodelVersion":             func() string { return version.Version },
@@ -42,13 +43,18 @@ var (
 			"filterFieldsEnumsOnly":        filterFieldsEnumsOnly,
 			"asEnum":                       asEnum,
 			"asArray":                      asArray,
+			"asMap":                        asMap,
 			"hasAnyAssociatedValues":       hasAnyAssociatedValues,
 			"filterFieldsNonEnumsOnly":     filterFieldsNonEnumsOnly,
 			"filterFieldsStructsOnly":      filterFieldsStructsOnly,
 			"filterFieldsStructArraysOnly": filterFieldsStructArraysOnly,
 			"filterFieldsEnumArraysOnly":   filterFieldsEnumArraysOnly,
 			"isDecodingType":               isDecodingType,
-			//"firestoreModelName":           firestoreModelName,
+			"pluralize":                    inflection.Plural,
+			"DirectSubcollectionsOfModel":  schema.DirectSubcollectionsOfModel,
+			"RootModels":                   schema.RootModels,
+			"ParentModel":                  schema.ParentModel,
+			"lastTemplatePart":             lastTemplatePart,
 		}).
 		Parse(file),
 	)
@@ -57,8 +63,14 @@ var (
 	_ = template.Must(tpl.New("client").Parse(client))
 	_ = template.Must(tpl.New("decoder").Parse(decoder))
 	_ = template.Must(tpl.New("coding").Parse(coding))
+	_ = template.Must(tpl.New("refcoding").Parse(refcoding))
 	_ = template.Must(tpl.New("enum").Parse(enum))
-)
+	return tpl
+}
+
+func lastTemplatePart(xs []firemodel.SchemaModelPathTemplatePart) firemodel.SchemaModelPathTemplatePart {
+	return xs[len(xs)-1]
+}
 
 func isDecodingType(codingType string, in *firemodel.SchemaField) bool {
 	switch codingType {
@@ -72,7 +84,6 @@ func isDecodingType(codingType string, in *firemodel.SchemaField) bool {
 			*firemodel.Timestamp,
 			*firemodel.Bytes,
 			*firemodel.Reference,
-			*firemodel.Map,
 			*firemodel.URL,
 			*firemodel.Struct,
 			*firemodel.File:
@@ -88,6 +99,11 @@ func isDecodingType(codingType string, in *firemodel.SchemaField) bool {
 		case *firemodel.Array:
 			return true
 		}
+	case "decodeMap":
+		switch in.Type.(type) {
+		case *firemodel.Map:
+			return true
+		}
 	}
 	return false
 }
@@ -98,6 +114,10 @@ func asEnum(in firemodel.SchemaFieldType) *firemodel.SchemaEnum {
 
 func asArray(in firemodel.SchemaFieldType) *firemodel.Array {
 	return in.(*firemodel.Array)
+}
+
+func asMap(in firemodel.SchemaFieldType) *firemodel.Map {
+	return in.(*firemodel.Map)
 }
 
 func hasAnyAssociatedValues(field firemodel.SchemaFieldType) bool {
@@ -276,15 +296,6 @@ func refType(schemaModel *firemodel.SchemaModel) string {
 	return fmt.Sprintf("%sRef", strcase.ToCamel(schemaModel.Name))
 }
 
-func firestoreModelName(model firemodel.SchemaModel) string {
-	modelName, err := model.Options.GetFirestoreModelName()
-	if err != nil {
-		panic(err)
-	}
-
-	return modelName
-}
-
 func toSwiftFieldName(in string) string {
 	lower := strcase.ToLowerCamel(in)
 	switch lower {
@@ -324,19 +335,17 @@ import FirebaseFirestore
 {{range .Models -}}
 {{template "coding" .}}
 {{- end}}
+{{range .Models -}}
+{{template "refcoding" .}}
+{{- end}}
 {{range .Structs -}}
 {{template "coding" .}}
 {{- end}}
-{{/* range .Enums -}}
-{{template "coding" .}}
-{{- end */}}
 
 {{template "client" .}}
 
 // MARK: - Decoder
 {{template "decoder" .}}
-
-// MARK: - Protocols 
 
 // MARK: - Standard Types
 
@@ -369,25 +378,28 @@ extension {{.Name | toCamel}}: Decodable {
 		{{- if . | isDecodingType "decodeIfPresent" }}
         self.{{.Name | toSwiftFieldName}} = try container.decodeIfPresent({{.Type | toSwiftType false}}.self, forKey: .{{.Name | toSwiftFieldName}})
 		{{- else if . | isDecodingType "decodeEnum" }}
-        let {{.Name | toSwiftFieldName}}Type = try container.decodeIfPresent(String.self, forKey: .{{.Name | toSwiftFieldName}})
-        let {{ .Name | toSwiftFieldName }} = try container.nestedContainer(keyedBy: {{.Type | toSwiftType false}}Type.self, forKey: .{{.Name | toSwiftFieldName}})
 		{{- if .Type | hasAnyAssociatedValues }}
-		switch {{.Name | toSwiftFieldName}}Type {
+        let {{ .Name | toSwiftFieldName }}Container = try container.nestedContainer(keyedBy: {{.Type | toSwiftType false}}Type.self, forKey: .{{.Name | toSwiftFieldName}})
+		{{- end }}
+        switch try container.decodeIfPresent(String.self, forKey: .{{.Name | toSwiftFieldName}}) {
         {{- $enum := .Type | asEnum}}
 		{{- range $enum.Values }}
+		case "{{ .Name | toScreamingSnake }}":
 		{{- if .AssociatedValue }}
-		case {{ $field.Type | toSwiftType false }}.{{ .Name | toSwiftFieldName }}.rawValue:
-		self.{{.Name}} = try container.decodeIfPresent({{ .AssociatedValue | toSwiftType false }}.self, forKey: .{{ .Name | toSwiftFieldName }})
+			self.{{ $field.Name | toSwiftFieldName }} = .{{.Name | toSwiftFieldName}}(try {{ $field.Name | toSwiftFieldName }}Container.decode({{ .AssociatedValue | toSwiftType false }}.self, forKey: {{ $field.Type | toSwiftType false }}Type.{{ .Name | toSwiftFieldName }}))
+		{{- else }}
+			self.{{ $field.Name | toSwiftFieldName }} = .{{.Name | toSwiftFieldName}}
   		{{- end }}
   		{{- end }}
 		default:
-			break
+			self.{{ $field.Name | toSwiftFieldName }} = nil
 		}
-		{{- end -}}
 		{{- else if . | isDecodingType "decodeArray" }}
-        self.{{ .Name | toSwiftFieldName }} =  try container.decodeIfPresent({{ .Type | asArray | toSwiftType true}})
+        self.{{ .Name | toSwiftFieldName }} =  try container.decode({{ .Type | asArray | toSwiftType true}}.self, forKey: .{{ .Name | toSwiftFieldName }})
+		{{- else if . | isDecodingType "decodeMap" }}
+        self.{{ .Name | toSwiftFieldName }} =  try container.decode({{ .Type | asMap | toSwiftType true}}.self, forKey: .{{ .Name | toSwiftFieldName }})
 		{{else -}}
-        self.{{.Name | toSwiftFieldName}} = try container.decode me
+        self.{{.Name | toSwiftFieldName}} = /* TODO: {{ .Type }} decoding */
 		{{end -}}
 		{{- end}}
     }
@@ -409,6 +421,20 @@ extension {{.Name | toCamel}}: Decodable {
 	}
 	{{- end }}
 	{{- end }}
+}
+`
+
+	refcoding = `
+extension {{.Name | toCamel}}Ref: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
 }
 `
 
@@ -757,9 +783,36 @@ struct DocumentSnapshotKeyedDecodingContainerProtocol<Key>: KeyedDecodingContain
 `
 
 	client = `
-typealias Source = FirebaseFirestore.FirestoreSource
+// MARK: - Client
 
-// MARK: - Protocols
+class FiremodelClient {
+    private let firestore: FirebaseFirestore.Firestore
+
+	// Deprecated. Please use DI initializer instead.
+    static func dev() -> FiremodelClient {
+        let firestore = FirebaseFirestore.Firestore.firestore()
+        return FiremodelClient(firestore: firestore)
+    }
+
+    init(firestore: FirebaseFirestore.Firestore) {
+        self.firestore = firestore
+    }
+
+    // MARK: - Root Collections
+
+	{{- range RootModels }}
+
+    func {{ .Name | toSwiftFieldName | pluralize }}() -> {{ .Name }}CollectionRef {
+        return {{ .Name }}CollectionRef(ref: firestore.collection("{{ (lastTemplatePart .FirestorePath.CollectionParts).CollectionName  }}"), client: self)
+    }
+
+    func {{ .Name | toSwiftFieldName }}(id: String) -> {{ .Name }}Ref {
+        return {{ .Name }}Ref(ref: firestore.collection("{{ (lastTemplatePart .FirestorePath.CollectionParts).CollectionName  }}").document(id), client: self)
+    }
+	{{- end }}
+}
+
+// MARK: - Subscription Helpers
 
 protocol FiremodelDocumentSubscriber {
     associatedtype DocumentType
@@ -775,6 +828,17 @@ protocol FiremodelCollectionSubscriber {
     associatedtype DocumentType
     func subscribe(withQuery applyQuery: ((Query) -> Query)?,
                    receiver publish: @escaping (FiremodelCollectionEvent<DocumentType>) -> Void) -> FiremodelUnsubscriber
+}
+
+enum FiremodelCollectionEvent<T> {
+    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
+    case error(Error)
+}
+
+struct FiremodelChange<T> {
+    let document: T
+    let oldIndex: UInt
+    let newIndex: UInt
 }
 
 class FiremodelUnsubscriber {
@@ -802,44 +866,13 @@ class FiremodelUnsubscriber {
     }
 }
 
-enum FiremodelCollectionEvent<T> {
-    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
-    case error(Error)
-}
 
-struct FiremodelChange<T> {
-    let document: T
-    let oldIndex: UInt
-    let newIndex: UInt
-}
+// MARK: - Decoding Helpers
 
-// MARK: - Client
+extension FiremodelClient {
 
-class FiremodelClient {
-    private let firestore: FirebaseFirestore.Firestore
 
-    static func dev() -> FiremodelClient {
-        let firestore = FirebaseFirestore.Firestore.firestore()
-        return FiremodelClient(firestore: firestore)
-    }
-
-    init(firestore: FirebaseFirestore.Firestore) {
-        self.firestore = firestore
-    }
-
-    // MARK: - Root Collections
-
-    func users() -> UserCollectionRef {
-        return UserCollectionRef(ref: firestore.collection("users"), client: self)
-    }
-
-    func user(id: String) -> UserRef {
-        return users().user(id: id)
-    }
-
-    // MARK: - Decoding
-
-    func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
+    fileprivate func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
         let decoder = DocumentSnapshotDecoder(documentSnapshot: snapshot,
                                               codingPath: [],
                                               userInfo: [firestoreClientDecodingKey: self])
@@ -847,32 +880,44 @@ class FiremodelClient {
         return try type.init(from: decoder)
     }
 
-    func rawDocumentReference(_ path: String) -> DocumentReference {
+    fileprivate func rawDocumentReference(_ path: String) -> DocumentReference {
         return self.firestore.document(path)
     }
+}
+
+enum FiremodelError: Error {
+    case typeError
+    case internalError
 }
 
 fileprivate let firestoreClientDecodingKey = CodingUserInfoKey(rawValue: "firestore")!
 `
 
 	refs = `
-struct {{ .Name | toCamel }}Ref: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
+struct {{ .Name | toCamel }}CollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
-	// TODO: Parent refs
+	{{- with ParentModel . }}
+
+	// MARK: - Parent Ref
+
+    func parent() -> {{ .Name }}Ref {
+        return {{ .Name }}Ref(ref: ref.parent!, client: client)
+    }
+	{{- end }}
+
+
+	// MARK: - Child Ref
+
+    func {{ .Name | toSwiftFieldName }}(id: String) -> {{ .Name }}Ref {
+        return {{ .Name }}Ref(ref: ref.document(id), client: client)
+    }
 }
 
-struct {{ .Name | toCamel }}CollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
-
+extension {{ .Name | toCamel }}CollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
-                   receiver publish: @escaping (FiremodelCollectionEvent<{{.Name | toCamel}}>) -> Void) -> FiremodelUnsubscriber {
+                   receiver publish: @escaping (FiremodelCollectionEvent<{{.Name }}>) -> Void) -> FiremodelUnsubscriber {
 
         let registration = (applyQuery?(ref) ?? ref)
             .addSnapshotListener { (snap: QuerySnapshot?, error: Error?) in
@@ -921,6 +966,59 @@ struct {{ .Name | toCamel }}CollectionRef: FiremodelCollectionSubscriber {
         return FiremodelUnsubscriber(listenerRegistration: registration)
     }
 }
+
+struct {{ .Name | toCamel }}Ref {
+	fileprivate let ref: DocumentReference
+	fileprivate let client: FiremodelClient
+
+	// MARK: - Parent Ref
+
+    func parent() -> {{ .Name }}CollectionRef {
+        return {{ .Name }}CollectionRef(ref: ref.parent, client: client)
+    }
+
+	{{- with $directSubcollections := . | DirectSubcollectionsOfModel }}
+
+	// MARK: -  Subcollection Refs
+
+	{{- range $directSubcollections }}
+
+    func {{ .Name | toSwiftFieldName | pluralize }}() -> {{ .Name }}CollectionRef {
+        return {{ .Name }}CollectionRef(ref: ref.collection("{{ (lastTemplatePart .FirestorePath.CollectionParts ).CollectionName  }}"), client: client)
+    }
+
+	{{- end }}
+	{{- end }}
+}
+
+extension {{ .Name | toCamel }}Ref: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<{{.Name}}>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode({{.Name}}.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
 `
 
 	// CUSTOM COLLECTIONS

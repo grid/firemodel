@@ -2,7 +2,7 @@
 import { firestore } from 'firebase';
 
 // tslint:disable-next-line:no-namespace
-export namespace firemodel {
+export namespace  {
   type URL = string;
 
   export interface IFile {
@@ -10,84 +10,3 @@ export namespace firemodel {
     mimeType: string;
     name: string;
   }
-
-  /** [unchanged] Enums provide type safety around string enumerations. Enums are stored in firestore as capitalized strings. */
-  export enum Audience {
-    global = 'GLOBAL',
-    friends = 'FRIENDS',
-  }
-
-  /** for enum values other than the active one are not written to firestore. */
-  export enum AttachmentContent {
-    /** e.g. for an Attachment, written as `content = "PLACEHOLDER"` */
-    placeholder = 'PLACEHOLDER',
-    /** e.g. for an Attachment, written as `content = "IMOJI", content.imoji = #BYTES#` */
-    imoji = 'IMOJI',
-    /** e.g. for an Attachment, written as `content = "IMOJI", content.imoji = #BYTES#` */
-    gram = 'GRAM',
-    /** e.g. for an Attachment, written as `content = "UPLOAD", content.upload.token = "oijasdf", content.upload.etc = the_rest` */
-    upload = 'UPLOAD',
-  }
-  export enum MessageContent {
-    text = 'TEXT',
-    photo = 'PHOTO',
-  }
-
-  /** firestore client libraries. */
-  export interface IAvatar {
-    url?: URL;
-    color?: string;
-  }
-  export interface ISendMessageRequest {
-    to?: firestore.DocumentReference<IFriend>;
-    content?: MessageContent;
-  }
-  export interface IImojiAttachment {
-    coolPic?: firestore.Blob;
-  }
-  export interface IGramAttachment {
-    ref?: string;
-  }
-  export interface IUploadAttachment {
-    title?: string;
-    src?: URL;
-  }
-  export interface IUpload {
-    url?: URL;
-    mimeType?: string;
-  }
-  export interface ITextMessageContent {
-    message?: string;
-  }
-  export interface IPhotoMessageContent {
-    caption?: string;
-    url?: URL;
-  }
-
-  /** [new] It is now assumed that all fields of all types (other than enums associated values) are optional. In order to facilitate queries on missing fields, missing fields are saved in firestore as explicit null values. */
-  export interface IUser {
-    username?: string;
-    displayName?: string;
-    avatar?: IAvatar;
-  }
-  export interface IGram {
-    sharedWith?: Audience;
-    photoUrl?: URL;
-    description?: string;
-    tags?: string[];
-  }
-  export interface IMessage {
-    content?: MessageContent;
-    from?: firestore.DocumentReference<IFriend>;
-  }
-  export interface IAttachment {
-    title?: string;
-    content?: AttachmentContent;
-  }
-  export interface IFriend {
-    username?: string;
-    displayName?: string;
-    avatar?: IAvatar;
-    friendsSinice?: firestore.Timestamp;
-  }
-}

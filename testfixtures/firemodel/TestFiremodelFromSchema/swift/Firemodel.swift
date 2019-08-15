@@ -70,7 +70,7 @@ struct TestModelRef: FiremodelDocumentSubscriber {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
+	// TODO: Subcollection refs.
 	// TODO: Parent refs
 }
 
@@ -136,7 +136,7 @@ struct TestTimestampsRef: FiremodelDocumentSubscriber {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
+	// TODO: Subcollection refs.
 	// TODO: Parent refs
 }
 
@@ -202,7 +202,7 @@ struct TestRef: FiremodelDocumentSubscriber {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs
+	// TODO: Subcollection refs.
 	// TODO: Parent refs
 }
 

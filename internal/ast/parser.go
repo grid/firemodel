@@ -78,7 +78,6 @@ type ASTElement struct {
 	Comment   string        `parser:"( @Comment )?"`
 	Model     *ASTModel     `parser:"( 'model' @@"`
 	Interface *ASTInterface `parser:"| 'interface' @@"`
-	Service   *ASTService   `parser:"| 'service' @@"`
 	Enum      *ASTEnum      `parser:"| 'enum' @@"`
 	Option    *ASTOption    `parser:"| 'option' @@"`
 	Struct    *ASTStruct    `parser:"| 'struct' @@ )"`
@@ -88,11 +87,17 @@ type ASTModel struct {
 	Identifier   ASTIdentifier      `parser:"@Ident ':'"`
 	PathTemplate *ASTPathTemplate   `parser:"@@"`
 	Implements   []ASTIdentifier    `parser:"( 'implements' ( @Ident ',' )* @Ident )?"`
-	Elements     []*ASTModelElement `parser:"'{' ( @@ )* '}'"`
+	Elements     []*ASTModelElement `parser:"'{' ( @@  | Comment  )* '}'"`
+}
+
+type ASTPathTemplatePart struct {
+	CollectionName      string
+	DocumentPlaceholder string
 }
 
 type ASTPathTemplate struct {
-	pattern string
+	Pattern         string
+	CollectionParts []ASTPathTemplatePart
 }
 
 func (pt *ASTPathTemplate) Parse(lex lexer.PeekingLexer) error {
@@ -115,38 +120,32 @@ func (pt *ASTPathTemplate) Parse(lex lexer.PeekingLexer) error {
 	}
 	for k, v := range parts[1:] { // start after blank for leading /
 		switch k % 2 {
-		case 1: //collections
+		case 0: //collections
 			if !collectionPattern.MatchString(v) {
 				return errors.Errorf("bad collection %s in pattern %s", v, tok.Value)
 			}
-		case 2: // documents
+		case 1: // documents
 			if !documentTemplatePattern.MatchString(v) {
 				return errors.Errorf("bad document template %s in pattern %s", v, tok.Value)
 			}
+			pt.CollectionParts = append(pt.CollectionParts, ASTPathTemplatePart{
+				CollectionName:      parts[k],
+				DocumentPlaceholder: parts[k+1],
+			})
 		}
 	}
-	pt.pattern = tok.Value
+	pt.Pattern = tok.Value
 	return nil
 }
 
 var (
-	collectionPattern       = regexp.MustCompile(`[a-zA-Z0-9]+`)
-	documentTemplatePattern = regexp.MustCompile(`\{[a-zA-Z0-9]+\}`)
+	collectionPattern       = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+	documentTemplatePattern = regexp.MustCompile(`^{[a-zA-Z0-9_-]+}$`)
 )
 
 type ASTInterface struct {
 	Identifier ASTIdentifier      `parser:"@Ident"`
 	Elements   []*ASTModelElement `parser:"'{' ( @@ )* '}'"`
-}
-
-type ASTService struct {
-	Elements []*ASTServiceElement `parser:"'{' ( @@  | Comment )* '}'"`
-}
-
-type ASTServiceElement struct {
-	Comment    string        `parser:"{ @Comment }"`
-	Identifier string        `parser:"'rpc' @Ident"`
-	Type       *ASTFieldType `parser:"'(' @@ ')' ';' "`
 }
 
 type ASTStruct struct {
@@ -194,7 +193,7 @@ type ASTModelElement struct {
 
 type ASTEnum struct {
 	Identifier ASTIdentifier   `parser:"@Ident '{'"`
-	Values     []*ASTEnumValue `parser:"( @@ ',' )* '}'"`
+	Values     []*ASTEnumValue `parser:"( ( @@ ',' ) | Comment )* '}'"`
 }
 
 type ASTOption struct {
@@ -204,7 +203,7 @@ type ASTOption struct {
 }
 
 type ASTEnumValue struct {
-	Comment         string        `parser:"{ @Comment }"`
+	Comment         string        `parser:"( @Comment )?"`
 	Name            string        `parser:"@Ident"`
 	AssociatedValue *ASTFieldType `parser:"( '(' @@ ')')?"`
 }

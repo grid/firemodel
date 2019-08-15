@@ -20,16 +20,6 @@ struct Avatar {
   string color;
 }
 
-// This is the service. There can only be one.
-service {
-  rpc SendMessage(SendMessageRequest);
-}
-
-struct SendMessageRequest {
-  reference<Friend> to;
-  MessageContent content;
-}
-
 // Models define structures for firestore documents models. Models cannot be used as field types.
 // [new] Models can implement zero or more interfaces.
 // [new] Models can have nested models, which designate nested collections.
@@ -41,20 +31,23 @@ model User: "/users/{user_id}" implements HasToken, Author {
   Avatar avatar;
 }
 
-model Gram: "/grams/{gram_id}" {
+model LocalizedString: "/localized_string/{localized_string}" {
+    map<string> strings;
+}
+
+model InstantGram: "/users/{user_id}/instant_grams/{gram_id}" {
   Audience shared_with;
   URL photo_url;
   string description;
   array<string> tags;
 }
 
-model Message: "/messages/{message_id}" {
+model Message: "/users/{user_id}/messages/{message_id}" {
   MessageContent content;
   reference<Friend> from;
-
 }
 
-model Attachment: "/attachments/{attachment_id}" {
+model Attachment: "/users/{user_id}/attachments/{attachment_id}" {
   string title;
   AttachmentContent content;
 }

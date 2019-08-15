@@ -2,39 +2,7 @@
 
 package firemodel
 
-import (
-	"fmt"
-	"regexp"
-	"time"
-)
-
-//
-// Firestore document location: /timestamps/{test_timestamps_id}
+// Firestore document location:
 type TestTimestamps struct {
 	T int64 `firestore:"t"`
-
-	// Creation timestamp.
-	CreatedAt time.Time `firestore:"createdAt"`
-	// Update timestamp.
-	UpdatedAt time.Time `firestore:"updatedAt"`
-}
-
-// TestTimestampsPath returns the path to a particular TestTimestamps in Firestore.
-func TestTimestampsPath(testTimestampsId string) string {
-	return fmt.Sprintf("timestamps/%s", testTimestampsId)
-}
-
-// TestTimestampsRegexPath is a regex that can be use to filter out firestore events of TestTimestamps
-var TestTimestampsRegexPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?timestamps/([a-zA-Z0-9]+)$")
-
-// TestTimestampsPathStruct is a struct that contains parts of a path of TestTimestamps
-type TestTimestampsPathStruct struct {
-	TestTimestampsId string
-}
-
-// TestTimestampsPathToStruct is a function that turns a firestore path into a PathStruct of TestTimestamps
-func TestTimestampsPathToStruct(path string) *TestTimestampsPathStruct {
-	parsed := TestTimestampsRegexPath.FindStringSubmatch(path)
-	result := &TestTimestampsPathStruct{TestTimestampsId: parsed[1]}
-	return result
 }

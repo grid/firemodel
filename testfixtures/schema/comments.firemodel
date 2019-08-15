@@ -11,6 +11,23 @@ struct Foo {
     // End of struct comment.
 }
 
+// Model Comments.
+model FooModel: "/foos/{foo_id}" {
+    // Ambiguous, ignored comment.
+    // Field comment
+    string cool_field; // After field comment.
+    // End of model comment.
+}
+
+// Enum Comments.
+enum FooEnum {
+    // Ambiguous, ignored comment.
+    // Case comment
+    one, // After case comment.
+    // End of case comment.
+}
+
+
 // --------------------
 // Middle separator
 // --------------------

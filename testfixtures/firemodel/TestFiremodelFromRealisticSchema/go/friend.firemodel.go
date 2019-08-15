@@ -4,6 +4,7 @@ package firemodel
 
 import "time"
 
+// Firestore document location: /users/{user_id}/friends/{friend_id}
 type Friend struct {
 	Username      string    `firestore:"username,omitempty"`
 	DisplayName   string    `firestore:"displayName,omitempty"`

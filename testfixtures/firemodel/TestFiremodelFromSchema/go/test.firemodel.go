@@ -2,6 +2,7 @@
 
 package firemodel
 
+// Firestore document location:
 type Test struct {
 	Direction TestEnum `firestore:"direction,omitempty"`
 }

@@ -1,1 +1,3 @@
-model Empty: "/empties/{empty_id}" {}
+model Empty: "/empties/{empty_id}" {
+
+}

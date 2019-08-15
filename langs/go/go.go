@@ -2,9 +2,6 @@ package golang
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
@@ -30,8 +27,8 @@ type ClientName struct {
 	ClientName string
 }
 
-func (m *GoModeler) Model(schema *firemodel.Schema, sourceCoder firemodel.SourceCoder) error {
-	m.pkg = schema.Options.Get("go")["package"]
+func (m *GoModeler) Model(schema *firemodel.Schema, options firemodel.GenOptions, sourceCoder firemodel.SourceCoder) error {
+	m.pkg = options.Get("package")
 	m.clientNames = []*ClientName{}
 	for _, model := range schema.Models {
 		if err := m.writeModel(model, sourceCoder); err != nil {
@@ -99,62 +96,50 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 	if model.Comment != "" {
 		f.Comment(model.Comment)
 	}
+	f.Commentf("Firestore document location: %s", model.FirestorePath)
 
-	format, args, err := model.Options.GetFirestorePath()
-	if err != nil {
-		return errors.Wrap(err, "firemodel/go: invalid firestore path")
-	}
-	if format != "" {
-		commentargs := make([]interface{}, len(args))
-		for idx, arg := range args {
-			commentargs[idx] = fmt.Sprintf("{%s}", arg)
-		}
-		f.Comment("")
-		f.Commentf("Firestore document location: /%s", fmt.Sprintf(format, commentargs...))
-	}
-	//clientName := fmt.Sprint("client", model.Name)
 	f.
 		Type().
 		Id(model.Name).
 		StructFunc(func(g *jen.Group) {
-			m.fields(model.Name, model.Fields, model.Options.GetAutoTimestamp())(g)
-
+			m.fields(model.Name, model.Fields)(g)
 		})
 
-	if format, args, err := model.Options.GetFirestorePath(); format != "" {
-		f.
-			Commentf("%s returns the path to a particular %s in Firestore.", fmt.Sprint(model.Name, "Path"), model.Name)
-		f.
-			Func().
-			Id(fmt.Sprint(model.Name, "Path")).
-			ParamsFunc(func(g *jen.Group) {
-				if err != nil {
-					panic(err)
-				}
-				for _, arg := range args {
-					g.Id(strcase.ToLowerCamel(arg)).String()
-				}
-			}).
-			String().
-			Block(jen.ReturnFunc(func(g *jen.Group) {
-				if err != nil {
-					panic(err)
-				}
-				g.
-					Qual("fmt", "Sprintf").
-					CallFunc(func(g *jen.Group) {
-						g.Lit(format)
-						for _, arg := range args {
-							g.Id(strcase.ToLowerCamel(arg))
-						}
-					})
-			}))
-		f.Commentf("%s is a regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexPath"), model.Name)
-		f.Var().Id(fmt.Sprint(model.Name, "RegexPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
-			regex := regexp.QuoteMeta(format)
-			start := "^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
-			g.Lit(fmt.Sprint(start, strings.Replace(regex, "%s", "([a-zA-Z0-9]+)", -1), "$"))
-		})
+	// TODO: RESTORE PATH FUNC
+	//format := model.FirestorePath
+	//f.
+	//	Commentf("%s returns the path to a particular %s in Firestore.", fmt.Sprint(model.Name, "Path"), model.Name)
+	//f.
+	//	Func().
+	//	Id(fmt.Sprint(model.Name, "Path")).
+	//	ParamsFunc(func(g *jen.Group) {
+	//		if err != nil {
+	//			panic(err)
+	//		}
+	//		for _, arg := range args {
+	//			g.Id(strcase.ToLowerCamel(arg)).String()
+	//		}
+	//	}).
+	//	String().
+	//	Block(jen.ReturnFunc(func(g *jen.Group) {
+	//		if err != nil {
+	//			panic(err)
+	//		}
+	//		g.
+	//			Qual("fmt", "Sprintf").
+	//			CallFunc(func(g *jen.Group) {
+	//				g.Lit(format)
+	//				for _, arg := range args {
+	//					g.Id(strcase.ToLowerCamel(arg))
+	//				}
+	//			})
+	//	}))
+	//f.Commentf("%s is a regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexPath"), model.Name)
+	//f.Var().Id(fmt.Sprint(model.Name, "RegexPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
+	//	regex := regexp.QuoteMeta(format)
+	//	start := "^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?"
+	//	g.Lit(fmt.Sprint(start, strings.Replace(regex, "%s", "([a-zA-Z0-9]+)", -1), "$"))
+	//})
 
 	//	f.Commentf("%s is a named regex that can be use to filter out firestore events of %s", fmt.Sprint(model.Name, "RegexNamedPath"), model.Name)
 	//	f.Var().Id(fmt.Sprint(model.Name, "RegexNamedPath")).Op("=").Qual("regexp", "MustCompile").CallFunc(func(g *jen.Group) {
@@ -167,28 +152,28 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 	//		g.Lit(fmt.Sprint(start, regex, "$"))
 	//	})
 	//
-		pathStructName := fmt.Sprint(model.Name, "PathStruct")
-		pathStructFunctionName := fmt.Sprint(model.Name, "PathToStruct")
-		//pathStructReverseFunctionName := fmt.Sprint(model.Name, "StructToPath")
-		f.Commentf("%s is a struct that contains parts of a path of %s", pathStructName, model.Name)
-		f.Type().Id(pathStructName).StructFunc(func(g *jen.Group) {
-			for _, arg := range args {
-				g.Id(strcase.ToCamel(arg)).String()
-			}
-		})
+	//pathStructName := fmt.Sprint(model.Name, "PathStruct")
+	//pathStructFunctionName := fmt.Sprint(model.Name, "PathToStruct")
+	//pathStructReverseFunctionName := fmt.Sprint(model.Name, "StructToPath")
+	//f.Commentf("%s is a struct that contains parts of a path of %s", pathStructName, model.Name)
+	//f.Type().Id(pathStructName).StructFunc(func(g *jen.Group) {
+	//	for _, arg := range args {
+	//		g.Id(strcase.ToCamel(arg)).String()
+	//	}
+	//})
 
-		f.Commentf("%s is a function that turns a firestore path into a PathStruct of %s", pathStructFunctionName, model.Name)
-		f.
-			Func().
-			Id(pathStructFunctionName).Params(jen.Id("path").String()).Id("*" + pathStructName).BlockFunc(func(g *jen.Group) {
-			g.Id("parsed").Op(":=").Id(fmt.Sprint(model.Name, "RegexPath")).Dot("FindStringSubmatch").Call(jen.Id("path"))
-			g.Id("result").Op(":=").Op("&").Id(pathStructName).ValuesFunc(func(g *jen.Group) {
-				for i, arg := range args {
-					g.Id(strcase.ToCamel(arg)).Op(":").Id("parsed").Index(jen.Lit(i + 1))
-				}
-			})
-			g.Return(jen.Id("result"))
-		})
+	//f.Commentf("%s is a function that turns a firestore path into a PathStruct of %s", pathStructFunctionName, model.Name)
+	//f.
+	//	Func().
+	//	Id(pathStructFunctionName).Params(jen.Id("path").String()).Id("*" + pathStructName).BlockFunc(func(g *jen.Group) {
+	//	g.Id("parsed").Op(":=").Id(fmt.Sprint(model.Name, "RegexPath")).Dot("FindStringSubmatch").Call(jen.Id("path"))
+	//	g.Id("result").Op(":=").Op("&").Id(pathStructName).ValuesFunc(func(g *jen.Group) {
+	//		for i, arg := range args {
+	//			g.Id(strcase.ToCamel(arg)).Op(":").Id("parsed").Index(jen.Lit(i + 1))
+	//		}
+	//	})
+	//	g.Return(jen.Id("result"))
+	//})
 	//
 	//	f.Commentf("%s is a function that turns a PathStruct of %s into a firestore path", pathStructReverseFunctionName, model.Name)
 	//	f.Func().Id(pathStructReverseFunctionName).Params(jen.Id("path").Id("*" + pathStructName)).String().BlockFunc(func(g *jen.Group) {
@@ -327,7 +312,6 @@ func (m *GoModeler) writeModel(model *firemodel.SchemaModel, sourceCoder firemod
 	//		g.Return(jen.Err())
 	//	})
 	//
-	}
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(model.Name), fileExtension))
 	if err != nil {
@@ -398,7 +382,7 @@ func (m *GoModeler) writeStruct(structType *firemodel.SchemaStruct, sourceCoder 
 	if structType.Comment != "" {
 		f.Comment(structType.Comment)
 	}
-	f.Type().Id(structName).StructFunc(m.fields(structName, structType.Fields, false))
+	f.Type().Id(structName).StructFunc(m.fields(structName, structType.Fields))
 
 	w, err := sourceCoder.NewFile(fmt.Sprint(strcase.ToSnake(structType.Name), fileExtension))
 	if err != nil {
@@ -434,7 +418,7 @@ func (m *GoModeler) fieldTags(field *firemodel.SchemaField) string {
 
 }
 
-func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, addTimestampFields bool) func(g *jen.Group) {
+func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField) func(g *jen.Group) {
 	return func(g *jen.Group) {
 		for _, field := range fields {
 			if field.Comment != "" {
@@ -445,20 +429,6 @@ func (m *GoModeler) fields(structName string, fields []*firemodel.SchemaField, a
 				Id(strcase.ToCamel(field.Name)).
 				Do(m.goType(field.Type)).
 				Tag(map[string]string{"firestore": m.fieldTags(field)})
-		}
-		if addTimestampFields {
-			g.Line()
-			g.Comment("Creation timestamp.")
-			g.
-				Id("CreatedAt").
-				Qual("time", "Time").
-				Tag(map[string]string{"firestore": "createdAt"})
-
-			g.Comment("Update timestamp.")
-			g.
-				Id("UpdatedAt").
-				Qual("time", "Time").
-				Tag(map[string]string{"firestore": "updatedAt"})
 		}
 	}
 }

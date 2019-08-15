@@ -2,7 +2,7 @@
 import { firestore } from 'firebase';
 
 // tslint:disable-next-line:no-namespace
-export namespace example {
+export namespace  {
   type URL = string;
 
   export interface IFile {
@@ -10,63 +10,3 @@ export namespace example {
     mimeType: string;
     name: string;
   }
-  export enum TestEnum {
-    left = 'LEFT',
-    right = 'RIGHT',
-    up = 'UP',
-    down = 'DOWN',
-    other = 'OTHER',
-  }
-  export interface ITestStruct {
-    where?: string;
-    howMuch?: number;
-    someEnum?: TestEnum;
-  }
-
-  /** A Test is a test model. */
-  export interface ITestModel {
-    nestedCollection: firestore.CollectionReference<ITestModel>;
-    /** The name. */
-    name?: string;
-    /** The age. */
-    age?: number;
-    /** The number pi. */
-    pi?: number;
-    /** The birth date. */
-    birthdate?: firestore.Timestamp;
-    /** True if it is good. */
-    isGood?: boolean;
-    data?: firestore.Blob;
-    friend?: firestore.DocumentReference<ITestModel>;
-    location?: firestore.GeoPoint;
-    colors?: string[];
-    numbers?: number[];
-    bools?: boolean[];
-    doubles?: number[];
-    directions?: TestEnum[];
-    models?: ITestStruct[];
-    models2?: ITestStruct[];
-    modelRefs?: firestore.DocumentReference<ITestTimestamps>[];
-    meta?: { [key: string]: string; };
-    direction?: TestEnum;
-    testFile?: IFile;
-    url?: URL;
-    nested?: ITestStruct;
-
-    /** Record creation timestamp. */
-    createdAt?: firestore.Timestamp;
-    /** Record update timestamp. */
-    updatedAt?: firestore.Timestamp;
-  }
-  export interface ITestTimestamps {
-    t?: number;
-
-    /** Record creation timestamp. */
-    createdAt?: firestore.Timestamp;
-    /** Record update timestamp. */
-    updatedAt?: firestore.Timestamp;
-  }
-  export interface ITest {
-    direction?: TestEnum;
-  }
-}

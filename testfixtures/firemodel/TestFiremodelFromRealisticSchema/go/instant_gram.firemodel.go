@@ -4,7 +4,8 @@ package firemodel
 
 import runtime "github.com/visor-tax/firemodel/runtime"
 
-type Gram struct {
+// Firestore document location: /users/{user_id}/instant_grams/{gram_id}
+type InstantGram struct {
 	SharedWith  Audience    `firestore:"sharedWith,omitempty"`
 	PhotoUrl    runtime.URL `firestore:"photoUrl,omitempty"`
 	Description string      `firestore:"description,omitempty"`

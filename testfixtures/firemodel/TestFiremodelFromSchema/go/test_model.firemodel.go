@@ -4,16 +4,13 @@ package firemodel
 
 import (
 	firestore "cloud.google.com/go/firestore"
-	"fmt"
 	runtime "github.com/visor-tax/firemodel/runtime"
 	latlng "google.golang.org/genproto/googleapis/type/latlng"
-	"regexp"
 	"time"
 )
 
 // A Test is a test model.
-//
-// Firestore document location: /users/{user_id}/test_models/{test_model_id}
+// Firestore document location:
 type TestModel struct {
 	// The name.
 	Name string `firestore:"name,omitempty"`
@@ -41,30 +38,4 @@ type TestModel struct {
 	TestFile   *runtime.File            `firestore:"testFile,omitempty"`
 	Url        runtime.URL              `firestore:"url,omitempty"`
 	Nested     *TestStruct              `firestore:"nested,omitempty"`
-
-	// Creation timestamp.
-	CreatedAt time.Time `firestore:"createdAt"`
-	// Update timestamp.
-	UpdatedAt time.Time `firestore:"updatedAt"`
-}
-
-// TestModelPath returns the path to a particular TestModel in Firestore.
-func TestModelPath(userId string, testModelId string) string {
-	return fmt.Sprintf("users/%s/test_models/%s", userId, testModelId)
-}
-
-// TestModelRegexPath is a regex that can be use to filter out firestore events of TestModel
-var TestModelRegexPath = regexp.MustCompile("^(?:projects/[^/]*/databases/[^/]*/documents/)?(?:/)?users/([a-zA-Z0-9]+)/test_models/([a-zA-Z0-9]+)$")
-
-// TestModelPathStruct is a struct that contains parts of a path of TestModel
-type TestModelPathStruct struct {
-	UserId      string
-	TestModelId string
-}
-
-// TestModelPathToStruct is a function that turns a firestore path into a PathStruct of TestModel
-func TestModelPathToStruct(path string) *TestModelPathStruct {
-	parsed := TestModelRegexPath.FindStringSubmatch(path)
-	result := &TestModelPathStruct{UserId: parsed[1], TestModelId: parsed[2]}
-	return result
 }
