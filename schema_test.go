@@ -103,11 +103,6 @@ func TestParseSchema(t *testing.T) {
 								Type: &Map{},
 							},
 							{
-								Name:    "a_file",
-								Comment: "Fake types...",
-								Type:    &File{},
-							},
-							{
 								Name: "an_url",
 								Type: &URL{},
 							},

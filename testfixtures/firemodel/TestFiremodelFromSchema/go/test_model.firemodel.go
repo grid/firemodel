@@ -35,7 +35,6 @@ type TestModel struct {
 	ModelRefs  []*firestore.DocumentRef `firestore:"modelRefs,omitempty"`
 	Meta       map[string]string        `firestore:"meta,omitempty"`
 	Direction  TestEnum                 `firestore:"direction,omitempty"`
-	TestFile   *runtime.File            `firestore:"testFile,omitempty"`
 	Url        runtime.URL              `firestore:"url,omitempty"`
 	Nested     *TestStruct              `firestore:"nested,omitempty"`
 }

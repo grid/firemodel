@@ -34,27 +34,22 @@ func newTpl(schema *firemodel.Schema) *template.Template {
 	tpl := template.Must(template.
 		New("file").
 		Funcs(map[string]interface{}{
-			"firemodelVersion":             func() string { return version.Version },
-			"toSwiftType":                  toSwiftType,
-			"toScreamingSnake":             strcase.ToScreamingSnake,
-			"toCamel":                      strcase.ToCamel,
-			"toLowerCamel":                 strcase.ToLowerCamel,
-			"toSwiftFieldName":             toSwiftFieldName,
-			"filterFieldsEnumsOnly":        filterFieldsEnumsOnly,
-			"asEnum":                       asEnum,
-			"asArray":                      asArray,
-			"asMap":                        asMap,
-			"hasAnyAssociatedValues":       hasAnyAssociatedValues,
-			"filterFieldsNonEnumsOnly":     filterFieldsNonEnumsOnly,
-			"filterFieldsStructsOnly":      filterFieldsStructsOnly,
-			"filterFieldsStructArraysOnly": filterFieldsStructArraysOnly,
-			"filterFieldsEnumArraysOnly":   filterFieldsEnumArraysOnly,
-			"isDecodingType":               isDecodingType,
-			"pluralize":                    inflection.Plural,
-			"DirectSubcollectionsOfModel":  schema.DirectSubcollectionsOfModel,
-			"RootModels":                   schema.RootModels,
-			"ParentModel":                  schema.ParentModel,
-			"lastTemplatePart":             lastTemplatePart,
+			"firemodelVersion":            func() string { return version.Version },
+			"toSwiftType":                 toSwiftType,
+			"toScreamingSnake":            strcase.ToScreamingSnake,
+			"toCamel":                     strcase.ToCamel,
+			"toLowerCamel":                strcase.ToLowerCamel,
+			"toSwiftFieldName":            toSwiftFieldName,
+			"asEnum":                      asEnum,
+			"asArray":                     asArray,
+			"asMap":                       asMap,
+			"hasAnyAssociatedValues":      hasAnyAssociatedValues,
+			"isDecodingType":              isDecodingType,
+			"pluralize":                   inflection.Plural,
+			"DirectSubcollectionsOfModel": schema.DirectSubcollectionsOfModel,
+			"RootModels":                  schema.RootModels,
+			"ParentModel":                 schema.ParentModel,
+			"lastTemplatePart":            lastTemplatePart,
 		}).
 		Parse(file),
 	)
@@ -128,69 +123,6 @@ func hasAnyAssociatedValues(field firemodel.SchemaFieldType) bool {
 		}
 	}
 	return false
-}
-
-func filterFieldsEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
-	var out []*firemodel.SchemaField
-	for _, i := range in {
-		if _, ok := i.Type.(*firemodel.Enum); !ok {
-			continue
-		}
-		out = append(out, i)
-	}
-	return out
-}
-
-func filterFieldsNonEnumsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
-	var out []*firemodel.SchemaField
-	for _, i := range in {
-		if _, ok := i.Type.(*firemodel.Enum); ok {
-			continue
-		}
-		out = append(out, i)
-	}
-	return out
-}
-
-func filterFieldsStructsOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
-	var out []*firemodel.SchemaField
-	for _, i := range in {
-		if _, ok := i.Type.(*firemodel.Struct); !ok {
-			continue
-		}
-		out = append(out, i)
-	}
-	return out
-}
-
-func filterFieldsStructArraysOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
-	var out []*firemodel.SchemaField
-	for _, i := range in {
-		t, ok := i.Type.(*firemodel.Array)
-		if !ok {
-			continue
-		}
-		if _, ok := t.T.(*firemodel.Struct); !ok {
-			continue
-		}
-		out = append(out, i)
-	}
-	return out
-}
-
-func filterFieldsEnumArraysOnly(in []*firemodel.SchemaField) []*firemodel.SchemaField {
-	var out []*firemodel.SchemaField
-	for _, i := range in {
-		t, ok := i.Type.(*firemodel.Array)
-		if !ok {
-			continue
-		}
-		if _, ok := t.T.(*firemodel.Enum); !ok {
-			continue
-		}
-		out = append(out, i)
-	}
-	return out
 }
 
 func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
@@ -1026,66 +958,6 @@ extension {{ .Name | toCamel }}Ref: FiremodelDocumentSubscriber {
 }
 
 `
-
-	// CUSTOM COLLECTIONS
-
-	// CUSTOM CODING
-	//{{- if .Fields | requiresCustomEncodeDecode }}
-	//
-	//override func encode(_ key: String, value: Any?) -> Any? {
-	//switch key {
-	//{{- range .Fields | filterFieldsEnumsOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//return self.{{.Name | toLowerCamel}}?.firestoreValue
-	//{{- end}}
-	//{{- range .Fields | filterFieldsStructArraysOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//return self.{{.Name | toLowerCamel}}?.map { $0.rawValue }
-	//{{- end}}
-	//{{- range .Fields | filterFieldsStructsOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//return self.{{.Name | toLowerCamel}}?.rawValue
-	//{{- end}}
-	//{{- range .Fields | filterFieldsEnumArraysOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//return self.{{.Name | toLowerCamel}}?.map { $0.firestoreValue }
-	//{{- end}}
-	//default:
-	//break
-	//}
-	//return nil
-	//}
-	//
-	//override func decode(_ key: String, value: Any?) -> Bool {
-	//switch key {
-	//{{- range .Fields | filterFieldsEnumsOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false }}(firestoreValue: value)
-	//{{- end}}
-	//{{- range .Fields | filterFieldsStructArraysOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//self.{{.Name | toLowerCamel}} = (value as? [[String: Any]])?
-	//.enumerated()
-	//.map { {{.Type.T | toSwiftType false }}(id: "{{.Name | toLowerCamel}}.\($0.offset)", value: $0.element) }
-	//{{- end}}
-	//{{- range .Fields | filterFieldsStructsOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//if let value = value as? [String: Any] {
-	//self.{{.Name | toLowerCamel}} = {{.Type | toSwiftType false}}(id: "\(0)", value: value)
-	//return true
-	//}
-	//{{- end}}
-	//{{- range .Fields | filterFieldsEnumArraysOnly}}
-	//case "{{.Name | toLowerCamel}}":
-	//self.{{.Name | toLowerCamel}} = (value as? [String])?.compactMap { {{.Type.T | toSwiftType false }}(firestoreValue: $0) }
-	//return true
-	//{{- end}}
-	//default:
-	//break
-	//}
-	//return false
-	//}
-	//{{- end}}
 
 	enum = `
 {{- if .Comment}}

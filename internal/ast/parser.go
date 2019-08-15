@@ -161,7 +161,7 @@ var (
 		// Primitive types.
 		"boolean", "integer", "double", "timestamp", "string",
 		"bytes", "reference", "geopoint", "array", "map", "url",
-		"file", "collection",
+		"collection",
 		// Keywords.
 		"model", "option", "enum", "implements", "struct", "at",
 	}
