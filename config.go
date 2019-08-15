@@ -106,9 +106,6 @@ func equalSchemaFieldTypes(a, b SchemaFieldType) bool {
 	case *URL:
 		_, ok := b.(*URL)
 		return ok
-	case *File:
-		_, ok := b.(*File)
-		return ok
 	}
 	return false
 }
@@ -132,7 +129,6 @@ type Map struct{ T SchemaFieldType }
 type Struct struct{ T *SchemaStruct }
 type Enum struct{ T *SchemaEnum }
 type URL struct{}
-type File struct{}
 
 func (t *Boolean) isSchemaTypeName()   {}
 func (t *Integer) isSchemaTypeName()   {}
@@ -147,7 +143,6 @@ func (t *Map) isSchemaTypeName()       {}
 func (t *Struct) isSchemaTypeName()    {}
 func (t *Enum) isSchemaTypeName()      {}
 func (t *URL) isSchemaTypeName()       {}
-func (t *File) isSchemaTypeName()      {}
 
 func (t *Boolean) String() string   { return "boolean" }
 func (t *Integer) String() string   { return "integer" }
@@ -162,4 +157,3 @@ func (t *Map) String() string       { return fmt.Sprintf("map<%s>", t.T) }
 func (t *Struct) String() string    { return t.T.Name }
 func (t *Enum) String() string      { return t.T.Name }
 func (t *URL) String() string       { return "URL" }
-func (t *File) String() string      { return "File" }

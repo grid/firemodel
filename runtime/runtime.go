@@ -26,9 +26,3 @@ func (raw *URL) Set(u *url.URL) {
 	}
 	*raw = URL(u.String())
 }
-
-type File struct {
-	Name     string `firestore:"name"`
-	URL      URL    `firestore:"url"`
-	MIMEType string `firestore:"mimeType"`
-}

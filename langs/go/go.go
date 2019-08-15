@@ -462,8 +462,6 @@ func (m *GoModeler) goType(firetype firemodel.SchemaFieldType) func(s *jen.State
 			return func(s *jen.Statement) { s.Index().Do(m.goType(firetype.T)) }
 		}
 		return func(s *jen.Statement) { s.Index().Interface() }
-	case *firemodel.File:
-		return func(s *jen.Statement) { s.Op("*").Qual("github.com/visor-tax/firemodel/runtime", "File") }
 	case *firemodel.Map:
 		if firetype.T != nil {
 			return func(s *jen.Statement) { s.Map(jen.String()).Do(m.goType(firetype.T)) }

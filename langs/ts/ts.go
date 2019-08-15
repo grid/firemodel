@@ -102,8 +102,6 @@ func toTypescriptType(firetype firemodel.SchemaFieldType) string {
 		}
 	case *firemodel.Struct:
 		return interfaceName(firetype.T.Name)
-	case *firemodel.File:
-		return "IFile"
 	case *firemodel.Map:
 		if firetype.T != nil {
 			return fmt.Sprintf("{ [key: string]: %s; }", toTypescriptType(firetype.T))
@@ -123,12 +121,6 @@ import { firestore } from 'firebase';
 // tslint:disable-next-line:no-namespace
 export namespace {{ .Options.Get "ts.namespace" }} {
   type URL = string;
-
-  export interface IFile {
-    url: URL;
-    mimeType: string;
-    name: string;
-  }
 
   {{- range .Enums -}}
   {{- template "enum" .}}

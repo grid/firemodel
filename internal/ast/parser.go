@@ -241,8 +241,6 @@ func (ft *ASTFieldType) IsPrimitive() bool {
 		Array,
 		Map:
 		return true
-	case collection:
-		panic("firemodel/schema: bug. collection should never be treated as primitive type.")
 	default:
 		return false
 	}
@@ -262,12 +260,5 @@ const (
 	Array     ASTType = "array"
 	Map       ASTType = "map"
 	// Fake types.
-	URL  ASTType = "URL"
-	File ASTType = "File"
-	// Non-types.
-	collection = "collection"
+	URL ASTType = "URL"
 )
-
-func (s ASTType) IsCollection() bool {
-	return s == collection
-}

@@ -86,8 +86,7 @@ func isDecodingType(codingType string, in *firemodel.SchemaField) bool {
 			*firemodel.Bytes,
 			*firemodel.Reference,
 			*firemodel.URL,
-			*firemodel.Struct,
-			*firemodel.File:
+			*firemodel.Struct:
 			return true
 		}
 	case "decodeEnum":
@@ -263,12 +262,6 @@ func toSwiftType(root bool, firetype firemodel.SchemaFieldType) string {
 			return fmt.Sprintf("[%s]", toSwiftType(false, firetype.T))
 		} else {
 			return fmt.Sprintf("[%s]?", toSwiftType(false, firetype.T))
-		}
-	case *firemodel.File:
-		if root {
-			return "Pring.File?"
-		} else {
-			return "Pring.File"
 		}
 	case *firemodel.Struct:
 		if root {

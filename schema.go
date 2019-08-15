@@ -250,9 +250,6 @@ func (c *configSchemaCompiler) compileModelFields(elements []*ast.ASTModelElemen
 		if field == nil {
 			continue
 		}
-		if field.Type.Base.IsCollection() {
-			continue // handled in compileCollections
-		}
 
 		out = append(out, &SchemaField{
 			Name:    strcase.ToSnake(field.Name),
@@ -268,9 +265,6 @@ func (c *configSchemaCompiler) compileStructFields(elements []*ast.ASTStructElem
 		field := element.Field
 		if field == nil {
 			continue
-		}
-		if field.Type.Base.IsCollection() {
-			continue // handled in compileCollections
 		}
 
 		out = append(out, &SchemaField{
@@ -311,8 +305,6 @@ func (c *configSchemaCompiler) compileFieldType(astFieldType *ast.ASTFieldType) 
 		return &Bytes{}
 	case ast.GeoPoint:
 		return &GeoPoint{}
-	case ast.File:
-		return &File{}
 	case ast.URL:
 		return &URL{}
 	case ast.Map:
