@@ -1,10 +1,12 @@
+// Root 1
 model Operator: "/operators/{operator_id}" {
 	string operator_name;
 }
+// Root 2
 model Component: "/components/{component_id}" {
 	string component_name;
 }
-model Machine: "/machines/{machine_id}" {
-	reference<Operator> owner;
-	collection<Component> components;
+// Child
+model Machine: "/operators/{operator_id}/machines/{machine_id}" {
+	reference<Component> component;
 }

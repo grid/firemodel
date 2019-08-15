@@ -2,6 +2,7 @@ package ts
 
 import (
 	"fmt"
+	"log"
 	"text/template"
 
 	"github.com/iancoleman/strcase"
@@ -17,6 +18,9 @@ func init() {
 type Modeler struct{}
 
 func (m *Modeler) Model(schema *firemodel.Schema, options firemodel.GenOptions, sourceCoder firemodel.SourceCoder) error {
+	log.Println("TS generation is temporarily disabled.")
+	return nil
+
 	f, err := sourceCoder.NewFile("firemodel.ts")
 	if err != nil {
 		return errors.Wrapf(err, "firemodel/ts: create typescript file")

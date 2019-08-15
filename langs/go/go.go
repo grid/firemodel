@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/visor-tax/firemodel"
 	"github.com/visor-tax/firemodel/version"
+	"log"
 )
 
 func init() {
@@ -28,6 +29,9 @@ type ClientName struct {
 }
 
 func (m *GoModeler) Model(schema *firemodel.Schema, options firemodel.GenOptions, sourceCoder firemodel.SourceCoder) error {
+	log.Println("Go generation is temporarily disabled.")
+	return nil
+
 	m.pkg = options.Get("package")
 	m.clientNames = []*ClientName{}
 	for _, model := range schema.Models {

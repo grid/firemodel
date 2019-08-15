@@ -43,8 +43,6 @@ model TestModel: "/test_models/{test_model_id}" {
   array<reference<TestTimestamps>> model_refs;
   map<string> meta;
   TestEnum direction;
-  File test_file;
   URL url;
   TestStruct nested;
-  collection<TestModel> nested_collection;
 }

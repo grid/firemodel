@@ -30,7 +30,6 @@ struct TestModel {
     let modelRefs: [TestTimestampsRef]
     let meta: [String: String]
     let direction: TestEnum?
-    let testFile: Pring.File?
     let url: URL?
     let nested: TestStruct?
 }
@@ -407,23 +406,7 @@ extension TestModel: Decodable {
         self.modelRefs =  try container.decode([TestTimestampsRef].self, forKey: .modelRefs)
         self.meta =  try container.decode([String: String].self, forKey: .meta)
 		
-        let directionContainer = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .direction)
-        let directionValue = try container.decodeIfPresent(String.self, forKey: .direction)
-        switch directionValue {
-		case "LEFT":
-			self.direction = .left
-		case "RIGHT":
-			self.direction = .right
-		case "UP":
-			self.direction = .up
-		case "DOWN":
-			self.direction = .down
-		case "OTHER":
-			self.direction = .other(try directionContainer.decode(TestStruct.self, forKey: TestEnumType.other))
-		default:
-			self.direction = .invalid(directionValue)
-		}
-        self.testFile = try container.decodeIfPresent(Pring.File.self, forKey: .testFile)
+		self.direction = try container.decodeIfPresent(TestEnum.self, forKey: .direction)
         self.url = try container.decodeIfPresent(URL.self, forKey: .url)
         self.nested = try container.decodeIfPresent(TestStruct.self, forKey: .nested)
     }
@@ -448,18 +431,9 @@ extension TestModel: Decodable {
 		case modelRefs = "model_refs"
 		case meta = "meta"
 		case direction = "direction"
-		case testFile = "test_file"
 		case url = "url"
 		case nested = "nested"
     }
-    // Coding keys for the TestEnum enum’s associated value.
-	enum TestEnumType: String, CodingKey {
-		case left = "left"
-		case right = "right"
-		case up = "up"
-		case down = "down"
-		case other = "other"
-	}
 }
 
 extension TestTimestamps: Decodable {
@@ -477,39 +451,17 @@ extension TestTimestamps: Decodable {
 extension Test: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let directionContainer = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .direction)
-        let directionValue = try container.decodeIfPresent(String.self, forKey: .direction)
-        switch directionValue {
-		case "LEFT":
-			self.direction = .left
-		case "RIGHT":
-			self.direction = .right
-		case "UP":
-			self.direction = .up
-		case "DOWN":
-			self.direction = .down
-		case "OTHER":
-			self.direction = .other(try directionContainer.decode(TestStruct.self, forKey: TestEnumType.other))
-		default:
-			self.direction = .invalid(directionValue)
-		}
+		self.direction = try container.decodeIfPresent(TestEnum.self, forKey: .direction)
     }
 
 	// Coding keys for Test.
     enum CodingKeys: String, CodingKey {
 		case direction = "direction"
     }
-    // Coding keys for the TestEnum enum’s associated value.
-	enum TestEnumType: String, CodingKey {
-		case left = "left"
-		case right = "right"
-		case up = "up"
-		case down = "down"
-		case other = "other"
-	}
 }
 
 
+// Decoding for TestModelRef.
 extension TestModelRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -522,6 +474,7 @@ extension TestModelRef: Decodable {
     }
 }
 
+// Decoding for TestTimestampsRef.
 extension TestTimestampsRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -534,6 +487,7 @@ extension TestTimestampsRef: Decodable {
     }
 }
 
+// Decoding for TestRef.
 extension TestRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -552,22 +506,7 @@ extension TestStruct: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.`where` = try container.decodeIfPresent(String.self, forKey: .`where`)
         self.howMuch = try container.decodeIfPresent(Int.self, forKey: .howMuch)
-        let someEnumContainer = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .someEnum)
-        let someEnumValue = try container.decodeIfPresent(String.self, forKey: .someEnum)
-        switch someEnumValue {
-		case "LEFT":
-			self.someEnum = .left
-		case "RIGHT":
-			self.someEnum = .right
-		case "UP":
-			self.someEnum = .up
-		case "DOWN":
-			self.someEnum = .down
-		case "OTHER":
-			self.someEnum = .other(try someEnumContainer.decode(TestStruct.self, forKey: TestEnumType.other))
-		default:
-			self.someEnum = .invalid(someEnumValue)
-		}
+		self.someEnum = try container.decodeIfPresent(TestEnum.self, forKey: .someEnum)
     }
 
 	// Coding keys for TestStruct.
@@ -576,12 +515,34 @@ extension TestStruct: Decodable {
 		case howMuch = "how_much"
 		case someEnum = "some_enum"
     }
+}
+
+
+// Decoding for TestEnum.
+extension TestEnum: Decodable {
+	init(from decoder: Decoder) throws {
+		let enumValueContainer = try decoder.singleValueContainer()
+        let enumValue = try enumValueContainer.decode(String.self)
+        switch enumValue {
+		case "LEFT":
+			self = .left
+		case "RIGHT":
+			self = .right
+		case "UP":
+			self = .up
+		case "DOWN":
+			self = .down
+		case "OTHER":
+			let associatedValueContainer = try decoder.container(keyedBy: TestEnumType.self)
+			let associatedValue = try associatedValueContainer.decode(TestStruct.self, forKey: TestEnumCodingKeys.other)
+			self = .other(associatedValue)
+		default:
+			self = .invalid(enumValue)
+		}
+	}
+
     // Coding keys for the TestEnum enum’s associated value.
-	enum TestEnumType: String, CodingKey {
-		case left = "left"
-		case right = "right"
-		case up = "up"
-		case down = "down"
+	enum TestEnumCodingKeys: String, CodingKey {
 		case other = "other"
 	}
 }
@@ -689,7 +650,6 @@ class FiremodelUnsubscriber {
 
 extension FiremodelClient {
 
-
     fileprivate func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
         let decoder = DocumentSnapshotDecoder(documentSnapshot: snapshot,
                                               codingPath: [],
@@ -713,25 +673,14 @@ fileprivate let firestoreClientDecodingKey = CodingUserInfoKey(rawValue: "firest
 
 // MARK: - Decoder
 
-struct DocumentSnapshotKey: CodingKey {
-    let stringValue: String
-
-    let intValue: Int? = nil
-
-    init?(stringValue: String) {
-        self.stringValue = stringValue
-    }
-
-    init?(intValue: Int) {
-        return nil
-    }
-}
 
 enum DocumentSnapshotDecodingError: Error {
+	// Programmer error: Firestore Client must be set in userInfo in order to decode 
+    // with DocumentSnapshotDecoder.
     case firestoreClientMissing
 }
 
-struct DocumentSnapshotDecoder: Decoder {
+fileprivate struct DocumentSnapshotDecoder: Decoder {
     let documentSnapshot: DocumentSnapshot
     let codingPath: [CodingKey]
     let userInfo: [CodingUserInfoKey : Any]

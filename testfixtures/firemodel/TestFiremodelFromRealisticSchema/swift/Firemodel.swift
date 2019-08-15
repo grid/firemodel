@@ -12,8 +12,10 @@ struct User {
     let displayName: String?
     let avatar: Avatar?
 }
+
 extension User: HasToken {
 }
+
 extension User: Author {
 }
 
@@ -44,6 +46,7 @@ struct Friend {
     let avatar: Avatar?
     let friendsSinice: Date?
 }
+
 extension Friend: Author {
 }
 
@@ -835,15 +838,7 @@ extension LocalizedString: Decodable {
 extension InstantGram: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let sharedWithValue = try container.decodeIfPresent(String.self, forKey: .sharedWith)
-        switch sharedWithValue {
-		case "GLOBAL":
-			self.sharedWith = .global
-		case "FRIENDS":
-			self.sharedWith = .friends
-		default:
-			self.sharedWith = .invalid(sharedWithValue)
-		}
+		self.sharedWith = try container.decodeIfPresent(Audience.self, forKey: .sharedWith)
         self.photoUrl = try container.decodeIfPresent(URL.self, forKey: .photoUrl)
         self.description = try container.decodeIfPresent(String.self, forKey: .description)
         self.tags =  try container.decode([String].self, forKey: .tags)
@@ -856,26 +851,12 @@ extension InstantGram: Decodable {
 		case description = "description"
 		case tags = "tags"
     }
-    // Coding keys for the Audience enum’s associated value.
-	enum AudienceType: String, CodingKey {
-		case global = "global"
-		case friends = "friends"
-	}
 }
 
 extension Message: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let contentContainer = try container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
-        let contentValue = try container.decodeIfPresent(String.self, forKey: .content)
-        switch contentValue {
-		case "TEXT":
-			self.content = .text(try contentContainer.decode(TextMessageContent.self, forKey: MessageContentType.text))
-		case "PHOTO":
-			self.content = .photo(try contentContainer.decode(PhotoMessageContent.self, forKey: MessageContentType.photo))
-		default:
-			self.content = .invalid(contentValue)
-		}
+		self.content = try container.decodeIfPresent(MessageContent.self, forKey: .content)
         self.from = try container.decodeIfPresent(FriendRef.self, forKey: .from)
     }
 
@@ -884,31 +865,13 @@ extension Message: Decodable {
 		case content = "content"
 		case from = "from"
     }
-    // Coding keys for the MessageContent enum’s associated value.
-	enum MessageContentType: String, CodingKey {
-		case text = "text"
-		case photo = "photo"
-	}
 }
 
 extension Attachment: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.title = try container.decodeIfPresent(String.self, forKey: .title)
-        let contentContainer = try container.nestedContainer(keyedBy: AttachmentContentType.self, forKey: .content)
-        let contentValue = try container.decodeIfPresent(String.self, forKey: .content)
-        switch contentValue {
-		case "PLACEHOLDER":
-			self.content = .placeholder
-		case "IMOJI":
-			self.content = .imoji(try contentContainer.decode(ImojiAttachment.self, forKey: AttachmentContentType.imoji))
-		case "GRAM":
-			self.content = .gram(try contentContainer.decode(GramAttachment.self, forKey: AttachmentContentType.gram))
-		case "UPLOAD":
-			self.content = .upload(try contentContainer.decode(UploadAttachment.self, forKey: AttachmentContentType.upload))
-		default:
-			self.content = .invalid(contentValue)
-		}
+		self.content = try container.decodeIfPresent(AttachmentContent.self, forKey: .content)
     }
 
 	// Coding keys for Attachment.
@@ -916,13 +879,6 @@ extension Attachment: Decodable {
 		case title = "title"
 		case content = "content"
     }
-    // Coding keys for the AttachmentContent enum’s associated value.
-	enum AttachmentContentType: String, CodingKey {
-		case placeholder = "placeholder"
-		case imoji = "imoji"
-		case gram = "gram"
-		case upload = "upload"
-	}
 }
 
 extension Friend: Decodable {
@@ -944,6 +900,7 @@ extension Friend: Decodable {
 }
 
 
+// Decoding for UserRef.
 extension UserRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -956,6 +913,7 @@ extension UserRef: Decodable {
     }
 }
 
+// Decoding for LocalizedStringRef.
 extension LocalizedStringRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -968,6 +926,7 @@ extension LocalizedStringRef: Decodable {
     }
 }
 
+// Decoding for InstantGramRef.
 extension InstantGramRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -980,6 +939,7 @@ extension InstantGramRef: Decodable {
     }
 }
 
+// Decoding for MessageRef.
 extension MessageRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -992,6 +952,7 @@ extension MessageRef: Decodable {
     }
 }
 
+// Decoding for AttachmentRef.
 extension AttachmentRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -1004,6 +965,7 @@ extension AttachmentRef: Decodable {
     }
 }
 
+// Decoding for FriendRef.
 extension FriendRef: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -1110,6 +1072,82 @@ extension PhotoMessageContent: Decodable {
 }
 
 
+// Decoding for Audience.
+extension Audience: Decodable {
+	init(from decoder: Decoder) throws {
+		let enumValueContainer = try decoder.singleValueContainer()
+        let enumValue = try enumValueContainer.decode(String.self)
+        switch enumValue {
+		case "GLOBAL":
+			self = .global
+		case "FRIENDS":
+			self = .friends
+		default:
+			self = .invalid(enumValue)
+		}
+	}
+}
+
+// Decoding for AttachmentContent.
+extension AttachmentContent: Decodable {
+	init(from decoder: Decoder) throws {
+		let enumValueContainer = try decoder.singleValueContainer()
+        let enumValue = try enumValueContainer.decode(String.self)
+        switch enumValue {
+		case "PLACEHOLDER":
+			self = .placeholder
+		case "IMOJI":
+			let associatedValueContainer = try decoder.container(keyedBy: AttachmentContentType.self)
+			let associatedValue = try associatedValueContainer.decode(ImojiAttachment.self, forKey: AttachmentContentCodingKeys.imoji)
+			self = .imoji(associatedValue)
+		case "GRAM":
+			let associatedValueContainer = try decoder.container(keyedBy: AttachmentContentType.self)
+			let associatedValue = try associatedValueContainer.decode(GramAttachment.self, forKey: AttachmentContentCodingKeys.gram)
+			self = .gram(associatedValue)
+		case "UPLOAD":
+			let associatedValueContainer = try decoder.container(keyedBy: AttachmentContentType.self)
+			let associatedValue = try associatedValueContainer.decode(UploadAttachment.self, forKey: AttachmentContentCodingKeys.upload)
+			self = .upload(associatedValue)
+		default:
+			self = .invalid(enumValue)
+		}
+	}
+
+    // Coding keys for the AttachmentContent enum’s associated value.
+	enum AttachmentContentCodingKeys: String, CodingKey {
+		case imoji = "imoji"
+		case gram = "gram"
+		case upload = "upload"
+	}
+}
+
+// Decoding for MessageContent.
+extension MessageContent: Decodable {
+	init(from decoder: Decoder) throws {
+		let enumValueContainer = try decoder.singleValueContainer()
+        let enumValue = try enumValueContainer.decode(String.self)
+        switch enumValue {
+		case "TEXT":
+			let associatedValueContainer = try decoder.container(keyedBy: MessageContentType.self)
+			let associatedValue = try associatedValueContainer.decode(TextMessageContent.self, forKey: MessageContentCodingKeys.text)
+			self = .text(associatedValue)
+		case "PHOTO":
+			let associatedValueContainer = try decoder.container(keyedBy: MessageContentType.self)
+			let associatedValue = try associatedValueContainer.decode(PhotoMessageContent.self, forKey: MessageContentCodingKeys.photo)
+			self = .photo(associatedValue)
+		default:
+			self = .invalid(enumValue)
+		}
+	}
+
+    // Coding keys for the MessageContent enum’s associated value.
+	enum MessageContentCodingKeys: String, CodingKey {
+		case text = "text"
+		case photo = "photo"
+	}
+}
+
+
 
 // MARK: - Client
 
@@ -1204,7 +1242,6 @@ class FiremodelUnsubscriber {
 
 extension FiremodelClient {
 
-
     fileprivate func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
         let decoder = DocumentSnapshotDecoder(documentSnapshot: snapshot,
                                               codingPath: [],
@@ -1228,25 +1265,14 @@ fileprivate let firestoreClientDecodingKey = CodingUserInfoKey(rawValue: "firest
 
 // MARK: - Decoder
 
-struct DocumentSnapshotKey: CodingKey {
-    let stringValue: String
-
-    let intValue: Int? = nil
-
-    init?(stringValue: String) {
-        self.stringValue = stringValue
-    }
-
-    init?(intValue: Int) {
-        return nil
-    }
-}
 
 enum DocumentSnapshotDecodingError: Error {
+	// Programmer error: Firestore Client must be set in userInfo in order to decode 
+    // with DocumentSnapshotDecoder.
     case firestoreClientMissing
 }
 
-struct DocumentSnapshotDecoder: Decoder {
+fileprivate struct DocumentSnapshotDecoder: Decoder {
     let documentSnapshot: DocumentSnapshot
     let codingPath: [CodingKey]
     let userInfo: [CodingUserInfoKey : Any]

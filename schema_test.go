@@ -1,13 +1,11 @@
 package firemodel
 
 import (
-	"runtime/debug"
-	"testing"
-
 	"gotest.tools/assert"
-
 	"os"
 	"path"
+	"runtime/debug"
+	"testing"
 )
 
 func TestParseSchema(t *testing.T) {
@@ -26,6 +24,15 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name: "Empty",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/empties/{empty_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "empties",
+									DocumentPlaceholder: "{empty_id}",
+								},
+							},
+						},
 					},
 				},
 			},
@@ -38,6 +45,12 @@ func TestParseSchema(t *testing.T) {
 						Name: "SimpleModel",
 						FirestorePath: SchemaModelPathTemplate{
 							Pattern: "/models/{model_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "models",
+									DocumentPlaceholder: "{model_id}",
+								},
+							},
 						},
 						Fields: []*SchemaField{
 							{
@@ -56,6 +69,15 @@ func TestParseSchema(t *testing.T) {
 					{
 						Name:    "TestModel",
 						Comment: "A Test is a test model.",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/tests/{test_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "tests",
+									DocumentPlaceholder: "{test_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name:    "name",
@@ -103,8 +125,9 @@ func TestParseSchema(t *testing.T) {
 								Type: &Map{},
 							},
 							{
-								Name: "an_url",
-								Type: &URL{},
+								Name:    "an_url",
+								Comment: "Fake types...",
+								Type:    &URL{},
 							},
 						},
 					},
@@ -120,6 +143,15 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name: "TestModel",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/tests/{test_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "tests",
+									DocumentPlaceholder: "{test_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "other",
@@ -185,6 +217,15 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name: "TestModel",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/tests/{test_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "tests",
+									DocumentPlaceholder: "{test_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "url",
@@ -222,6 +263,15 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name: "TestModel",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/tests/{test_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "tests",
+									DocumentPlaceholder: "{test_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Comment: "The direction.",
@@ -323,7 +373,17 @@ func TestParseSchema(t *testing.T) {
 			want: &Schema{
 				Models: []*SchemaModel{
 					{
-						Name: "Operator",
+						Name:    "Operator",
+						Comment: "Root 1",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/operators/{operator_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "operators",
+									DocumentPlaceholder: "{operator_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "operator_name",
@@ -332,7 +392,17 @@ func TestParseSchema(t *testing.T) {
 						},
 					},
 					{
-						Name: "Component",
+						Name:    "Component",
+						Comment: "Root 2",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/components/{component_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "components",
+									DocumentPlaceholder: "{component_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "component_name",
@@ -341,11 +411,25 @@ func TestParseSchema(t *testing.T) {
 						},
 					},
 					{
-						Name: "Machine",
+						Name:    "Machine",
+						Comment: "Child",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/operators/{operator_id}/machines/{machine_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "operators",
+									DocumentPlaceholder: "{operator_id}",
+								},
+								{
+									CollectionName:      "machines",
+									DocumentPlaceholder: "{machine_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
-								Name: "owner",
-								Type: &Reference{T: &SchemaModel{Name: "Operator"}},
+								Name: "component",
+								Type: &Reference{T: &SchemaModel{Name: "Component"}},
 							},
 						},
 					},
@@ -358,6 +442,15 @@ func TestParseSchema(t *testing.T) {
 				Models: []*SchemaModel{
 					{
 						Name: "NormalCase",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/normals/{normal}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "normals",
+									DocumentPlaceholder: "{normal}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "foo_bar",
@@ -367,6 +460,15 @@ func TestParseSchema(t *testing.T) {
 					},
 					{
 						Name: "CamelCase",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/camels/{camel}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "camels",
+									DocumentPlaceholder: "{camel}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "foo_bar",
@@ -376,6 +478,15 @@ func TestParseSchema(t *testing.T) {
 					},
 					{
 						Name: "TitleCase",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/titles/{title}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "titles",
+									DocumentPlaceholder: "{title}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "foo_bar",
@@ -385,6 +496,15 @@ func TestParseSchema(t *testing.T) {
 					},
 					{
 						Name: "SnakeCase",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/snakes/{snake}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "snakes",
+									DocumentPlaceholder: "{snake}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "foo_bar",
@@ -435,6 +555,15 @@ func TestParseSchema(t *testing.T) {
 					{
 						Name:    "User",
 						Comment: "Regression test.",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/users/{user}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "users",
+									DocumentPlaceholder: "{user}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name: "name",
@@ -452,6 +581,15 @@ func TestParseSchema(t *testing.T) {
 					{
 						Name:    "FooModel",
 						Comment: "Model Comments.",
+						FirestorePath: SchemaModelPathTemplate{
+							Pattern: "/foos/{foo_id}",
+							CollectionParts: []SchemaModelPathTemplatePart{
+								{
+									CollectionName:      "foos",
+									DocumentPlaceholder: "{foo_id}",
+								},
+							},
+						},
 						Fields: []*SchemaField{
 							{
 								Name:    "cool_field",

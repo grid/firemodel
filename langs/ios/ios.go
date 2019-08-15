@@ -59,6 +59,7 @@ func newTpl(schema *firemodel.Schema) *template.Template {
 	_ = template.Must(tpl.New("decoder").Parse(decoder))
 	_ = template.Must(tpl.New("coding").Parse(coding))
 	_ = template.Must(tpl.New("refcoding").Parse(refcoding))
+	_ = template.Must(tpl.New("enumcoding").Parse(enumcoding))
 	_ = template.Must(tpl.New("enum").Parse(enum))
 	_ = template.Must(tpl.New("protocol").Parse(protocol))
 	return tpl
@@ -115,8 +116,7 @@ func asMap(in firemodel.SchemaFieldType) *firemodel.Map {
 	return in.(*firemodel.Map)
 }
 
-func hasAnyAssociatedValues(field firemodel.SchemaFieldType) bool {
-	enum := asEnum(field)
+func hasAnyAssociatedValues(enum firemodel.SchemaEnum) bool {
 	for _, value := range enum.Values {
 		if value.AssociatedValue != nil {
 			return true
@@ -272,6 +272,9 @@ import FirebaseFirestore
 {{range .Structs -}}
 {{template "coding" .}}
 {{- end}}
+{{range .Enums -}}
+{{template "enumcoding" .}}
+{{- end}}
 
 {{template "client" .}}
 
@@ -302,6 +305,7 @@ struct {{.Name | toCamel}} {
 
 {{- $type := . -}}
 {{- range .Implements }}
+
 extension {{ $type.Name | toCamel }}: {{.Name | toCamel }} {
 }
 {{- end }}
@@ -310,28 +314,14 @@ extension {{ $type.Name | toCamel }}: {{.Name | toCamel }} {
 	coding = `
 extension {{.Name | toCamel}}: Decodable {
     init(from decoder: Decoder) throws {
+		{{- if .Fields}}
         let container = try decoder.container(keyedBy: CodingKeys.self)
+		{{- end }}
 		{{- range $field := .Fields}}
 		{{- if . | isDecodingType "decodeIfPresent" }}
         self.{{.Name | toSwiftFieldName}} = try container.decodeIfPresent({{.Type | toSwiftType false}}.self, forKey: .{{.Name | toSwiftFieldName}})
 		{{- else if . | isDecodingType "decodeEnum" }}
-		{{- if .Type | hasAnyAssociatedValues }}
-        let {{ .Name | toSwiftFieldName }}Container = try container.nestedContainer(keyedBy: {{.Type | toSwiftType false}}Type.self, forKey: .{{.Name | toSwiftFieldName}})
-		{{- end }}
-        let {{ .Name | toSwiftFieldName }}Value = try container.decodeIfPresent(String.self, forKey: .{{.Name | toSwiftFieldName}})
-        switch {{ .Name | toSwiftFieldName }}Value {
-        {{- $enum := .Type | asEnum}}
-		{{- range $enum.Values }}
-		case "{{ .Name | toScreamingSnake }}":
-		{{- if .AssociatedValue }}
-			self.{{ $field.Name | toSwiftFieldName }} = .{{.Name | toSwiftFieldName}}(try {{ $field.Name | toSwiftFieldName }}Container.decode({{ .AssociatedValue | toSwiftType false }}.self, forKey: {{ $field.Type | toSwiftType false }}Type.{{ .Name | toSwiftFieldName }}))
-		{{- else }}
-			self.{{ $field.Name | toSwiftFieldName }} = .{{.Name | toSwiftFieldName}}
-  		{{- end }}
-  		{{- end }}
-		default:
-			self.{{ $field.Name | toSwiftFieldName }} = .invalid({{ .Name | toSwiftFieldName }}Value)
-		}
+		self.{{ $field.Name | toSwiftFieldName }} = try container.decodeIfPresent({{ .Type | toSwiftType false }}.self, forKey: .{{.Name | toSwiftFieldName}})
 		{{- else if . | isDecodingType "decodeArray" }}
         self.{{ .Name | toSwiftFieldName }} =  try container.decode({{ .Type | asArray | toSwiftType true}}.self, forKey: .{{ .Name | toSwiftFieldName }})
 		{{- else if . | isDecodingType "decodeMap" }}
@@ -342,27 +332,57 @@ extension {{.Name | toCamel}}: Decodable {
 		{{- end}}
     }
 
+	{{- if .Fields}}
+
 	// Coding keys for {{ .Name }}.
     enum CodingKeys: String, CodingKey {
 		{{- range .Fields}}
 		case {{ .Name | toSwiftFieldName }} = "{{ .Name }}"
 		{{- end}}
     }
+	{{- end}}
+}
+`
 
-	{{- range .Fields }}
-	{{- if . | isDecodingType "decodeEnum" }}
-    // Coding keys for the {{ .Type | toSwiftType false }} enum’s associated value.
-	enum {{ .Type | toSwiftType false -}}Type: String, CodingKey {
-	{{- range ( .Type | asEnum ).Values }}
-		case {{ .Name | toSwiftFieldName }} = "{{- .Name -}}"
+	enumcoding = `
+// Decoding for {{ .Name | toCamel }}.
+extension {{.Name | toCamel }}: Decodable {
+	init(from decoder: Decoder) throws {
+		let enumValueContainer = try decoder.singleValueContainer()
+        let enumValue = try enumValueContainer.decode(String.self)
+        switch enumValue {
+        {{- $enum := . }}
+		{{- range $enum.Values }}
+		case "{{ .Name | toScreamingSnake }}":
+			{{- if .AssociatedValue }}
+			let associatedValueContainer = try decoder.container(keyedBy: {{ $enum.Name | toCamel }}Type.self)
+			let associatedValue = try associatedValueContainer.decode({{ .AssociatedValue | toSwiftType false }}.self, forKey: {{ $enum.Name | toCamel }}CodingKeys.{{ .Name | toSwiftFieldName }})
+			self = .{{.Name | toSwiftFieldName}}(associatedValue)
+			{{- else }}
+			self = .{{.Name | toSwiftFieldName}}
+			{{- end }}
+  		{{- end }}
+		default:
+			self = .invalid(enumValue)
+		}
+	}
+
+    {{- if hasAnyAssociatedValues . }}
+
+    // Coding keys for the {{ .Name | toCamel }} enum’s associated value.
+	enum {{ .Name | toCamel }}CodingKeys: String, CodingKey {
+	{{- range  .Values }}
+		{{- if .AssociatedValue }}
+		case {{ .Name | toSwiftFieldName }} = "{{- .Name | toSwiftFieldName -}}"
+		{{- end }}
 	{{- end }}
 	}
-	{{- end }}
 	{{- end }}
 }
 `
 
 	refcoding = `
+// Decoding for {{ .Name | toCamel }}Ref.
 extension {{.Name | toCamel}}Ref: Decodable {
     init(from decoder: Decoder) throws {
         guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
@@ -377,25 +397,14 @@ extension {{.Name | toCamel}}Ref: Decodable {
 `
 
 	decoder = `
-struct DocumentSnapshotKey: CodingKey {
-    let stringValue: String
-
-    let intValue: Int? = nil
-
-    init?(stringValue: String) {
-        self.stringValue = stringValue
-    }
-
-    init?(intValue: Int) {
-        return nil
-    }
-}
 
 enum DocumentSnapshotDecodingError: Error {
+	// Programmer error: Firestore Client must be set in userInfo in order to decode 
+    // with DocumentSnapshotDecoder.
     case firestoreClientMissing
 }
 
-struct DocumentSnapshotDecoder: Decoder {
+fileprivate struct DocumentSnapshotDecoder: Decoder {
     let documentSnapshot: DocumentSnapshot
     let codingPath: [CodingKey]
     let userInfo: [CodingUserInfoKey : Any]
@@ -808,7 +817,6 @@ class FiremodelUnsubscriber {
 // MARK: - Decoding Helpers
 
 extension FiremodelClient {
-
 
     fileprivate func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
         let decoder = DocumentSnapshotDecoder(documentSnapshot: snapshot,
