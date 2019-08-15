@@ -10,7 +10,7 @@ import (
 )
 
 // A Test is a test model.
-// Firestore document location:
+// Firestore document location: /test_models/{test_model_id}
 type TestModel struct {
 	// The name.
 	Name string `firestore:"name,omitempty"`

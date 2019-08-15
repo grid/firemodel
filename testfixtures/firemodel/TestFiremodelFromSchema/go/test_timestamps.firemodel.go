@@ -2,7 +2,7 @@
 
 package firemodel
 
-// Firestore document location:
+// Firestore document location: /test_timestamps/{test_timestamp_id}
 type TestTimestamps struct {
 	T int64 `firestore:"t"`
 }

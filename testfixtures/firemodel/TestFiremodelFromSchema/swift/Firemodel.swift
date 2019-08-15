@@ -56,6 +56,8 @@ struct TestStruct {
 // MARK: - Enums
 
 enum TestEnum {
+	// An unknown enum value with its raw string.
+	case invalid(String?)
     case left
     case right
     case up
@@ -64,23 +66,24 @@ enum TestEnum {
 }
 
 
+// MARK: - Interfaces
+
+
 // MARK: - References
 
-struct TestModelRef: FiremodelDocumentSubscriber {
-	fileprivate let ref: DocumentReference
+struct TestModelCollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs.
-	// TODO: Parent refs
+
+	// MARK: - Child Ref
+
+    func testModel(id: String) -> TestModelRef {
+        return TestModelRef(ref: ref.document(id), client: client)
+    }
 }
 
-struct TestModelCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
-	fileprivate let client: FiremodelClient
-
-	// TODO: Subdoc refs
-}
-
+extension TestModelCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<TestModel>) -> Void) -> FiremodelUnsubscriber {
 
@@ -132,21 +135,59 @@ struct TestModelCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct TestTimestampsRef: FiremodelDocumentSubscriber {
+struct TestModelRef {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs.
-	// TODO: Parent refs
+	// MARK: - Parent Ref
+
+    func parent() -> TestModelCollectionRef {
+        return TestModelCollectionRef(ref: ref.parent, client: client)
+    }
 }
 
-struct TestTimestampsCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
+extension TestModelRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<TestModel>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(TestModel.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
+struct TestTimestampsCollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subdoc refs
+
+	// MARK: - Child Ref
+
+    func testTimestamps(id: String) -> TestTimestampsRef {
+        return TestTimestampsRef(ref: ref.document(id), client: client)
+    }
 }
 
+extension TestTimestampsCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<TestTimestamps>) -> Void) -> FiremodelUnsubscriber {
 
@@ -198,21 +239,59 @@ struct TestTimestampsCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
-struct TestRef: FiremodelDocumentSubscriber {
+struct TestTimestampsRef {
 	fileprivate let ref: DocumentReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subcollection refs.
-	// TODO: Parent refs
+	// MARK: - Parent Ref
+
+    func parent() -> TestTimestampsCollectionRef {
+        return TestTimestampsCollectionRef(ref: ref.parent, client: client)
+    }
 }
 
-struct TestCollectionRef: FiremodelCollectionSubscriber {
-	fileprivate let ref: DocumentReference
+extension TestTimestampsRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<TestTimestamps>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(TestTimestamps.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
+struct TestCollectionRef {
+	fileprivate let ref: CollectionReference
 	fileprivate let client: FiremodelClient
 
-	// TODO: Subdoc refs
+
+	// MARK: - Child Ref
+
+    func test(id: String) -> TestRef {
+        return TestRef(ref: ref.document(id), client: client)
+    }
 }
 
+extension TestCollectionRef: FiremodelCollectionSubscriber {
     func subscribe(withQuery applyQuery: ((Query) -> Query)? = nil,
                    receiver publish: @escaping (FiremodelCollectionEvent<Test>) -> Void) -> FiremodelUnsubscriber {
 
@@ -264,6 +343,46 @@ struct TestCollectionRef: FiremodelCollectionSubscriber {
     }
 }
 
+struct TestRef {
+	fileprivate let ref: DocumentReference
+	fileprivate let client: FiremodelClient
+
+	// MARK: - Parent Ref
+
+    func parent() -> TestCollectionRef {
+        return TestCollectionRef(ref: ref.parent, client: client)
+    }
+}
+
+extension TestRef: FiremodelDocumentSubscriber {
+
+    func subscribe(receiver publish: @escaping (FiremodelDocumentEvent<Test>) -> Void) -> FiremodelUnsubscriber {
+        let registration = ref
+            .addSnapshotListener { (snap: DocumentSnapshot?, error: Error?) in
+                if let error = error {
+                    publish(.error(error))
+                    return
+                }
+                guard let snap = snap else {
+                    assertionFailure("Error was nil but Snapshot was also nil. This is unexpected behavior from addSnapshotListener!")
+                    publish(.error(FiremodelError.internalError))
+                    return
+                }
+                
+                do {
+                    let model = try self.client.decode(Test.self, from: snap)
+                    publish(.snapshot(model, metadata: snap.metadata))
+                } catch {
+                    publish(.error(error))
+                    return
+                }
+        }
+        
+        return FiremodelUnsubscriber(listenerRegistration: registration)
+    }
+}
+
+
 
 // MARK: - Coding 
 
@@ -278,30 +397,31 @@ extension TestModel: Decodable {
         self.data = try container.decodeIfPresent(Data.self, forKey: .data)
         self.friend = try container.decodeIfPresent(TestModelRef.self, forKey: .friend)
         self.location = try container.decodeIfPresent(GeoPoint.self, forKey: .location)
-        self.colors =  try container.decodeIfPresent([String])
+        self.colors =  try container.decode([String].self, forKey: .colors)
+        self.numbers =  try container.decode([Int].self, forKey: .numbers)
+        self.bools =  try container.decode([Bool].self, forKey: .bools)
+        self.doubles =  try container.decode([Float].self, forKey: .doubles)
+        self.directions =  try container.decode([TestEnum].self, forKey: .directions)
+        self.models =  try container.decode([TestStruct].self, forKey: .models)
+        self.models2 =  try container.decode([TestStruct].self, forKey: .models2)
+        self.modelRefs =  try container.decode([TestTimestampsRef].self, forKey: .modelRefs)
+        self.meta =  try container.decode([String: String].self, forKey: .meta)
 		
-        self.numbers =  try container.decodeIfPresent([Int])
-		
-        self.bools =  try container.decodeIfPresent([Bool])
-		
-        self.doubles =  try container.decodeIfPresent([Float])
-		
-        self.directions =  try container.decodeIfPresent([TestEnum])
-		
-        self.models =  try container.decodeIfPresent([TestStruct])
-		
-        self.models2 =  try container.decodeIfPresent([TestStruct])
-		
-        self.modelRefs =  try container.decodeIfPresent([TestTimestampsRef])
-		
-        self.meta = try container.decodeIfPresent([String: String].self, forKey: .meta)
-        let directionType = try container.decodeIfPresent(String.self, forKey: .direction)
-        let direction = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .direction)
-		switch directionType {
-		case TestEnum.other.rawValue:
-		self.other = try container.decodeIfPresent(TestStruct.self, forKey: .other)
+        let directionContainer = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .direction)
+        let directionValue = try container.decodeIfPresent(String.self, forKey: .direction)
+        switch directionValue {
+		case "LEFT":
+			self.direction = .left
+		case "RIGHT":
+			self.direction = .right
+		case "UP":
+			self.direction = .up
+		case "DOWN":
+			self.direction = .down
+		case "OTHER":
+			self.direction = .other(try directionContainer.decode(TestStruct.self, forKey: TestEnumType.other))
 		default:
-			break
+			self.direction = .invalid(directionValue)
 		}
         self.testFile = try container.decodeIfPresent(Pring.File.self, forKey: .testFile)
         self.url = try container.decodeIfPresent(URL.self, forKey: .url)
@@ -357,13 +477,21 @@ extension TestTimestamps: Decodable {
 extension Test: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let directionType = try container.decodeIfPresent(String.self, forKey: .direction)
-        let direction = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .direction)
-		switch directionType {
-		case TestEnum.other.rawValue:
-		self.other = try container.decodeIfPresent(TestStruct.self, forKey: .other)
+        let directionContainer = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .direction)
+        let directionValue = try container.decodeIfPresent(String.self, forKey: .direction)
+        switch directionValue {
+		case "LEFT":
+			self.direction = .left
+		case "RIGHT":
+			self.direction = .right
+		case "UP":
+			self.direction = .up
+		case "DOWN":
+			self.direction = .down
+		case "OTHER":
+			self.direction = .other(try directionContainer.decode(TestStruct.self, forKey: TestEnumType.other))
 		default:
-			break
+			self.direction = .invalid(directionValue)
 		}
     }
 
@@ -382,18 +510,63 @@ extension Test: Decodable {
 }
 
 
+extension TestModelRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+extension TestTimestampsRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+extension TestRef: Decodable {
+    init(from decoder: Decoder) throws {
+        guard let client = decoder.userInfo[firestoreClientDecodingKey] as? FiremodelClient else {
+            assertionFailure("firemodel client is missing in user info")
+            throw DocumentSnapshotDecodingError.firestoreClientMissing
+        }
+        let container = try decoder.singleValueContainer()
+        self.client = client
+        self.ref  = client.rawDocumentReference(try container.decode(String.self))
+    }
+}
+
+
 extension TestStruct: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.`where` = try container.decodeIfPresent(String.self, forKey: .`where`)
         self.howMuch = try container.decodeIfPresent(Int.self, forKey: .howMuch)
-        let someEnumType = try container.decodeIfPresent(String.self, forKey: .someEnum)
-        let someEnum = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .someEnum)
-		switch someEnumType {
-		case TestEnum.other.rawValue:
-		self.other = try container.decodeIfPresent(TestStruct.self, forKey: .other)
+        let someEnumContainer = try container.nestedContainer(keyedBy: TestEnumType.self, forKey: .someEnum)
+        let someEnumValue = try container.decodeIfPresent(String.self, forKey: .someEnum)
+        switch someEnumValue {
+		case "LEFT":
+			self.someEnum = .left
+		case "RIGHT":
+			self.someEnum = .right
+		case "UP":
+			self.someEnum = .up
+		case "DOWN":
+			self.someEnum = .down
+		case "OTHER":
+			self.someEnum = .other(try someEnumContainer.decode(TestStruct.self, forKey: TestEnumType.other))
 		default:
-			break
+			self.someEnum = .invalid(someEnumValue)
 		}
     }
 
@@ -415,10 +588,49 @@ extension TestStruct: Decodable {
 
 
 
+// MARK: - Client
 
-typealias Source = FirebaseFirestore.FirestoreSource
+class FiremodelClient {
+    private let firestore: FirebaseFirestore.Firestore
 
-// MARK: - Protocols
+	// Deprecated. Please use DI initializer instead.
+    static func dev() -> FiremodelClient {
+        let firestore = FirebaseFirestore.Firestore.firestore()
+        return FiremodelClient(firestore: firestore)
+    }
+
+    init(firestore: FirebaseFirestore.Firestore) {
+        self.firestore = firestore
+    }
+
+    // MARK: - Root Collections
+
+    func testModels() -> TestModelCollectionRef {
+        return TestModelCollectionRef(ref: firestore.collection("test_models"), client: self)
+    }
+
+    func testModel(id: String) -> TestModelRef {
+        return TestModelRef(ref: firestore.collection("test_models").document(id), client: self)
+    }
+
+    func testTimestamps() -> TestTimestampsCollectionRef {
+        return TestTimestampsCollectionRef(ref: firestore.collection("test_timestamps"), client: self)
+    }
+
+    func testTimestamps(id: String) -> TestTimestampsRef {
+        return TestTimestampsRef(ref: firestore.collection("test_timestamps").document(id), client: self)
+    }
+
+    func tests() -> TestCollectionRef {
+        return TestCollectionRef(ref: firestore.collection("test_timestamps"), client: self)
+    }
+
+    func test(id: String) -> TestRef {
+        return TestRef(ref: firestore.collection("test_timestamps").document(id), client: self)
+    }
+}
+
+// MARK: - Subscription Helpers
 
 protocol FiremodelDocumentSubscriber {
     associatedtype DocumentType
@@ -434,6 +646,17 @@ protocol FiremodelCollectionSubscriber {
     associatedtype DocumentType
     func subscribe(withQuery applyQuery: ((Query) -> Query)?,
                    receiver publish: @escaping (FiremodelCollectionEvent<DocumentType>) -> Void) -> FiremodelUnsubscriber
+}
+
+enum FiremodelCollectionEvent<T> {
+    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
+    case error(Error)
+}
+
+struct FiremodelChange<T> {
+    let document: T
+    let oldIndex: UInt
+    let newIndex: UInt
 }
 
 class FiremodelUnsubscriber {
@@ -461,44 +684,13 @@ class FiremodelUnsubscriber {
     }
 }
 
-enum FiremodelCollectionEvent<T> {
-    case snapshot(_: [T], diff: (additions: [FiremodelChange<T>], modifications: [FiremodelChange<T>], removals: [FiremodelChange<T>]), metadata: SnapshotMetadata)
-    case error(Error)
-}
 
-struct FiremodelChange<T> {
-    let document: T
-    let oldIndex: UInt
-    let newIndex: UInt
-}
+// MARK: - Decoding Helpers
 
-// MARK: - Client
+extension FiremodelClient {
 
-class FiremodelClient {
-    private let firestore: FirebaseFirestore.Firestore
 
-    static func dev() -> FiremodelClient {
-        let firestore = FirebaseFirestore.Firestore.firestore()
-        return FiremodelClient(firestore: firestore)
-    }
-
-    init(firestore: FirebaseFirestore.Firestore) {
-        self.firestore = firestore
-    }
-
-    // MARK: - Root Collections
-
-    func users() -> UserCollectionRef {
-        return UserCollectionRef(ref: firestore.collection("users"), client: self)
-    }
-
-    func user(id: String) -> UserRef {
-        return users().user(id: id)
-    }
-
-    // MARK: - Decoding
-
-    func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
+    fileprivate func decode<T>(_ type: T.Type, from snapshot: FirebaseFirestore.DocumentSnapshot) throws -> T where T: Decodable {
         let decoder = DocumentSnapshotDecoder(documentSnapshot: snapshot,
                                               codingPath: [],
                                               userInfo: [firestoreClientDecodingKey: self])
@@ -506,9 +698,14 @@ class FiremodelClient {
         return try type.init(from: decoder)
     }
 
-    func rawDocumentReference(_ path: String) -> DocumentReference {
+    fileprivate func rawDocumentReference(_ path: String) -> DocumentReference {
         return self.firestore.document(path)
     }
+}
+
+enum FiremodelError: Error {
+    case typeError
+    case internalError
 }
 
 fileprivate let firestoreClientDecodingKey = CodingUserInfoKey(rawValue: "firestore")!
@@ -858,8 +1055,6 @@ struct DocumentSnapshotKeyedDecodingContainerProtocol<Key>: KeyedDecodingContain
     }
 }
 
-
-// MARK: - Protocols 
 
 // MARK: - Standard Types
 
