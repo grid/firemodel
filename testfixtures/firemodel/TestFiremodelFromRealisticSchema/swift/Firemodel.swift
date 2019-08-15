@@ -81,12 +81,16 @@ struct PhotoMessageContent {
 
 // [unchanged] Enums provide type safety around string enumerations. Enums are stored in firestore as capitalized strings.
 enum Audience {
+	// An unknown enum value with its raw string.
+	case invalid(String?)
     case global
     case friends
 }
 
 // for enum values other than the active one are not written to firestore.
 enum AttachmentContent {
+	// An unknown enum value with its raw string.
+	case invalid(String?)
     // e.g. for an Attachment, written as `content = "PLACEHOLDER"`
     case placeholder
     // e.g. for an Attachment, written as `content = "IMOJI", content.imoji = #BYTES#`
@@ -98,6 +102,8 @@ enum AttachmentContent {
 }
 
 enum MessageContent {
+	// An unknown enum value with its raw string.
+	case invalid(String?)
     case text(TextMessageContent)
     case photo(PhotoMessageContent)
 }
@@ -806,13 +812,14 @@ extension LocalizedString: Decodable {
 extension InstantGram: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        switch try container.decodeIfPresent(String.self, forKey: .sharedWith) {
+        let sharedWithValue = try container.decodeIfPresent(String.self, forKey: .sharedWith)
+        switch sharedWithValue {
 		case "GLOBAL":
 			self.sharedWith = .global
 		case "FRIENDS":
 			self.sharedWith = .friends
 		default:
-			self.sharedWith = nil
+			self.sharedWith = .invalid(sharedWithValue)
 		}
         self.photoUrl = try container.decodeIfPresent(URL.self, forKey: .photoUrl)
         self.description = try container.decodeIfPresent(String.self, forKey: .description)
@@ -837,13 +844,14 @@ extension Message: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let contentContainer = try container.nestedContainer(keyedBy: MessageContentType.self, forKey: .content)
-        switch try container.decodeIfPresent(String.self, forKey: .content) {
+        let contentValue = try container.decodeIfPresent(String.self, forKey: .content)
+        switch contentValue {
 		case "TEXT":
 			self.content = .text(try contentContainer.decode(TextMessageContent.self, forKey: MessageContentType.text))
 		case "PHOTO":
 			self.content = .photo(try contentContainer.decode(PhotoMessageContent.self, forKey: MessageContentType.photo))
 		default:
-			self.content = nil
+			self.content = .invalid(contentValue)
 		}
         self.from = try container.decodeIfPresent(FriendRef.self, forKey: .from)
     }
@@ -865,7 +873,8 @@ extension Attachment: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.title = try container.decodeIfPresent(String.self, forKey: .title)
         let contentContainer = try container.nestedContainer(keyedBy: AttachmentContentType.self, forKey: .content)
-        switch try container.decodeIfPresent(String.self, forKey: .content) {
+        let contentValue = try container.decodeIfPresent(String.self, forKey: .content)
+        switch contentValue {
 		case "PLACEHOLDER":
 			self.content = .placeholder
 		case "IMOJI":
@@ -875,7 +884,7 @@ extension Attachment: Decodable {
 		case "UPLOAD":
 			self.content = .upload(try contentContainer.decode(UploadAttachment.self, forKey: AttachmentContentType.upload))
 		default:
-			self.content = nil
+			self.content = .invalid(contentValue)
 		}
     }
 

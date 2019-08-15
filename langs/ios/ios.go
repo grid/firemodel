@@ -381,7 +381,8 @@ extension {{.Name | toCamel}}: Decodable {
 		{{- if .Type | hasAnyAssociatedValues }}
         let {{ .Name | toSwiftFieldName }}Container = try container.nestedContainer(keyedBy: {{.Type | toSwiftType false}}Type.self, forKey: .{{.Name | toSwiftFieldName}})
 		{{- end }}
-        switch try container.decodeIfPresent(String.self, forKey: .{{.Name | toSwiftFieldName}}) {
+        let {{ .Name | toSwiftFieldName }}Value = try container.decodeIfPresent(String.self, forKey: .{{.Name | toSwiftFieldName}})
+        switch {{ .Name | toSwiftFieldName }}Value {
         {{- $enum := .Type | asEnum}}
 		{{- range $enum.Values }}
 		case "{{ .Name | toScreamingSnake }}":
@@ -392,7 +393,7 @@ extension {{.Name | toCamel}}: Decodable {
   		{{- end }}
   		{{- end }}
 		default:
-			self.{{ $field.Name | toSwiftFieldName }} = nil
+			self.{{ $field.Name | toSwiftFieldName }} = .invalid({{ .Name | toSwiftFieldName }}Value)
 		}
 		{{- else if . | isDecodingType "decodeArray" }}
         self.{{ .Name | toSwiftFieldName }} =  try container.decode({{ .Type | asArray | toSwiftType true}}.self, forKey: .{{ .Name | toSwiftFieldName }})
@@ -1086,6 +1087,8 @@ extension {{ .Name | toCamel }}Ref: FiremodelDocumentSubscriber {
 // {{.Comment}}
 {{- end}}
 enum {{.Name | toCamel }} {
+	// An unknown enum value with its raw string.
+	case invalid(String?)
     {{- range .Values}}
     {{- if .Comment}}
     // {{.Comment}}
