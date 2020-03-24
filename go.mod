@@ -4,7 +4,12 @@ go 1.13
 
 require (
 	cloud.google.com/go/firestore v1.1.1
-	github.com/alecthomas/participle v0.4.2-0.20200224000046-9a4297c13d0d
+	github.com/alecthomas/go-thrift v0.0.0-20170109061633-7914173639b2 // indirect
+	github.com/alecthomas/kong v0.2.1 // indirect
+	github.com/alecthomas/participle v0.3.0
+	github.com/alecthomas/repr v0.0.0-20181024024818-d37bc2a10ba1 // indirect
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/dave/jennifer v1.4.0
 	github.com/go-errors/errors v1.0.1
 	github.com/google/go-cmp v0.4.0 // indirect
