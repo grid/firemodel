@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cimg/go:1.13
+      - image: circleci/golang:1.13
     working_directory: /go/src/github.com/visor-tax/firemodel
     steps:
       - checkout
