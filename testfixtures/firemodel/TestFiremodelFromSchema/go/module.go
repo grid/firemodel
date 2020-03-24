@@ -2,7 +2,7 @@
 
 package firemodel
 
-import firestore "cloud.google.com/go/firestore"
+import "cloud.google.com/go/firestore"
 
 type Client struct {
 	Client         *firestore.Client

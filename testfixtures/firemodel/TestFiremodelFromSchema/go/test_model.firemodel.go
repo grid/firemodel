@@ -3,12 +3,12 @@
 package firemodel
 
 import (
-	firestore "cloud.google.com/go/firestore"
+	"cloud.google.com/go/firestore"
 	"context"
 	"errors"
 	"fmt"
-	runtime "github.com/visor-tax/firemodel/runtime"
-	latlng "google.golang.org/genproto/googleapis/type/latlng"
+	"github.com/visor-tax/firemodel/runtime"
+	"google.golang.org/genproto/googleapis/type/latlng"
 	"regexp"
 	"time"
 )

@@ -3,7 +3,7 @@
 package firemodel
 
 import (
-	firestore "cloud.google.com/go/firestore"
+	"cloud.google.com/go/firestore"
 	"context"
 	"errors"
 	"fmt"
